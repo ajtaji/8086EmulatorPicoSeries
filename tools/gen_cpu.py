@@ -24,7 +24,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 import os
 VARIANT = os.environ.get('CPU86_VARIANT', '')
-REP_BLOCK = False   # REP MOVS/STOS block path (emit_rep_block)
+REP_BLOCK = True    # REP MOVS/STOS block path (emit_rep_block)
 
 # ---------------------------------------------------------------- emitter
 OUT = []

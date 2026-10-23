@@ -272,6 +272,56 @@ Procedure Main()
   Check("rep cx", R(1), 0)
   Check("rep copy", Peek8($300) | (Peek8($301) << 8) | (Peek8($302) << 16), $030201)
 
+  ; REP MOVS / STOS: overlap at distance 1 (byte and word), a copy across a
+  ; page boundary, STOSW into ROM and unmapped pages, STOSW wrapping the segment.
+  Fresh()
+  R(1) = 5 : R(6) = $200 : R(7) = $201
+  Put($200, $AA, 0, 0, 0, 0, 0, 0, -1)
+  Put($100, $FC, $F3, $A4, -1, -1, -1, -1, -1)                       ; CLD / REP MOVSB
+  Cpu86Run(2)
+  Check("rep movsb overlap", Peek8($201) + Peek8($202) + Peek8($203) + Peek8($204) + Peek8($205), 5 * $AA)
+  Check("rep movsb overlap end", Peek8($206), 0)
+  Fresh()
+  R(1) = 2 : R(6) = $300 : R(7) = $301
+  Put($300, 1, 2, 3, 4, 0, -1, -1, -1)
+  Put($100, $FC, $F3, $A5, -1, -1, -1, -1, -1)                       ; CLD / REP MOVSW
+  Cpu86Run(2)
+  Check("rep movsw overlap", Peek8($300) | (Peek8($301) << 8) | (Peek8($302) << 16) | (Peek8($303) << 24), $02020101)
+  Check("rep movsw overlap last", Peek8($304), 4)
+  Fresh()
+  For K = 0 To 31
+    Poke8($0FF0 + K, K + 1)
+  Next
+  R(1) = 16 : R(6) = $0FF0 : R(7) = $2FF1
+  Put($100, $FC, $F3, $A5, -1, -1, -1, -1, -1)
+  Cpu86Run(2)
+  Got = 0
+  For K = 0 To 31
+    If Peek8($2FF1 + K) <> K + 1
+      Got = Got + 1
+    EndIf
+  Next
+  Check("rep movsw across pages", Got, 0)
+  Check("rep movsw si", R(6), $1010)
+  Check("rep movsw di", R(7), $3011)
+  Fresh()
+  Cpu86SetSeg(0, $2000)
+  R(0) = $5A5A : R(1) = 8 : R(7) = $0FF8
+  Put($100, $FC, $F3, $AB, -1, -1, -1, -1, -1)                       ; CLD / REP STOSW
+  Cpu86Run(2)
+  Check("rep stosw rom unchanged", PeekA(@RomPage(0) + $FF8) | (PeekA(@RomPage(0) + $FFF) << 8), $FFF8)
+  Check("rep stosw di", R(7), $1008)
+  Check("rep stosw cx", R(1), 0)
+  Fresh()
+  Cpu86SetSeg(0, $0100)
+  R(0) = $1234 : R(1) = 3 : R(7) = $FFFE
+  Put($100, $FC, $F3, $AB, -1, -1, -1, -1, -1)
+  Cpu86Run(2)
+  Check("rep stosw wrap 1", Peek16($10FFE), $1234)
+  Check("rep stosw wrap 2", Peek16($1000), $1234)
+  Check("rep stosw wrap 3", Peek16($1002), $1234)
+  Check("rep stosw wrap di", R(7), 4)
+
   ; PUSH SP pushes the decremented SP; IN reaches the port hook.
   Fresh()
   R(4) = $200

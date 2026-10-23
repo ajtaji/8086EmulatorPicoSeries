@@ -5178,6 +5178,58 @@ OpA4:
   Else
     cnt = R(1)
   EndIf
+  If (Rep <> 0) And (cnt <> 0) And (DirStep = 1)
+    While cnt <> 0
+      y = SegB(0) + R(7)
+      vr = PageW(y >> 12)
+      va = ($1000 - (y & $FFF)) >> 0
+      vb = ($10000 - R(7)) >> 0
+      If vb < va
+        va = vb
+      EndIf
+      x = SegD + R(6)
+      t = PageR(x >> 12)
+      vb = ($1000 - (x & $FFF)) >> 0
+      If vb < va
+        va = vb
+      EndIf
+      vb = ($10000 - R(6)) >> 0
+      If vb < va
+        va = vb
+      EndIf
+      If t = 0
+        va = 0
+      EndIf
+      If vr = 0
+        va = 0
+      EndIf
+      If cnt < va
+        va = cnt
+      EndIf
+      If va = 0
+        vb = Cpu86Rd8(SegD + R(6))
+        Cpu86Wr8(SegB(0) + R(7), vb)
+        R(6) = R(6) + 1
+        R(7) = R(7) + 1
+        cnt = cnt - 1
+  Charge(17)
+      Else
+        vr = vr + y
+        ea = vr + (va << 0)
+        t = t + x
+        While vr < ea
+          PokeA(vr, PeekA(t))
+          t = t + 1
+          vr = vr + 1
+        Wend
+        R(6) = R(6) + (va << 0)
+        R(7) = R(7) + (va << 0)
+        cnt = cnt - va
+  Charge(17 * va)
+      EndIf
+    Wend
+    R(1) = 0
+  EndIf
   While cnt <> 0
   eo = R(6)
   sb = SegD
@@ -5213,6 +5265,60 @@ OpA5:
     cnt = 1
   Else
     cnt = R(1)
+  EndIf
+  If (Rep <> 0) And (cnt <> 0) And (DirStep = 1)
+    While cnt <> 0
+      y = SegB(0) + R(7)
+      vr = PageW(y >> 12)
+      va = ($1000 - (y & $FFF)) >> 1
+      vb = ($10000 - R(7)) >> 1
+      If vb < va
+        va = vb
+      EndIf
+      x = SegD + R(6)
+      t = PageR(x >> 12)
+      vb = ($1000 - (x & $FFF)) >> 1
+      If vb < va
+        va = vb
+      EndIf
+      vb = ($10000 - R(6)) >> 1
+      If vb < va
+        va = vb
+      EndIf
+      If t = 0
+        va = 0
+      EndIf
+      If vr = 0
+        va = 0
+      EndIf
+      If cnt < va
+        va = cnt
+      EndIf
+      If va = 0
+        vb = Cpu86Rd16(SegD, R(6))
+        Cpu86Wr16(SegB(0), R(7), vb)
+        R(6) = R(6) + 2
+        R(7) = R(7) + 2
+        cnt = cnt - 1
+  Charge(17)
+      Else
+        vr = vr + y
+        ea = vr + (va << 1)
+        t = t + x
+        While vr < ea
+          vb = PeekA(t) | (PeekA(t + 1) << 8)
+          PokeA(vr, vb)
+          PokeA(vr + 1, vb >> 8)
+          t = t + 2
+          vr = vr + 2
+        Wend
+        R(6) = R(6) + (va << 1)
+        R(7) = R(7) + (va << 1)
+        cnt = cnt - va
+  Charge(17 * va)
+      EndIf
+    Wend
+    R(1) = 0
   EndIf
   While cnt <> 0
   eo = R(6)
@@ -5363,6 +5469,41 @@ OpAA:
   Else
     cnt = R(1)
   EndIf
+  If (Rep <> 0) And (cnt <> 0) And (DirStep = 1)
+    While cnt <> 0
+      y = SegB(0) + R(7)
+      vr = PageW(y >> 12)
+      va = ($1000 - (y & $FFF)) >> 0
+      vb = ($10000 - R(7)) >> 0
+      If vb < va
+        va = vb
+      EndIf
+      If vr = 0
+        va = 0
+      EndIf
+      If cnt < va
+        va = cnt
+      EndIf
+      If va = 0
+        Cpu86Wr8(SegB(0) + R(7), PeekA(@R(0)))
+        R(7) = R(7) + 1
+        cnt = cnt - 1
+  Charge(10)
+      Else
+        vr = vr + y
+        ea = vr + (va << 0)
+        vb = PeekA(@R(0))
+        While vr < ea
+          PokeA(vr, vb)
+          vr = vr + 1
+        Wend
+        R(7) = R(7) + (va << 0)
+        cnt = cnt - va
+  Charge(10 * va)
+      EndIf
+    Wend
+    R(1) = 0
+  EndIf
   While cnt <> 0
   eo = R(7)
   sb = SegB(0)
@@ -5389,6 +5530,42 @@ OpAB:
     cnt = 1
   Else
     cnt = R(1)
+  EndIf
+  If (Rep <> 0) And (cnt <> 0) And (DirStep = 1)
+    While cnt <> 0
+      y = SegB(0) + R(7)
+      vr = PageW(y >> 12)
+      va = ($1000 - (y & $FFF)) >> 1
+      vb = ($10000 - R(7)) >> 1
+      If vb < va
+        va = vb
+      EndIf
+      If vr = 0
+        va = 0
+      EndIf
+      If cnt < va
+        va = cnt
+      EndIf
+      If va = 0
+        Cpu86Wr16(SegB(0), R(7), R(0))
+        R(7) = R(7) + 2
+        cnt = cnt - 1
+  Charge(10)
+      Else
+        vr = vr + y
+        ea = vr + (va << 1)
+        vb = R(0)
+        While vr < ea
+          PokeA(vr, vb)
+          PokeA(vr + 1, vb >> 8)
+          vr = vr + 2
+        Wend
+        R(7) = R(7) + (va << 1)
+        cnt = cnt - va
+  Charge(10 * va)
+      EndIf
+    Wend
+    R(1) = 0
   EndIf
   While cnt <> 0
   eo = R(7)
