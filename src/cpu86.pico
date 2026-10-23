@@ -22,8 +22,8 @@ EnableExplicit
 Global Dim R.u(8)               ; AX CX DX BX SP BP SI DI
 Global Dim SegV.u(4)            ; ES CS SS DS
 Global Dim SegB.i(4)            ; segment bases (value << 4)
-Global Dim PageR.i(#CPU86_PAGES)
-Global Dim PageW.i(#CPU86_PAGES)
+Global Dim PageR.i(#CPU86_PAGES + 16) ; 256-271 mirror 0-15: seg + off < $110000
+Global Dim PageW.i(#CPU86_PAGES + 16)
 Global Dim PageK.a(#CPU86_PAGES)
 Global Dim PageH.i(#CPU86_PAGES) ; host base of a ROM/RAM page (for slow paths)
 Global Dim Dispatch.Label(256)
@@ -39,7 +39,7 @@ Global SegD.i, SegS.i, Rep.i
 Global FlagsHi.i, DirStep.i, DirStep2.i
 Global EvPend.i, IrqVector.i, Halted.i
 Global Budget.i, Ready.i, CpuCycles.i, InitIndex.i, Cpu86Fetching.i
-ReserveRegister PIP = r4, PEnd = r5, FZS = r8, FC = r9, FO = r10, Left = r11
+ReserveRegister PIP = r4, Left = r6, FZS = r8, FC = r9, FO = r10, PEnd = r11
 
 ; EvPend bits: 1 trap armed, 2 NMI, 4 IRQ, 8 inhibit interrupts for one boundary.
 
@@ -95,7 +95,7 @@ ProcedureRAM.i Cpu86Flags()
     f = f | 1
   EndIf
   f = f | Par((FZS ! (FZS >> 17)) & 255)
-  f = f | (FA & $10)
+  f = f | ((FA ! FZS) & $10)
   If (FZS << 15) = 0
     f = f | $40
   EndIf
@@ -112,7 +112,6 @@ EndProcedure
 ProcedureRAM Cpu86SetFlags(f.i)
   Protected z.i
   FC = (f & 1) << 31
-  FA = f & $10
   FO = (f & $800) << 20
   If f & $40
     z = 0
@@ -129,6 +128,7 @@ ProcedureRAM Cpu86SetFlags(f.i)
     z = z | $80000000
   EndIf
   FZS = z
+  FA = (f & $10) ! z
   If (f & $300) & ~(FlagsHi & $300)
     PEnd = 0                     ; TF or IF just set: check at the next boundary
   EndIf
@@ -185,6 +185,16 @@ Procedure Cpu86MapPages(lin.i, bytes.i, kind.i, host.i)
       PageW(p) = host - (p << 12)
     ElseIf kind = #CPU86_ROM
       PageR(p) = host - (p << 12)
+    EndIf
+    If p < 16                   ; the mirror above 1 MB (the 8086 wraps there)
+      PageR(p + 256) = 0
+      PageW(p + 256) = 0
+      If PageR(p)
+        PageR(p + 256) = PageR(p) - $100000
+      EndIf
+      If PageW(p)
+        PageW(p + 256) = PageW(p) - $100000
+      EndIf
     EndIf
     host = host + 4096
     p = (p + 1) & 255
@@ -576,7 +586,7 @@ Macro NextOp(c)
     EndIf
     CompilerIf #CPU_ASM_TAIL = 1
       ASM Uses PIP, PEnd
-        cmp r4, r5
+        cmp r4, r11
         bhs __ul_cpu86run_resync
         ldrb r0, [r4]
         lsls r0, r0, #2
@@ -593,11 +603,9 @@ Macro NextOp(c)
   CompilerElse
     CompilerIf #CPU_ASM_TAIL = 1
       ASM Uses Left, PIP, PEnd
-        mov r0, r11
-        subs r0, #1
-        mov r11, r0
+        subs r6, #1
         beq __ul_cpu86run_done
-        cmp r4, r5
+        cmp r4, r11
         bhs __ul_cpu86run_resync
         ldrb r0, [r4]
         lsls r0, r0, #2
@@ -953,168 +961,168 @@ Ea00:
   eo = (R(3) + R(6)) & $FFFF
   PIP = PIP + 2
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(7)
   Goto EaRet
 Ea01:
   eo = (R(3) + R(7)) & $FFFF
   PIP = PIP + 2
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(8)
   Goto EaRet
 Ea02:
   eo = (R(5) + R(6)) & $FFFF
   PIP = PIP + 2
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(8)
   Goto EaRet
 Ea03:
   eo = (R(5) + R(7)) & $FFFF
   PIP = PIP + 2
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(7)
   Goto EaRet
 Ea04:
-  eo = R(6) & $FFFF
+  eo = R(6)
   PIP = PIP + 2
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(5)
   Goto EaRet
 Ea05:
-  eo = R(7) & $FFFF
+  eo = R(7)
   PIP = PIP + 2
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(5)
   Goto EaRet
 Ea06:
   eo = PeekA(PIP + 2) | (PeekA(PIP + 3) << 8)
   PIP = PIP + 4
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(6)
   Goto EaRet
 Ea07:
-  eo = R(3) & $FFFF
+  eo = R(3)
   PIP = PIP + 2
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(5)
   Goto EaRet
 Ea10:
   eo = ((R(3) + R(6)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(11)
   Goto EaRet
 Ea11:
   eo = ((R(3) + R(7)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(12)
   Goto EaRet
 Ea12:
   eo = ((R(5) + R(6)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(12)
   Goto EaRet
 Ea13:
   eo = ((R(5) + R(7)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(11)
   Goto EaRet
 Ea14:
   eo = (R(6) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Ea15:
   eo = (R(7) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Ea16:
   eo = (R(5) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Ea17:
   eo = (R(3) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Ea20:
   eo = ((R(3) + R(6)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(11)
   Goto EaRet
 Ea21:
   eo = ((R(3) + R(7)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(12)
   Goto EaRet
 Ea22:
   eo = ((R(5) + R(6)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(12)
   Goto EaRet
 Ea23:
   eo = ((R(5) + R(7)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(11)
   Goto EaRet
 Ea24:
   eo = (R(6) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Ea25:
   eo = (R(7) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Ea26:
   eo = (R(5) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegS
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Ea27:
   eo = (R(3) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   Charge(9)
   Goto EaRet
 Op00:
@@ -1129,7 +1137,7 @@ Op00:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -1144,7 +1152,7 @@ Op00M:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -1165,16 +1173,13 @@ Op01:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 Op01M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1186,13 +1191,10 @@ Op01M:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1214,7 +1216,7 @@ Op02:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(3)
@@ -1229,7 +1231,7 @@ Op02M:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(9)
@@ -1245,17 +1247,14 @@ Op03:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(3)
 Op03M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1266,7 +1265,7 @@ Op03M:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(9)
@@ -1277,7 +1276,7 @@ Op04:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
   NextOp(4)
@@ -1288,7 +1287,7 @@ Op05:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
   NextOp(4)
@@ -1304,7 +1303,7 @@ Op08:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -1319,7 +1318,7 @@ Op08M:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -1340,16 +1339,13 @@ Op09:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 Op09M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1361,13 +1357,10 @@ Op09M:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1389,7 +1382,7 @@ Op0A:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(3)
@@ -1404,7 +1397,7 @@ Op0AM:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(9)
@@ -1420,17 +1413,14 @@ Op0B:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(3)
 Op0BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1441,7 +1431,7 @@ Op0BM:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(9)
@@ -1452,7 +1442,7 @@ Op0C:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
   NextOp(4)
@@ -1463,7 +1453,7 @@ Op0D:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(0) = vr
   NextOp(4)
@@ -1479,7 +1469,7 @@ Op10:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -1494,7 +1484,7 @@ Op10M:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -1515,16 +1505,13 @@ Op11:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 Op11M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1536,13 +1523,10 @@ Op11M:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1564,7 +1548,7 @@ Op12:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(3)
@@ -1579,7 +1563,7 @@ Op12M:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(9)
@@ -1595,17 +1579,14 @@ Op13:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(3)
 Op13M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1616,7 +1597,7 @@ Op13M:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(9)
@@ -1627,7 +1608,7 @@ Op14:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
   NextOp(4)
@@ -1638,7 +1619,7 @@ Op15:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
   NextOp(4)
@@ -1654,7 +1635,7 @@ Op18:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -1669,7 +1650,7 @@ Op18M:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -1690,16 +1671,13 @@ Op19:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 Op19M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1711,13 +1689,10 @@ Op19M:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1739,7 +1714,7 @@ Op1A:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(3)
@@ -1754,7 +1729,7 @@ Op1AM:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(9)
@@ -1770,17 +1745,14 @@ Op1B:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(3)
 Op1BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1791,7 +1763,7 @@ Op1BM:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(9)
@@ -1802,7 +1774,7 @@ Op1C:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
   NextOp(4)
@@ -1813,7 +1785,7 @@ Op1D:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
   NextOp(4)
@@ -1829,7 +1801,7 @@ Op20:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -1844,7 +1816,7 @@ Op20M:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -1865,16 +1837,13 @@ Op21:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 Op21M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1886,13 +1855,10 @@ Op21M:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1914,7 +1880,7 @@ Op22:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(3)
@@ -1929,7 +1895,7 @@ Op22M:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(9)
@@ -1945,17 +1911,14 @@ Op23:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(3)
 Op23M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -1966,7 +1929,7 @@ Op23M:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(9)
@@ -1977,7 +1940,7 @@ Op24:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
   NextOp(4)
@@ -1988,7 +1951,7 @@ Op25:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(0) = vr
   NextOp(4)
@@ -2004,7 +1967,7 @@ Op28:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -2019,7 +1982,7 @@ Op28M:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -2040,16 +2003,13 @@ Op29:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 Op29M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2061,13 +2021,10 @@ Op29M:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2089,7 +2046,7 @@ Op2A:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(3)
@@ -2104,7 +2061,7 @@ Op2AM:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(9)
@@ -2120,17 +2077,14 @@ Op2B:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(3)
 Op2BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2141,7 +2095,7 @@ Op2BM:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(9)
@@ -2152,7 +2106,7 @@ Op2C:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
   NextOp(4)
@@ -2163,7 +2117,7 @@ Op2D:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
   NextOp(4)
@@ -2179,7 +2133,7 @@ Op30:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -2194,7 +2148,7 @@ Op30M:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -2215,16 +2169,13 @@ Op31:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 Op31M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2236,13 +2187,10 @@ Op31M:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2264,7 +2212,7 @@ Op32:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(3)
@@ -2279,7 +2227,7 @@ Op32M:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
   NextOp(9)
@@ -2295,17 +2243,14 @@ Op33:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(3)
 Op33M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2316,7 +2261,7 @@ Op33M:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
   NextOp(9)
@@ -2327,7 +2272,7 @@ Op34:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
   NextOp(4)
@@ -2338,7 +2283,7 @@ Op35:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(0) = vr
   NextOp(4)
@@ -2354,7 +2299,7 @@ Op38:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(3)
 Op38M:
@@ -2368,7 +2313,7 @@ Op38M:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(9)
 Op39:
@@ -2383,15 +2328,12 @@ Op39:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(3)
 Op39M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2403,7 +2345,7 @@ Op39M:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(9)
 Op3A:
@@ -2418,7 +2360,7 @@ Op3A:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(3)
 Op3AM:
@@ -2432,7 +2374,7 @@ Op3AM:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(9)
 Op3B:
@@ -2447,16 +2389,13 @@ Op3B:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(3)
 Op3BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2467,7 +2406,7 @@ Op3BM:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(9)
 Op3C:
@@ -2477,7 +2416,7 @@ Op3C:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(4)
 Op3D:
@@ -2487,19 +2426,16 @@ Op3D:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(4)
 Op06:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2512,12 +2448,9 @@ Op06:
 Op07:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2533,12 +2466,9 @@ Op0E:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2551,12 +2481,9 @@ Op0E:
 Op0F:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2576,12 +2503,9 @@ Op16:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2594,12 +2518,9 @@ Op16:
 Op17:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2618,12 +2539,9 @@ Op1E:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2636,12 +2554,9 @@ Op1E:
 Op1F:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2677,7 +2592,7 @@ Op3E:
 Op27:
   va = PeekA(@R(0) + 0)
   x = (FC >> 31) & 1
-  y = (FA >> 4) & 1
+  y = ((FA ! FZS) >> 4) & 1
   vr = va
   FO = 0
   If x
@@ -2705,12 +2620,13 @@ Op27:
   EndIf
   PokeA(@R(0), vr)
   FZS = (vr << 24) >> 24
+  FA = FA ! vr
   PIP = PIP + 1
   NextOp(4)
 Op2F:
   va = PeekA(@R(0) + 0)
   x = (FC >> 31) & 1
-  y = (FA >> 4) & 1
+  y = ((FA ! FZS) >> 4) & 1
   vr = va
   FO = 0
   If (x = 0) And (y = 0)
@@ -2748,11 +2664,12 @@ Op2F:
   EndIf
   PokeA(@R(0), vr)
   FZS = (vr << 24) >> 24
+  FA = FA ! vr
   PIP = PIP + 1
   NextOp(4)
 Op37:
   va = PeekA(@R(0) + 0)
-  If ((va & 15) > 9) Or (FA & $10)
+  If ((va & 15) > 9) Or ((FA ! FZS) & $10)
     PokeA(@R(0) + 1, PeekA(@R(0) + 1) + 1)
     vr = (va + 6) & 255
     FA = $10
@@ -2775,11 +2692,12 @@ Op37:
   If vr = 0
     FZS = FZS & $80000000
   EndIf
+  FA = FA ! vr
   PIP = PIP + 1
   NextOp(4)
 Op3F:
   va = PeekA(@R(0) + 0)
-  y = (FA >> 4) & 1
+  y = ((FA ! FZS) >> 4) & 1
   If ((va & 15) > 9) Or y
     vr = (va - 6) & 255
     PokeA(@R(0) + 1, PeekA(@R(0) + 1) - 1)
@@ -2809,13 +2727,14 @@ Op3F:
   If vr = 0
     FZS = FZS & $80000000
   EndIf
+  FA = FA ! vr
   PIP = PIP + 1
   NextOp(4)
 Op40:
   va = R(0)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(0) = vr
   PIP = PIP + 1
@@ -2823,8 +2742,8 @@ Op40:
 Op48:
   va = R(0)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(0) = vr
   PIP = PIP + 1
@@ -2834,12 +2753,9 @@ Op50:
   va = R(0)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2852,12 +2768,9 @@ Op50:
 Op58:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2871,8 +2784,8 @@ Op58:
 Op41:
   va = R(1)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(1) = vr
   PIP = PIP + 1
@@ -2880,8 +2793,8 @@ Op41:
 Op49:
   va = R(1)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(1) = vr
   PIP = PIP + 1
@@ -2891,12 +2804,9 @@ Op51:
   va = R(1)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2909,12 +2819,9 @@ Op51:
 Op59:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2928,8 +2835,8 @@ Op59:
 Op42:
   va = R(2)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(2) = vr
   PIP = PIP + 1
@@ -2937,8 +2844,8 @@ Op42:
 Op4A:
   va = R(2)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(2) = vr
   PIP = PIP + 1
@@ -2948,12 +2855,9 @@ Op52:
   va = R(2)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2966,12 +2870,9 @@ Op52:
 Op5A:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -2985,8 +2886,8 @@ Op5A:
 Op43:
   va = R(3)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(3) = vr
   PIP = PIP + 1
@@ -2994,8 +2895,8 @@ Op43:
 Op4B:
   va = R(3)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(3) = vr
   PIP = PIP + 1
@@ -3005,12 +2906,9 @@ Op53:
   va = R(3)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3023,12 +2921,9 @@ Op53:
 Op5B:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3042,8 +2937,8 @@ Op5B:
 Op44:
   va = R(4)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(4) = vr
   PIP = PIP + 1
@@ -3051,8 +2946,8 @@ Op44:
 Op4C:
   va = R(4)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(4) = vr
   PIP = PIP + 1
@@ -3061,12 +2956,9 @@ Op54:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3079,12 +2971,9 @@ Op54:
 Op5C:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3098,8 +2987,8 @@ Op5C:
 Op45:
   va = R(5)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(5) = vr
   PIP = PIP + 1
@@ -3107,8 +2996,8 @@ Op45:
 Op4D:
   va = R(5)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(5) = vr
   PIP = PIP + 1
@@ -3118,12 +3007,9 @@ Op55:
   va = R(5)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3136,12 +3022,9 @@ Op55:
 Op5D:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3155,8 +3038,8 @@ Op5D:
 Op46:
   va = R(6)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(6) = vr
   PIP = PIP + 1
@@ -3164,8 +3047,8 @@ Op46:
 Op4E:
   va = R(6)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(6) = vr
   PIP = PIP + 1
@@ -3175,12 +3058,9 @@ Op56:
   va = R(6)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3193,12 +3073,9 @@ Op56:
 Op5E:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3212,8 +3089,8 @@ Op5E:
 Op47:
   va = R(7)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(7) = vr
   PIP = PIP + 1
@@ -3221,8 +3098,8 @@ Op47:
 Op4F:
   va = R(7)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(7) = vr
   PIP = PIP + 1
@@ -3232,12 +3109,9 @@ Op57:
   va = R(7)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3250,12 +3124,9 @@ Op57:
 Op5F:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3633,7 +3504,7 @@ G80R0:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -3649,7 +3520,7 @@ G80M0:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -3665,7 +3536,7 @@ G80R1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -3681,7 +3552,7 @@ G80M1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -3697,7 +3568,7 @@ G80R2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -3713,7 +3584,7 @@ G80M2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -3729,7 +3600,7 @@ G80R3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -3745,7 +3616,7 @@ G80M3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -3761,7 +3632,7 @@ G80R4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -3777,7 +3648,7 @@ G80M4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -3793,7 +3664,7 @@ G80R5:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -3809,7 +3680,7 @@ G80M5:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -3825,7 +3696,7 @@ G80R6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -3841,7 +3712,7 @@ G80M6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -3857,7 +3728,7 @@ G80R7:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(4)
 G80M7:
@@ -3872,7 +3743,7 @@ G80M7:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(10)
 Op81:
@@ -3890,16 +3761,13 @@ G81R0:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G81M0:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3912,13 +3780,10 @@ G81M0:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3935,16 +3800,13 @@ G81R1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G81M1:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3957,13 +3819,10 @@ G81M1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -3980,16 +3839,13 @@ G81R2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G81M2:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4002,13 +3858,10 @@ G81M2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4025,16 +3878,13 @@ G81R3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G81M3:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4047,13 +3897,10 @@ G81M3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4070,16 +3917,13 @@ G81R4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G81M4:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4092,13 +3936,10 @@ G81M4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4115,16 +3956,13 @@ G81R5:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G81M5:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4137,13 +3975,10 @@ G81M5:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4160,16 +3995,13 @@ G81R6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G81M6:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4182,13 +4014,10 @@ G81M6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4205,15 +4034,12 @@ G81R7:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(4)
 G81M7:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4226,7 +4052,7 @@ G81M7:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(10)
 Op82:
@@ -4244,7 +4070,7 @@ G82R0:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -4260,7 +4086,7 @@ G82M0:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -4276,7 +4102,7 @@ G82R1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -4292,7 +4118,7 @@ G82M1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -4308,7 +4134,7 @@ G82R2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -4324,7 +4150,7 @@ G82M2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -4340,7 +4166,7 @@ G82R3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -4356,7 +4182,7 @@ G82M3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -4372,7 +4198,7 @@ G82R4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -4388,7 +4214,7 @@ G82M4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -4404,7 +4230,7 @@ G82R5:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -4420,7 +4246,7 @@ G82M5:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -4436,7 +4262,7 @@ G82R6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(4)
@@ -4452,7 +4278,7 @@ G82M6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -4468,7 +4294,7 @@ G82R7:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(4)
 G82M7:
@@ -4483,7 +4309,7 @@ G82M7:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   NextOp(10)
 Op83:
@@ -4501,16 +4327,13 @@ G83R0:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G83M0:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4523,13 +4346,10 @@ G83M0:
   vr = va + vb
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4546,16 +4366,13 @@ G83R1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G83M1:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4568,13 +4385,10 @@ G83M1:
   vr = va | vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4591,16 +4405,13 @@ G83R2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G83M2:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4613,13 +4424,10 @@ G83M2:
   vr = va + vb + ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vr) & (vb ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4636,16 +4444,13 @@ G83R3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G83M3:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4658,13 +4463,10 @@ G83M3:
   vr = va - vb - ((FC >> 31) & 1)
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4681,16 +4483,13 @@ G83R4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G83M4:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4703,13 +4502,10 @@ G83M4:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4726,16 +4522,13 @@ G83R5:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G83M5:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4748,13 +4541,10 @@ G83M5:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4771,16 +4561,13 @@ G83R6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(4)
 G83M6:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4793,13 +4580,10 @@ G83M6:
   vr = va ! vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4816,15 +4600,12 @@ G83R7:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(4)
 G83M7:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4837,7 +4618,7 @@ G83M7:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   NextOp(10)
 Op84:
@@ -4852,7 +4633,7 @@ Op84:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   NextOp(3)
 Op84M:
@@ -4866,7 +4647,7 @@ Op84M:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   NextOp(9)
 Op85:
@@ -4881,15 +4662,12 @@ Op85:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   NextOp(3)
 Op85M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4901,7 +4679,7 @@ Op85M:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   NextOp(9)
 Op86:
@@ -4946,10 +4724,7 @@ Op87:
   NextOp(4)
 Op87M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -4959,10 +4734,7 @@ Op87M:
   EndIf
   vb = R((m >> 3) & 7)
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5005,10 +4777,7 @@ Op89:
 Op89M:
   va = R((m >> 3) & 7)
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5049,10 +4818,7 @@ Op8B:
   NextOp(2)
 Op8BM:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5075,10 +4841,7 @@ Op8C:
 Op8CM:
   va = SegV((m >> 3) & 3)
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5131,10 +4894,7 @@ Op8E:
   NextOp(2)
 Op8EM:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5170,12 +4930,9 @@ Op8F:
   EndIf
   PIP = PIP + 2
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5191,12 +4948,9 @@ Op8FM:
   y = eo
   cnt = sb
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5209,10 +4963,7 @@ Op8FM:
   eo = y
   sb = cnt
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5286,12 +5037,9 @@ Op9A:
   va = SegV(1)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5303,12 +5051,9 @@ Op9A:
   va = ((PIP - PBase) & $FFFF)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5331,12 +5076,9 @@ Op9C:
   va = Cpu86Flags()
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5349,12 +5091,9 @@ Op9C:
 Op9D:
   PIP = PIP + 1
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5376,7 +5115,7 @@ Op9F:
 OpA0:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   PIP = PIP + 3
   t = PageR(ea >> 12)
   If t <> 0
@@ -5389,13 +5128,10 @@ OpA0:
 OpA1:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   PIP = PIP + 3
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5408,7 +5144,7 @@ OpA1:
 OpA2:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   PIP = PIP + 3
   va = PeekA(@R(0) + 0)
   t = PageW(ea >> 12)
@@ -5421,14 +5157,11 @@ OpA2:
 OpA3:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   PIP = PIP + 3
   va = R(0)
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5448,7 +5181,7 @@ OpA4:
   While cnt <> 0
   eo = R(6)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
   If t <> 0
     va = PeekA(t + ea)
@@ -5457,7 +5190,7 @@ OpA4:
   EndIf
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageW(ea >> 12)
   If t <> 0
     PokeA(t + ea, va)
@@ -5484,12 +5217,9 @@ OpA5:
   While cnt <> 0
   eo = R(6)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5499,12 +5229,9 @@ OpA5:
   EndIf
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5533,7 +5260,7 @@ OpA6:
   While cnt <> 0
   eo = R(6)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
   If t <> 0
     va = PeekA(t + ea)
@@ -5542,7 +5269,7 @@ OpA6:
   EndIf
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
   If t <> 0
     vb = PeekA(t + ea)
@@ -5552,7 +5279,7 @@ OpA6:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   R(6) = R(6) + DirStep
   R(7) = R(7) + DirStep
@@ -5583,12 +5310,9 @@ OpA7:
   While cnt <> 0
   eo = R(6)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5598,12 +5322,9 @@ OpA7:
   EndIf
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5614,7 +5335,7 @@ OpA7:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(6) = R(6) + DirStep2
   R(7) = R(7) + DirStep2
@@ -5645,7 +5366,7 @@ OpAA:
   While cnt <> 0
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   va = PeekA(@R(0))
   t = PageW(ea >> 12)
   If t <> 0
@@ -5672,13 +5393,10 @@ OpAB:
   While cnt <> 0
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   va = R(0)
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5706,7 +5424,7 @@ OpAC:
   While cnt <> 0
   eo = R(6)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
   If t <> 0
     va = PeekA(t + ea)
@@ -5733,12 +5451,9 @@ OpAD:
   While cnt <> 0
   eo = R(6)
   sb = SegD
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5766,7 +5481,7 @@ OpAE:
   While cnt <> 0
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
   If t <> 0
     vb = PeekA(t + ea)
@@ -5777,7 +5492,7 @@ OpAE:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   R(7) = R(7) + DirStep
   If Rep = 0
@@ -5807,12 +5522,9 @@ OpAF:
   While cnt <> 0
   eo = R(7)
   sb = SegB(0)
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5824,7 +5536,7 @@ OpAF:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(7) = R(7) + DirStep2
   If Rep = 0
@@ -5851,7 +5563,7 @@ OpA8:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   NextOp(4)
 OpA9:
@@ -5861,7 +5573,7 @@ OpA9:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   NextOp(4)
 OpB0:
@@ -5931,12 +5643,9 @@ OpBF:
 OpC2:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5954,12 +5663,9 @@ OpC2:
 OpC0:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5976,12 +5682,9 @@ OpC0:
   NextOp(12)
 OpC3:
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -5997,12 +5700,9 @@ OpC3:
   NextOp(8)
 OpC1:
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6019,12 +5719,9 @@ OpC1:
 OpCA:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6034,12 +5731,9 @@ OpCA:
   EndIf
   R(4) = eo + 2
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6058,12 +5752,9 @@ OpCA:
 OpC8:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6073,12 +5764,9 @@ OpC8:
   EndIf
   R(4) = eo + 2
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6096,12 +5784,9 @@ OpC8:
   NextOp(17)
 OpCB:
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6111,12 +5796,9 @@ OpCB:
   EndIf
   R(4) = eo + 2
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6133,12 +5815,9 @@ OpCB:
   NextOp(18)
 OpC9:
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6148,12 +5827,9 @@ OpC9:
   EndIf
   R(4) = eo + 2
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6180,10 +5856,7 @@ OpC4:
   NextOp(2)
 OpC4M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6192,12 +5865,9 @@ OpC4M:
     va = Cpu86Rd16(sb, eo)
   EndIf
   eo = (eo + 2) & $FFFF
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6221,10 +5891,7 @@ OpC5:
   NextOp(2)
 OpC5M:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6233,12 +5900,9 @@ OpC5M:
     va = Cpu86Rd16(sb, eo)
   EndIf
   eo = (eo + 2) & $FFFF
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6287,10 +5951,7 @@ OpC7M:
   va = PeekA(PIP) | (PeekA(PIP + 1) << 8)
   PIP = PIP + 2
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6318,12 +5979,9 @@ OpCE:
   NextOp(4)
 OpCF:
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6333,12 +5991,9 @@ OpCF:
   EndIf
   R(4) = eo + 2
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6348,12 +6003,9 @@ OpCF:
   EndIf
   R(4) = eo + 2
   eo = R(4)
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6541,7 +6193,7 @@ GD0R4:
     vr = y & $FF
     FC = y << 23
     FO = ((vr >> 7) ! (y >> 8)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
@@ -6563,7 +6215,7 @@ GD0M4:
     vr = y & $FF
     FC = y << 23
     FO = ((vr >> 7) ! (y >> 8)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -6585,7 +6237,7 @@ GD0R5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 7) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
@@ -6607,7 +6259,7 @@ GD0M5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 7) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -6624,7 +6276,7 @@ GD0R6:
     vr = $FF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
@@ -6641,7 +6293,7 @@ GD0M6:
     vr = $FF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -6663,7 +6315,7 @@ GD0R7:
     vr = (y >> 1) & $FF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
@@ -6685,7 +6337,7 @@ GD0M7:
     vr = (y >> 1) & $FF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -6718,10 +6370,7 @@ GD1R0:
   NextOp(2)
 GD1M0:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6738,10 +6387,7 @@ GD1M0:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6767,10 +6413,7 @@ GD1R1:
   NextOp(2)
 GD1M1:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6787,10 +6430,7 @@ GD1M1:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6818,10 +6458,7 @@ GD1R2:
   NextOp(2)
 GD1M2:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6840,10 +6477,7 @@ GD1M2:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6871,10 +6505,7 @@ GD1R3:
   NextOp(2)
 GD1M3:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6893,10 +6524,7 @@ GD1M3:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6919,17 +6547,14 @@ GD1R4:
     vr = y & $FFFF
     FC = y << 15
     FO = ((vr >> 15) ! (y >> 16)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
   NextOp(2)
 GD1M4:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6947,13 +6572,10 @@ GD1M4:
     vr = y & $FFFF
     FC = y << 15
     FO = ((vr >> 15) ! (y >> 16)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -6976,17 +6598,14 @@ GD1R5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 15) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
   NextOp(2)
 GD1M5:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7004,13 +6623,10 @@ GD1M5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 15) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7028,17 +6644,14 @@ GD1R6:
     vr = $FFFF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
   NextOp(2)
 GD1M6:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7051,13 +6664,10 @@ GD1M6:
     vr = $FFFF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7080,17 +6690,14 @@ GD1R7:
     vr = (y >> 1) & $FFFF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
   NextOp(2)
 GD1M7:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7108,13 +6715,10 @@ GD1M7:
     vr = (y >> 1) & $FFFF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7305,7 +6909,7 @@ GD2R4:
     vr = y & $FF
     FC = y << 23
     FO = ((vr >> 7) ! (y >> 8)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   Charge(4)
@@ -7328,7 +6932,7 @@ GD2M4:
     vr = y & $FF
     FC = y << 23
     FO = ((vr >> 7) ! (y >> 8)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -7351,7 +6955,7 @@ GD2R5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 7) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   Charge(4)
@@ -7374,7 +6978,7 @@ GD2M5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 7) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -7392,7 +6996,7 @@ GD2R6:
     vr = $FF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   Charge(4)
@@ -7410,7 +7014,7 @@ GD2M6:
     vr = $FF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -7433,7 +7037,7 @@ GD2R7:
     vr = (y >> 1) & $FF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   Charge(4)
@@ -7456,7 +7060,7 @@ GD2M7:
     vr = (y >> 1) & $FF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -7491,10 +7095,7 @@ GD3R0:
   NextOp(8)
 GD3M0:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7511,10 +7112,7 @@ GD3M0:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7542,10 +7140,7 @@ GD3R1:
   NextOp(8)
 GD3M1:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7562,10 +7157,7 @@ GD3M1:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7595,10 +7187,7 @@ GD3R2:
   NextOp(8)
 GD3M2:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7617,10 +7206,7 @@ GD3M2:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7650,10 +7236,7 @@ GD3R3:
   NextOp(8)
 GD3M3:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7672,10 +7255,7 @@ GD3M3:
     FC = FC & $80000000
     FO = FO & $80000000
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7699,7 +7279,7 @@ GD3R4:
     vr = y & $FFFF
     FC = y << 15
     FO = ((vr >> 15) ! (y >> 16)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   Charge(4)
@@ -7707,10 +7287,7 @@ GD3R4:
   NextOp(8)
 GD3M4:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7728,13 +7305,10 @@ GD3M4:
     vr = y & $FFFF
     FC = y << 15
     FO = ((vr >> 15) ! (y >> 16)) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7758,7 +7332,7 @@ GD3R5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 15) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   Charge(4)
@@ -7766,10 +7340,7 @@ GD3R5:
   NextOp(8)
 GD3M5:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7787,13 +7358,10 @@ GD3M5:
     vr = y >> 1
     FC = y << 31
     FO = (y >> 15) << 31
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7812,7 +7380,7 @@ GD3R6:
     vr = $FFFF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   Charge(4)
@@ -7820,10 +7388,7 @@ GD3R6:
   NextOp(8)
 GD3M6:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7836,13 +7401,10 @@ GD3M6:
     vr = $FFFF
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7866,7 +7428,7 @@ GD3R7:
     vr = (y >> 1) & $FFFF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   Charge(4)
@@ -7874,10 +7436,7 @@ GD3R7:
   NextOp(8)
 GD3M7:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7895,13 +7454,10 @@ GD3M7:
     vr = (y >> 1) & $FFFF
     FC = y << 31
     FO = 0
-    FA = 0
+    FA = vr
     FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -7926,7 +7482,7 @@ OpD4:
   FZS = (vr << 24) >> 24
     FC = 0
     FO = 0
-    FA = 0
+    FA = vr
   EndIf
   NextOp(83)
 OpD5:
@@ -7937,7 +7493,7 @@ OpD5:
   vr = va + vb
   FC = vr << 23
   FO = ((va ! vr) & (vb ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   R(0) = vr & 255
   NextOp(60)
@@ -7951,7 +7507,7 @@ OpD6:
   NextOp(4)
 OpD7:
   eo = (R(3) + PeekA(@R(0))) & $FFFF
-  ea = (SegD + eo) & $FFFFF
+  ea = SegD + eo
   t = PageR(ea >> 12)
   If t <> 0
     va = PeekA(t + ea)
@@ -8130,12 +7686,9 @@ OpE8:
   va = ((PIP - PBase) & $FFFF)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8211,7 +7764,7 @@ GF6R0:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   NextOp(5)
 GF6M0:
@@ -8226,7 +7779,7 @@ GF6M0:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   NextOp(11)
 GF6R1:
@@ -8236,7 +7789,7 @@ GF6R1:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   NextOp(5)
 GF6M1:
@@ -8251,7 +7804,7 @@ GF6M1:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 24) >> 24
   NextOp(11)
 GF6R2:
@@ -8281,7 +7834,7 @@ GF6R3:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -8297,7 +7850,7 @@ GF6M3:
   vr = va - vb
   FC = vr << 23
   FO = ((va ! vb) & (va ! vr)) << 24
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -8322,7 +7875,7 @@ GF6R4:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(74)
 GF6M4:
   t = PageR(ea >> 12)
@@ -8345,7 +7898,7 @@ GF6M4:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(80)
 GF6R5:
   vb = PeekA(@R(0) + R8O(m & 7))
@@ -8363,7 +7916,7 @@ GF6R5:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(89)
 GF6M5:
   t = PageR(ea >> 12)
@@ -8386,7 +7939,7 @@ GF6M5:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(95)
 GF6R6:
   vb = PeekA(@R(0) + R8O(m & 7))
@@ -8501,15 +8054,12 @@ GF7R0:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   NextOp(5)
 GF7M0:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8522,7 +8072,7 @@ GF7M0:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   NextOp(11)
 GF7R1:
@@ -8532,15 +8082,12 @@ GF7R1:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   NextOp(5)
 GF7M1:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8553,7 +8100,7 @@ GF7M1:
   vr = va & vb
   FC = 0
   FO = 0
-  FA = 0
+  FA = vr
   FZS = (vr << 16) >> 16
   NextOp(11)
 GF7R2:
@@ -8563,10 +8110,7 @@ GF7R2:
   NextOp(3)
 GF7M2:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8576,10 +8120,7 @@ GF7M2:
   EndIf
   vr = ~va
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8596,16 +8137,13 @@ GF7R3:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(3)
 GF7M3:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8618,13 +8156,10 @@ GF7M3:
   vr = va - vb
   FC = vr << 15
   FO = ((va ! vb) & (va ! vr)) << 16
-  FA = va ! vb ! vr
+  FA = va ! vb
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8651,14 +8186,11 @@ GF7R4:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(128)
 GF7M4:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8681,7 +8213,7 @@ GF7M4:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(134)
 GF7R5:
   vb = R(m & 7)
@@ -8700,14 +8232,11 @@ GF7R5:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(141)
 GF7M5:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8730,7 +8259,7 @@ GF7M5:
     FC = 0
     FO = 0
   EndIf
-  FA = 0
+  FA = FZS
   NextOp(147)
 GF7R6:
   vb = R(m & 7)
@@ -8749,10 +8278,7 @@ GF7R6:
   NextOp(153)
 GF7M6:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8811,10 +8337,7 @@ GF7R7:
   NextOp(175)
 GF7M7:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -8899,8 +8422,8 @@ OpFE:
 GFER0:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -8912,8 +8435,8 @@ GFEM0:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -8925,8 +8448,8 @@ GFEM0:
 GFER1:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -8938,8 +8461,8 @@ GFEM1:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -8951,8 +8474,8 @@ GFEM1:
 GFER2:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -8964,8 +8487,8 @@ GFEM2:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -8977,8 +8500,8 @@ GFEM2:
 GFER3:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -8990,8 +8513,8 @@ GFEM3:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -9003,8 +8526,8 @@ GFEM3:
 GFER4:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -9016,8 +8539,8 @@ GFEM4:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -9029,8 +8552,8 @@ GFEM4:
 GFER5:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -9042,8 +8565,8 @@ GFEM5:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -9055,8 +8578,8 @@ GFEM5:
 GFER6:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -9068,8 +8591,8 @@ GFEM6:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -9081,8 +8604,8 @@ GFEM6:
 GFER7:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   NextOp(3)
@@ -9094,8 +8617,8 @@ GFEM7:
     va = Cpu86Rd8(ea)
   EndIf
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 24
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 24
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   t = PageW(ea >> 12)
   If t <> 0
@@ -9115,17 +8638,14 @@ OpFF:
 GFFR0:
   va = R(m & 7)
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(2)
 GFFM0:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9134,14 +8654,11 @@ GFFM0:
     va = Cpu86Rd16(sb, eo)
   EndIf
   vr = va + 1
-  FO = ((va ! vr) & (1 ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (vr & ~va) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9154,17 +8671,14 @@ GFFM0:
 GFFR1:
   va = R(m & 7)
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
   NextOp(2)
 GFFM1:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9173,14 +8687,11 @@ GFFM1:
     va = Cpu86Rd16(sb, eo)
   EndIf
   vr = va - 1
-  FO = ((va ! 1) & (va ! vr)) << 16
-  FA = va ! 1 ! vr
+  FO = (va & ~vr) << 16
+  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9195,12 +8706,9 @@ GFFR2:
   va = ((PIP - PBase) & $FFFF)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9216,10 +8724,7 @@ GFFR2:
   NextOp(16)
 GFFM2:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9230,12 +8735,9 @@ GFFM2:
   va = ((PIP - PBase) & $FFFF)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9254,12 +8756,9 @@ GFFR3:
   va = ((PIP - PBase) & $FFFF)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9275,10 +8774,7 @@ GFFR3:
   NextOp(16)
 GFFM3:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9287,12 +8783,9 @@ GFFM3:
     y = Cpu86Rd16(sb, eo)
   EndIf
   eo = (eo + 2) & $FFFF
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9303,12 +8796,9 @@ GFFM3:
   va = SegV(1)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9320,12 +8810,9 @@ GFFM3:
   va = ((PIP - PBase) & $FFFF)
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9349,10 +8836,7 @@ GFFR4:
   NextOp(11)
 GFFM4:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9374,10 +8858,7 @@ GFFR5:
   NextOp(11)
 GFFM5:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9386,12 +8867,9 @@ GFFM5:
     y = Cpu86Rd16(sb, eo)
   EndIf
   eo = (eo + 2) & $FFFF
-  ea = (sb + eo) & $FFFFF
+  ea = sb + eo
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9413,12 +8891,9 @@ GFFR6:
   EndIf
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9430,10 +8905,7 @@ GFFR6:
   NextOp(11)
 GFFM6:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9443,12 +8915,9 @@ GFFM6:
   EndIf
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9466,12 +8935,9 @@ GFFR7:
   EndIf
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9483,10 +8949,7 @@ GFFR7:
   NextOp(11)
 GFFM7:
   t = PageR(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0
@@ -9496,12 +8959,9 @@ GFFM7:
   EndIf
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
-  ea = (SegB(2) + eo) & $FFFFF
+  ea = SegB(2) + eo
   t = PageW(ea >> 12)
-  If (ea & $FFF) = $FFF
-    t = 0
-  EndIf
-  If eo = $FFFF
+  If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
     t = 0
   EndIf
   If t <> 0

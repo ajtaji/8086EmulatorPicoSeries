@@ -22,6 +22,9 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+import os
+VARIANT = os.environ.get('CPU86_VARIANT', '')
+REP_BLOCK = False   # REP MOVS/STOS block path (emit_rep_block)
 
 # ---------------------------------------------------------------- emitter
 OUT = []
@@ -67,10 +70,7 @@ def wr8(v, ea='ea'):
 
 def rd16(dst, sb='sb', eo='eo', ea='ea'):
     e(f'  t = PageR({ea} >> 12)')
-    e(f'  If ({ea} & $FFF) = $FFF')
-    e(f'    t = 0')
-    e(f'  EndIf')
-    e(f'  If {eo} = $FFFF')
+    e(f'  If (~{ea} << 28) = 0              ; xxxF: maybe a page or segment end')
     e(f'    t = 0')
     e(f'  EndIf')
     e(f'  If t <> 0')
@@ -81,10 +81,7 @@ def rd16(dst, sb='sb', eo='eo', ea='ea'):
 
 def wr16(v, sb='sb', eo='eo', ea='ea'):
     e(f'  t = PageW({ea} >> 12)')
-    e(f'  If ({ea} & $FFF) = $FFF')
-    e(f'    t = 0')
-    e(f'  EndIf')
-    e(f'  If {eo} = $FFFF')
+    e(f'  If (~{ea} << 28) = 0              ; xxxF: maybe a page or segment end')
     e(f'    t = 0')
     e(f'  EndIf')
     e(f'  If t <> 0')
@@ -98,12 +95,12 @@ def push16(v):
     """Push v (an expression that does not use eo/ea/t) on SS:SP."""
     e(f'  eo = (R({SP}) - 2) & $FFFF')
     e(f'  R({SP}) = eo')
-    e(f'  ea = (SegB({SS}) + eo) & $FFFFF')
+    e(f'  ea = SegB({SS}) + eo')
     wr16(v, sb=f'SegB({SS})')
 
 def pop16(dst):
     e(f'  eo = R({SP})')
-    e(f'  ea = (SegB({SS}) + eo) & $FFFFF')
+    e(f'  ea = SegB({SS}) + eo')
     rd16(dst, sb=f'SegB({SS})')
     e(f'  R({SP}) = eo + 2')
 
@@ -164,15 +161,15 @@ def alu(op, w, a='va', b='vb', r='vr'):
     if op in ('ADD', 'ADC'):
         e(f'  FC = {r} << {sc}')
         e(f'  FO = (({a} ! {r}) & ({b} ! {r})) << {so}')
-        e(f'  FA = {a} ! {b} ! {r}')
+        e(f'  FA = {a} ! {b}')
     elif op in ('SUB', 'CMP', 'SBB'):
         e(f'  FC = {r} << {sc}')
         e(f'  FO = (({a} ! {b}) & ({a} ! {r})) << {so}')
-        e(f'  FA = {a} ! {b} ! {r}')
+        e(f'  FA = {a} ! {b}')
     else:
         e(f'  FC = 0')
         e(f'  FO = 0')
-        e(f'  FA = 0')
+        e(f'  FA = {r}')
     set_zs(w, r)
     return op not in ('CMP', 'TEST')
 
@@ -296,8 +293,8 @@ def generate(target):
     e('Global Dim R.u(8)               ; AX CX DX BX SP BP SI DI')
     e('Global Dim SegV.u(4)            ; ES CS SS DS')
     e('Global Dim SegB.i(4)            ; segment bases (value << 4)')
-    e('Global Dim PageR.i(#CPU86_PAGES)')
-    e('Global Dim PageW.i(#CPU86_PAGES)')
+    e('Global Dim PageR.i(#CPU86_PAGES + 16) ; 256-271 mirror 0-15: seg + off < $110000')
+    e('Global Dim PageW.i(#CPU86_PAGES + 16)')
     e('Global Dim PageK.a(#CPU86_PAGES)')
     e('Global Dim PageH.i(#CPU86_PAGES) ; host base of a ROM/RAM page (for slow paths)')
     e('Global Dim Dispatch.Label(256)')
@@ -313,10 +310,9 @@ def generate(target):
     e('Global FlagsHi.i, DirStep.i, DirStep2.i')
     e('Global EvPend.i, IrqVector.i, Halted.i')
     e('Global Budget.i, Ready.i, CpuCycles.i, InitIndex.i, Cpu86Fetching.i')
-    if rp2350:
-        e('ReserveRegister PIP = r4, PEnd = r5, FZS = r8, FC = r9, FO = r10, Left = r11')
-    else:
-        e('ReserveRegister PIP = r4, PEnd = r5, FZS = r8, FC = r9, FO = r10, Left = r11')
+    # Left in r6 lets the tail decrement it in place; r5 must stay free (the
+    # RP2040 allocator needs one of r5/r6 for its spill pool).
+    e('ReserveRegister PIP = r4, Left = r6, FZS = r8, FC = r9, FO = r10, PEnd = r11')
     e('')
     e('; EvPend bits: 1 trap armed, 2 NMI, 4 IRQ, 8 inhibit interrupts for one boundary.')
     e('')
@@ -380,7 +376,7 @@ def emit_api():
     e('    f = f | 1')
     e('  EndIf')
     e('  f = f | Par((FZS ! (FZS >> 17)) & 255)')
-    e('  f = f | (FA & $10)')
+    e('  f = f | ((FA ! FZS) & $10)')
     e('  If (FZS << 15) = 0')
     e('    f = f | $40')
     e('  EndIf')
@@ -397,7 +393,6 @@ def emit_api():
     e('ProcedureRAM Cpu86SetFlags(f.i)')
     e('  Protected z.i')
     e('  FC = (f & 1) << 31')
-    e('  FA = f & $10')
     e('  FO = (f & $800) << 20')
     e('  If f & $40')
     e('    z = 0')
@@ -414,6 +409,7 @@ def emit_api():
     e('    z = z | $80000000')
     e('  EndIf')
     e('  FZS = z')
+    e('  FA = (f & $10) ! z')
     e('  If (f & $300) & ~(FlagsHi & $300)')
     e('    PEnd = 0                     ; TF or IF just set: check at the next boundary')
     e('  EndIf')
@@ -470,6 +466,16 @@ def emit_api():
     e('      PageW(p) = host - (p << 12)')
     e('    ElseIf kind = #CPU86_ROM')
     e('      PageR(p) = host - (p << 12)')
+    e('    EndIf')
+    e('    If p < 16                   ; the mirror above 1 MB (the 8086 wraps there)')
+    e('      PageR(p + 256) = 0')
+    e('      PageW(p + 256) = 0')
+    e('      If PageR(p)')
+    e('        PageR(p + 256) = PageR(p) - $100000')
+    e('      EndIf')
+    e('      If PageW(p)')
+    e('        PageW(p + 256) = PageW(p) - $100000')
+    e('      EndIf')
     e('    EndIf')
     e('    host = host + 4096')
     e('    p = (p + 1) & 255')
@@ -646,6 +652,9 @@ def emit_ea():
             if mod == 0 and rm == 6:
                 e('  eo = PeekA(PIP + 2) | (PeekA(PIP + 3) << 8)')
                 e('  PIP = PIP + 4')
+            elif mod == 0 and rm >= 4:
+                e(f'  eo = {EABASE[rm]}')
+                e('  PIP = PIP + 2')
             elif mod == 0:
                 e(f'  eo = {EABASE[rm]} & $FFFF')
                 e('  PIP = PIP + 2')
@@ -656,7 +665,7 @@ def emit_ea():
                 e(f'  eo = ({EABASE[rm]} + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF')
                 e('  PIP = PIP + 4')
             e(f'  sb = {seg}')
-            e('  ea = (sb + eo) & $FFFFF')
+            e('  ea = sb + eo')
             charge(EACYC[mod][rm])
             e('  Goto EaRet')
 
@@ -676,7 +685,7 @@ def emit_run(rp2350):
     e('    CompilerIf #CPU_ASM_TAIL = 1')
     if rp2350:
         e('      ASM Uses PIP, PEnd')
-        e('        cmp r4, r5')
+        e('        cmp r4, ' + 'r11')
         e('        bhs __ul_cpu86run_resync')
         e('        ldrb r0, [r4]')
         e('        lsls r0, r0, #2')
@@ -686,7 +695,7 @@ def emit_run(rp2350):
         e('      EndASM')
     else:
         e('      ASM Uses PIP, PEnd')
-        e('        cmp r4, r5')
+        e('        cmp r4, ' + 'r11')
         e('        bhs __ul_cpu86run_resync')
         e('        ldrb r0, [r4]')
         e('        lsls r0, r0, #2')
@@ -703,12 +712,18 @@ def emit_run(rp2350):
     e('  CompilerElse')
     e('    CompilerIf #CPU_ASM_TAIL = 1')
     e('      ASM Uses Left, PIP, PEnd')
-    e('        mov r0, r11')
-    e('        subs r0, #1')
-    e('        mov r11, r0')
-    e('        beq __ul_cpu86run_done')
-    e('        cmp r4, r5')
-    e('        bhs __ul_cpu86run_resync')
+    if True:  # Left in r6, PEnd in r11 (measured faster than PEnd r5 / Left r11)
+        e('        subs r6, #1')
+        e('        beq __ul_cpu86run_done')
+        e('        cmp r4, r11')
+        e('        bhs __ul_cpu86run_resync')
+    else:
+        e('        mov r0, r11')
+        e('        subs r0, #1')
+        e('        mov r11, r0')
+        e('        beq __ul_cpu86run_done')
+        e('        cmp r4, r5')
+        e('        bhs __ul_cpu86run_resync')
     e('        ldrb r0, [r4]')
     e('        lsls r0, r0, #2')
     e('        ldr r1, =global_dispatch')
@@ -875,8 +890,8 @@ def emit_handlers():
         op(0x40 + r)
         e(f'  va = R({r})')
         e('  vr = va + 1')
-        e('  FO = ((va ! vr) & (1 ! vr)) << 16')
-        e('  FA = va ! 1 ! vr')
+        e('  FO = (vr & ~va) << 16')
+        e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e(f'  R({r}) = vr')
         e('  PIP = PIP + 1')
@@ -884,8 +899,8 @@ def emit_handlers():
         op(0x48 + r)
         e(f'  va = R({r})')
         e('  vr = va - 1')
-        e('  FO = ((va ! 1) & (va ! vr)) << 16')
-        e('  FA = va ! 1 ! vr')
+        e('  FO = (va & ~vr) << 16')
+        e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e(f'  R({r}) = vr')
         e('  PIP = PIP + 1')
@@ -895,7 +910,7 @@ def emit_handlers():
         if r == SP:
             e('  eo = (R(4) - 2) & $FFFF')
             e('  R(4) = eo')
-            e(f'  ea = (SegB({SS}) + eo) & $FFFFF')
+            e(f'  ea = SegB({SS}) + eo')
             wr16('eo', sb=f'SegB({SS})')
         else:
             e(f'  va = R({r})')
@@ -1073,7 +1088,7 @@ def emit_handlers():
         op(n)
         e('  eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)')
         e('  sb = SegD')
-        e('  ea = (sb + eo) & $FFFFF')
+        e('  ea = sb + eo')
         e('  PIP = PIP + 3')
         if n == 0xA0:
             rd8('va')
@@ -1154,7 +1169,7 @@ def emit_handlers():
                 return
             rd16('va')
             e('  eo = (eo + 2) & $FFFF')
-            e('  ea = (sb + eo) & $FFFFF')
+            e('  ea = sb + eo')
             rd16('vb')
             g_write(1, 'va')
             e(f'  SegV({sr}) = vb')
@@ -1211,7 +1226,7 @@ def emit_handlers():
     set_zs(0, 'vr')
     e('    FC = 0')
     e('    FO = 0')
-    e('    FA = 0')
+    e('    FA = vr')
     e('  EndIf')
     tail(83)
     op(0xD5)
@@ -1232,7 +1247,7 @@ def emit_handlers():
     tail(4)
     op(0xD7)
     e('  eo = (R(3) + PeekA(@R(0))) & $FFFF')
-    e('  ea = (SegD + eo) & $FFFFF')
+    e('  ea = SegD + eo')
     rd8('va')
     e('  PokeA(@R(0), va)')
     e('  PIP = PIP + 1')
@@ -1391,7 +1406,7 @@ def emit_8f():
     e('  EndIf')
     e('  PIP = PIP + 2')
     e(f'  eo = R({SP})')
-    e(f'  ea = (SegB({SS}) + eo) & $FFFFF')
+    e(f'  ea = SegB({SS}) + eo')
     rd16('va', sb=f'SegB({SS})')
     e(f'  R({SP}) = eo + 2')
     e('  R(m & 7) = va')
@@ -1401,7 +1416,7 @@ def emit_8f():
     e('  y = eo')
     e('  cnt = sb')
     e(f'  eo = R({SP})')
-    e(f'  ea = (SegB({SS}) + eo) & $FFFFF')
+    e(f'  ea = SegB({SS}) + eo')
     rd16('va', sb=f'SegB({SS})')
     e(f'  R({SP}) = eo + 2')
     e('  ea = x')
@@ -1415,7 +1430,7 @@ def emit_bcd(op):
     op(0x27)
     e(f'  va = {rd_reg8_const(0)}')
     e('  x = (FC >> 31) & 1')
-    e('  y = (FA >> 4) & 1')
+    e('  y = ((FA ! FZS) >> 4) & 1')
     e('  vr = va')
     e('  FO = 0')
     e('  If x')
@@ -1443,13 +1458,14 @@ def emit_bcd(op):
     e('  EndIf')
     e('  PokeA(@R(0), vr)')
     set_zs(0, 'vr')
+    e('  FA = FA ! vr')
     e('  PIP = PIP + 1')
     tail(4)
     # 2F DAS
     op(0x2F)
     e(f'  va = {rd_reg8_const(0)}')
     e('  x = (FC >> 31) & 1')
-    e('  y = (FA >> 4) & 1')
+    e('  y = ((FA ! FZS) >> 4) & 1')
     e('  vr = va')
     e('  FO = 0')
     e('  If (x = 0) And (y = 0)')
@@ -1487,12 +1503,13 @@ def emit_bcd(op):
     e('  EndIf')
     e('  PokeA(@R(0), vr)')
     set_zs(0, 'vr')
+    e('  FA = FA ! vr')
     e('  PIP = PIP + 1')
     tail(4)
     # 37 AAA
     op(0x37)
     e(f'  va = {rd_reg8_const(0)}')
-    e('  If ((va & 15) > 9) Or (FA & $10)')
+    e('  If ((va & 15) > 9) Or ((FA ! FZS) & $10)')
     e('    PokeA(@R(0) + 1, PeekA(@R(0) + 1) + 1)')
     e('    vr = (va + 6) & 255')
     e('    FA = $10')
@@ -1516,12 +1533,13 @@ def emit_bcd(op):
     e('  If vr = 0')
     e('    FZS = FZS & $80000000')
     e('  EndIf')
+    e('  FA = FA ! vr')
     e('  PIP = PIP + 1')
     tail(4)
     # 3F AAS
     op(0x3F)
     e(f'  va = {rd_reg8_const(0)}')
-    e('  y = (FA >> 4) & 1')
+    e('  y = ((FA ! FZS) >> 4) & 1')
     e('  If ((va & 15) > 9) Or y')
     e('    vr = (va - 6) & 255')
     e('    PokeA(@R(0) + 1, PeekA(@R(0) + 1) - 1)')
@@ -1551,19 +1569,115 @@ def emit_bcd(op):
     e('  If vr = 0')
     e('    FZS = FZS & $80000000')
     e('  EndIf')
+    e('  FA = FA ! vr')
     e('  PIP = PIP + 1')
     tail(4)
+
+def emit_rep_block(kind, w, iter_cyc):
+    """REP MOVS / REP STOS going up (DF = 0): copy whole runs that stay inside
+    one RAM page and one 64 KB segment on each side straight between host
+    pointers. Elements are still moved one at a time and in order, each read
+    before it is written, so overlapping copies give the 8086's result. An
+    element that cannot (page or segment edge, ROM, hooks) is done through
+    the slow procedures, one at a time, and the block path resumes after it."""
+    sh = 1 if w else 0
+    size = 2 if w else 1
+    e('  If (Rep <> 0) And (cnt <> 0) And (DirStep = 1)')
+    e('    While cnt <> 0')
+    e(f'      y = SegB({ES}) + R({DI})')
+    e('      vr = PageW(y >> 12)')
+    e(f'      va = ($1000 - (y & $FFF)) >> {sh}')
+    e(f'      vb = ($10000 - R({DI})) >> {sh}')
+    e('      If vb < va')
+    e('        va = vb')
+    e('      EndIf')
+    if kind == 'MOVS':
+        e(f'      x = SegD + R({SI})')
+        e('      t = PageR(x >> 12)')
+        e(f'      vb = ($1000 - (x & $FFF)) >> {sh}')
+        e('      If vb < va')
+        e('        va = vb')
+        e('      EndIf')
+        e(f'      vb = ($10000 - R({SI})) >> {sh}')
+        e('      If vb < va')
+        e('        va = vb')
+        e('      EndIf')
+        e('      If t = 0')
+        e('        va = 0')
+        e('      EndIf')
+    e('      If vr = 0')
+    e('        va = 0')
+    e('      EndIf')
+    e('      If cnt < va')
+    e('        va = cnt')
+    e('      EndIf')
+    e('      If va = 0')
+    if kind == 'MOVS':
+        if w:
+            e(f'        vb = Cpu86Rd16(SegD, R({SI}))')
+            e(f'        Cpu86Wr16(SegB({ES}), R({DI}), vb)')
+        else:
+            e(f'        vb = Cpu86Rd8(SegD + R({SI}))')
+            e(f'        Cpu86Wr8(SegB({ES}) + R({DI}), vb)')
+        e(f'        R({SI}) = R({SI}) + {size}')
+    else:
+        if w:
+            e(f'        Cpu86Wr16(SegB({ES}), R({DI}), R(0))')
+        else:
+            e(f'        Cpu86Wr8(SegB({ES}) + R({DI}), PeekA(@R(0)))')
+    e(f'        R({DI}) = R({DI}) + {size}')
+    e('        cnt = cnt - 1')
+    charge(iter_cyc)
+    e('      Else')
+    e('        vr = vr + y')
+    e(f'        ea = vr + (va << {sh})')
+    if kind == 'MOVS':
+        e('        t = t + x')
+        e('        While vr < ea')
+        if w:
+            e('          vb = PeekA(t) | (PeekA(t + 1) << 8)')
+            e('          PokeA(vr, vb)')
+            e('          PokeA(vr + 1, vb >> 8)')
+            e('          t = t + 2')
+            e('          vr = vr + 2')
+        else:
+            e('          PokeA(vr, PeekA(t))')
+            e('          t = t + 1')
+            e('          vr = vr + 1')
+        e('        Wend')
+        e(f'        R({SI}) = R({SI}) + (va << {sh})')
+    else:
+        if w:
+            e('        vb = R(0)')
+            e('        While vr < ea')
+            e('          PokeA(vr, vb)')
+            e('          PokeA(vr + 1, vb >> 8)')
+            e('          vr = vr + 2')
+            e('        Wend')
+        else:
+            e('        vb = PeekA(@R(0))')
+            e('        While vr < ea')
+            e('          PokeA(vr, vb)')
+            e('          vr = vr + 1')
+            e('        Wend')
+    e(f'        R({DI}) = R({DI}) + (va << {sh})')
+    e('        cnt = cnt - va')
+    charge(f'{iter_cyc} * va')
+    e('      EndIf')
+    e('    Wend')
+    e('    R(1) = 0')
+    e('  EndIf')
 
 def emit_strings(op):
     # Source DS:SI (overridable, SegD), destination ES:DI. Rep: 0 none, 1 REPNZ, 2 REPZ.
     def src_ea():
         e(f'  eo = R({SI})')
         e('  sb = SegD')
-        e('  ea = (sb + eo) & $FFFFF')
+        e('  ea = sb + eo')
     def dst_ea():
         e(f'  eo = R({DI})')
         e(f'  sb = SegB({ES})')
-        e('  ea = (sb + eo) & $FFFFF')
+        e('  ea = sb + eo')
     def loop(n, w, kind, once_cyc, iter_cyc):
         op(n)
         step = 'DirStep2' if w else 'DirStep'
@@ -1573,6 +1687,8 @@ def emit_strings(op):
         e('  Else')
         e('    cnt = R(1)')
         e('  EndIf')
+        if kind in ('MOVS', 'STOS') and REP_BLOCK:
+            emit_rep_block(kind, w, iter_cyc)
         e('  While cnt <> 0')
         if kind == 'MOVS':
             src_ea()
@@ -1704,7 +1820,7 @@ def shift_body(k, w, W, mask, msb):
         e(f'    vr = y & {mask}')
         e(f'    FC = y << {sc}')
         e(f'    FO = ((vr >> {msb}) ! (y >> {W})) << 31')
-        e('    FA = 0')
+        e('    FA = vr')
         set_zs_i(w, 'vr')
     elif k == 5:  # SHR
         e('    If cnt > 31')
@@ -1715,13 +1831,13 @@ def shift_body(k, w, W, mask, msb):
         e('    vr = y >> 1')
         e('    FC = y << 31')
         e(f'    FO = (y >> {msb}) << 31')
-        e('    FA = 0')
+        e('    FA = vr')
         set_zs_i(w, 'vr')
     elif k == 6:  # SETMO / SETMOC: all ones, flags as OR with ones
         e(f'    vr = {mask}')
         e('    FC = 0')
         e('    FO = 0')
-        e('    FA = 0')
+        e('    FA = vr')
         set_zs_i(w, 'vr')
     else:         # SAR
         s = 32 - W
@@ -1733,7 +1849,7 @@ def shift_body(k, w, W, mask, msb):
         e(f'    vr = (y >> 1) & {mask}')
         e('    FC = y << 31')
         e('    FO = 0')
-        e('    FA = 0')
+        e('    FA = vr')
         set_zs_i(w, 'vr')
     if k < 4:
         # Rotates leave SF, ZF, PF, AF alone. Normalise CF/OF to bit 31 only.
@@ -1789,7 +1905,7 @@ def emit_grp3():
             e('    FC = 0')
             e('    FO = 0')
             e('  EndIf')
-            e('  FA = 0')
+            e('  FA = FZS')
         def imul_b(kind, w=w):
             e_read(kind, w, 'vb')
             if w:
@@ -1816,7 +1932,7 @@ def emit_grp3():
             e('    FC = 0')
             e('    FO = 0')
             e('  EndIf')
-            e('  FA = 0')
+            e('  FA = FZS')
         def div_b(kind, w=w):
             e_read(kind, w, 'vb')
             if w:
@@ -1925,11 +2041,11 @@ def emit_grp45():
             e_read(kind, 0, 'va')
             if k % 2 == 0:
                 e('  vr = va + 1')
-                e('  FO = ((va ! vr) & (1 ! vr)) << 24')
+                e('  FO = (vr & ~va) << 24')
             else:
                 e('  vr = va - 1')
-                e('  FO = ((va ! 1) & (va ! vr)) << 24')
-            e('  FA = va ! 1 ! vr')
+                e('  FO = (va & ~vr) << 24')
+            e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
             set_zs(0, 'vr')
             e_write(kind, 0, 'vr')
         bodies.append(body)
@@ -1938,15 +2054,15 @@ def emit_grp45():
     def inc(kind):
         e_read(kind, 1, 'va')
         e('  vr = va + 1')
-        e('  FO = ((va ! vr) & (1 ! vr)) << 16')
-        e('  FA = va ! 1 ! vr')
+        e('  FO = (vr & ~va) << 16')
+        e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e_write(kind, 1, 'vr')
     def dec(kind):
         e_read(kind, 1, 'va')
         e('  vr = va - 1')
-        e('  FO = ((va ! 1) & (va ! vr)) << 16')
-        e('  FA = va ! 1 ! vr')
+        e('  FO = (va & ~vr) << 16')
+        e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e_write(kind, 1, 'vr')
     def calln(kind):
@@ -1961,7 +2077,7 @@ def emit_grp45():
             return
         rd16('y')
         e('  eo = (eo + 2) & $FFFF')
-        e('  ea = (sb + eo) & $FFFFF')
+        e('  ea = sb + eo')
         rd16('vb')
         e(f'  va = SegV({CS})')
         push16('va')
@@ -1977,7 +2093,7 @@ def emit_grp45():
             return
         rd16('y')
         e('  eo = (eo + 2) & $FFFF')
-        e('  ea = (sb + eo) & $FFFFF')
+        e('  ea = sb + eo')
         rd16('vb')
         far_jump('vb', 'y')
     def push(kind):

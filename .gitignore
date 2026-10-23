@@ -12,3 +12,4 @@ Diagnostics/fetch.log
 *.build.log
 *.stderr.log
 __pycache__/
+Diagnostics/variant/

@@ -1,0 +1,449 @@
+8086 vectors clk_sys kHz=200000 timing=0 asm-tail=1
+READY
+G 00 pass=100 fail=0 tests=100 us=41180
+G 01 pass=100 fail=0 tests=100 us=42779
+G 02 pass=100 fail=0 tests=100 us=40766
+G 03 pass=100 fail=0 tests=100 us=41519
+G 04 pass=100 fail=0 tests=100 us=28935
+G 05 pass=100 fail=0 tests=100 us=28908
+G 06 pass=100 fail=0 tests=100 us=46175
+G 07 pass=100 fail=0 tests=100 us=45319
+G 08 pass=100 fail=0 tests=100 us=41049
+G 09 pass=100 fail=0 tests=100 us=42029
+G 0A pass=100 fail=0 tests=100 us=41536
+G 0B pass=100 fail=0 tests=100 us=42377
+G 0C pass=100 fail=0 tests=100 us=28785
+G 0D pass=100 fail=0 tests=100 us=29443
+G 0E pass=100 fail=0 tests=100 us=46428
+G 10 pass=100 fail=0 tests=100 us=39476
+G 11 pass=100 fail=0 tests=100 us=42930
+G 12 pass=100 fail=0 tests=100 us=40980
+G 13 pass=100 fail=0 tests=100 us=42679
+G 14 pass=100 fail=0 tests=100 us=28923
+G 15 pass=100 fail=0 tests=100 us=28958
+G 16 pass=100 fail=0 tests=100 us=46433
+G 17 pass=100 fail=0 tests=100 us=45268
+G 18 pass=100 fail=0 tests=100 us=39836
+G 19 pass=100 fail=0 tests=100 us=42171
+G 1A pass=100 fail=0 tests=100 us=39833
+G 1B pass=100 fail=0 tests=100 us=41927
+G 1C pass=100 fail=0 tests=100 us=29266
+G 1D pass=100 fail=0 tests=100 us=28929
+G 1E pass=100 fail=0 tests=100 us=46989
+G 1F pass=100 fail=0 tests=100 us=45362
+G 20 pass=100 fail=0 tests=100 us=40524
+G 21 pass=100 fail=0 tests=100 us=40997
+G 22 pass=100 fail=0 tests=100 us=40902
+G 23 pass=100 fail=0 tests=100 us=39866
+G 24 pass=100 fail=0 tests=100 us=29251
+G 25 pass=100 fail=0 tests=100 us=29161
+G 27 pass=100 fail=0 tests=100 us=29173
+G 28 pass=100 fail=0 tests=100 us=41296
+G 29 pass=100 fail=0 tests=100 us=41870
+G 2A pass=100 fail=0 tests=100 us=41235
+G 2B pass=100 fail=0 tests=100 us=40418
+G 2C pass=100 fail=0 tests=100 us=29172
+G 2D pass=100 fail=0 tests=100 us=29047
+G 2F pass=100 fail=0 tests=100 us=29049
+G 30 pass=100 fail=0 tests=100 us=40650
+G 31 pass=100 fail=0 tests=100 us=43051
+G 32 pass=100 fail=0 tests=100 us=39222
+G 33 pass=100 fail=0 tests=100 us=40451
+G 34 pass=100 fail=0 tests=100 us=29115
+G 35 pass=100 fail=0 tests=100 us=28886
+G 37 pass=100 fail=0 tests=100 us=29174
+G 38 pass=100 fail=0 tests=100 us=41172
+G 39 pass=100 fail=0 tests=100 us=42292
+G 3A pass=100 fail=0 tests=100 us=40260
+G 3B pass=100 fail=0 tests=100 us=39918
+G 3C pass=100 fail=0 tests=100 us=28908
+G 3D pass=100 fail=0 tests=100 us=29124
+G 3F pass=100 fail=0 tests=100 us=28979
+F 1 flags got=0F496 want=0F486   [inc ax]
+F 2 flags got=0F416 want=0F406   [inc ax]
+F 3 flags got=0F016 want=0F006   [inc ax]
+F 4 flags got=0F412 want=0F402   [inc ax]
+F 6 flags got=0F402 want=0F412   [inc ax]
+F 8 flags got=0F412 want=0F402   [inc ax]
+G 40 pass=48 fail=52 tests=100 us=28948
+F 0 flags got=0F017 want=0F007   [inc cx]
+F 3 flags got=0F497 want=0F487   [inc cx]
+F 4 flags got=0F017 want=0F007   [inc cx]
+F 5 flags got=0F093 want=0F083   [inc cx]
+F 6 flags got=0F493 want=0F483   [inc cx]
+F 7 flags got=0F096 want=0F086   [inc cx]
+G 41 pass=57 fail=43 tests=100 us=28913
+F 0 flags got=0F493 want=0F483   [inc dx]
+F 1 flags got=0F417 want=0F407   [inc dx]
+F 2 flags got=0F092 want=0F082   [inc dx]
+F 3 flags got=0F403 want=0F413   [inc dx]
+F 4 flags got=0F412 want=0F402   [inc dx]
+F 5 flags got=0F497 want=0F487   [inc dx]
+G 42 pass=49 fail=51 tests=100 us=29440
+F 2 flags got=0F012 want=0F002   [inc bx]
+F 5 flags got=0F017 want=0F007   [inc bx]
+F 8 flags got=0F496 want=0F486   [inc bx]
+F 9 flags got=0F496 want=0F486   [inc bx]
+F 10 flags got=0F092 want=0F082   [inc bx]
+F 12 flags got=0F012 want=0F002   [inc bx]
+G 43 pass=58 fail=42 tests=100 us=29327
+F 0 flags got=0F416 want=0F406   [inc sp]
+F 3 flags got=0F093 want=0F083   [inc sp]
+F 4 flags got=0F412 want=0F402   [inc sp]
+F 6 flags got=0F013 want=0F003   [inc sp]
+F 8 flags got=0F017 want=0F007   [inc sp]
+F 9 flags got=0F416 want=0F406   [inc sp]
+G 44 pass=52 fail=48 tests=100 us=29150
+F 0 flags got=0F012 want=0F002   [inc bp]
+F 1 flags got=0F482 want=0F492   [inc bp]
+F 3 flags got=0F492 want=0F482   [inc bp]
+F 5 flags got=0F097 want=0F087   [inc bp]
+F 6 flags got=0F096 want=0F086   [inc bp]
+F 7 flags got=0F096 want=0F086   [inc bp]
+G 45 pass=49 fail=51 tests=100 us=29145
+F 0 flags got=0F496 want=0F486   [inc si]
+F 3 flags got=0F496 want=0F486   [inc si]
+F 5 flags got=0F493 want=0F483   [inc si]
+F 6 flags got=0F096 want=0F086   [inc si]
+F 10 flags got=0F416 want=0F406   [inc si]
+F 11 flags got=0F407 want=0F417   [inc si]
+G 46 pass=54 fail=46 tests=100 us=28952
+F 1 flags got=0F496 want=0F486   [inc di]
+F 4 flags got=0F416 want=0F406   [inc di]
+F 5 flags got=0F413 want=0F403   [inc di]
+F 6 flags got=0F492 want=0F482   [inc di]
+F 13 flags got=0F496 want=0F486   [inc di]
+F 14 flags got=0F497 want=0F487   [inc di]
+G 47 pass=53 fail=47 tests=100 us=29163
+F 3 flags got=0F413 want=0F403   [dec ax]
+F 6 flags got=0F493 want=0F483   [dec ax]
+F 7 flags got=0F087 want=0F097   [dec ax]
+F 11 flags got=0F096 want=0F086   [dec ax]
+F 12 flags got=0F497 want=0F487   [dec ax]
+F 13 flags got=0F096 want=0F086   [dec ax]
+G 48 pass=47 fail=53 tests=100 us=29265
+F 0 flags got=0F493 want=0F483   [dec cx]
+F 1 flags got=0F013 want=0F003   [dec cx]
+F 6 flags got=0F487 want=0F497   [dec cx]
+F 9 flags got=0F493 want=0F483   [dec cx]
+F 10 flags got=0F093 want=0F083   [dec cx]
+F 11 flags got=0F093 want=0F083   [dec cx]
+G 49 pass=44 fail=56 tests=100 us=29192
+F 0 flags got=0F017 want=0F007   [dec dx]
+F 1 flags got=0F492 want=0F482   [dec dx]
+F 2 flags got=0F417 want=0F407   [dec dx]
+F 3 flags got=0F016 want=0F006   [dec dx]
+F 4 flags got=0F017 want=0F007   [dec dx]
+F 5 flags got=0F493 want=0F483   [dec dx]
+G 4A pass=44 fail=56 tests=100 us=29306
+F 0 flags got=0F096 want=0F086   [dec bx]
+F 3 flags got=0F413 want=0F403   [dec bx]
+F 4 flags got=0F093 want=0F083   [dec bx]
+F 5 flags got=0F497 want=0F487   [dec bx]
+F 9 flags got=0F017 want=0F007   [dec bx]
+F 10 flags got=0F096 want=0F086   [dec bx]
+G 4B pass=44 fail=56 tests=100 us=29028
+F 0 flags got=0F403 want=0F413   [dec sp]
+F 2 flags got=0F496 want=0F486   [dec sp]
+F 3 flags got=0F413 want=0F403   [dec sp]
+F 4 flags got=0F417 want=0F407   [dec sp]
+F 7 flags got=0F016 want=0F006   [dec sp]
+F 8 flags got=0F413 want=0F403   [dec sp]
+G 4C pass=49 fail=51 tests=100 us=28959
+F 1 flags got=0F486 want=0F496   [dec bp]
+F 2 flags got=0F093 want=0F083   [dec bp]
+F 3 flags got=0F493 want=0F483   [dec bp]
+F 5 flags got=0F487 want=0F497   [dec bp]
+F 6 flags got=0F413 want=0F403   [dec bp]
+F 7 flags got=0F013 want=0F003   [dec bp]
+G 4D pass=41 fail=59 tests=100 us=29017
+F 0 flags got=0F492 want=0F482   [dec si]
+F 1 flags got=0F492 want=0F482   [dec si]
+F 4 flags got=0F497 want=0F487   [dec si]
+F 7 flags got=0F493 want=0F483   [dec si]
+F 8 flags got=0F402 want=0F412   [dec si]
+F 9 flags got=0F493 want=0F483   [dec si]
+G 4E pass=38 fail=62 tests=100 us=29259
+F 0 flags got=0F413 want=0F403   [dec di]
+F 1 flags got=0F017 want=0F007   [dec di]
+F 2 flags got=0F097 want=0F087   [dec di]
+F 5 flags got=0F096 want=0F086   [dec di]
+F 6 flags got=0F093 want=0F083   [dec di]
+F 7 flags got=0F096 want=0F086   [dec di]
+G 4F pass=41 fail=59 tests=100 us=29209
+G 50 pass=100 fail=0 tests=100 us=46445
+G 51 pass=100 fail=0 tests=100 us=46338
+G 52 pass=100 fail=0 tests=100 us=46332
+G 53 pass=100 fail=0 tests=100 us=46391
+G 54 pass=100 fail=0 tests=100 us=46282
+G 55 pass=100 fail=0 tests=100 us=46530
+G 56 pass=100 fail=0 tests=100 us=46158
+G 57 pass=100 fail=0 tests=100 us=46291
+G 58 pass=100 fail=0 tests=100 us=45353
+G 59 pass=100 fail=0 tests=100 us=45362
+G 5A pass=100 fail=0 tests=100 us=45351
+G 5B pass=100 fail=0 tests=100 us=45178
+G 5C pass=100 fail=0 tests=100 us=45376
+G 5D pass=100 fail=0 tests=100 us=45787
+G 5E pass=100 fail=0 tests=100 us=45527
+G 5F pass=100 fail=0 tests=100 us=45482
+G 60 pass=100 fail=0 tests=100 us=29073
+G 61 pass=100 fail=0 tests=100 us=29312
+G 62 pass=100 fail=0 tests=100 us=28908
+G 63 pass=100 fail=0 tests=100 us=29207
+G 64 pass=100 fail=0 tests=100 us=29306
+G 65 pass=100 fail=0 tests=100 us=29218
+G 66 pass=100 fail=0 tests=100 us=29473
+G 67 pass=100 fail=0 tests=100 us=28952
+G 68 pass=100 fail=0 tests=100 us=29049
+G 69 pass=100 fail=0 tests=100 us=29248
+G 6A pass=100 fail=0 tests=100 us=28931
+G 6B pass=100 fail=0 tests=100 us=28966
+G 6C pass=100 fail=0 tests=100 us=28918
+G 6D pass=100 fail=0 tests=100 us=28816
+G 6E pass=100 fail=0 tests=100 us=29048
+G 6F pass=100 fail=0 tests=100 us=29000
+G 70 pass=100 fail=0 tests=100 us=28968
+G 71 pass=100 fail=0 tests=100 us=28951
+G 72 pass=100 fail=0 tests=100 us=28852
+G 73 pass=100 fail=0 tests=100 us=29062
+G 74 pass=100 fail=0 tests=100 us=29076
+G 75 pass=100 fail=0 tests=100 us=28856
+G 76 pass=100 fail=0 tests=100 us=29224
+G 77 pass=100 fail=0 tests=100 us=28858
+G 78 pass=100 fail=0 tests=100 us=29156
+G 79 pass=100 fail=0 tests=100 us=28848
+G 7A pass=100 fail=0 tests=100 us=28869
+G 7B pass=100 fail=0 tests=100 us=29266
+G 7C pass=100 fail=0 tests=100 us=28895
+G 7D pass=100 fail=0 tests=100 us=29006
+G 7E pass=100 fail=0 tests=100 us=28762
+G 7F pass=100 fail=0 tests=100 us=28693
+G 80.0 pass=100 fail=0 tests=100 us=41893
+G 80.1 pass=100 fail=0 tests=100 us=41058
+G 80.2 pass=100 fail=0 tests=100 us=41432
+G 80.3 pass=100 fail=0 tests=100 us=41424
+G 80.4 pass=100 fail=0 tests=100 us=40617
+G 80.5 pass=100 fail=0 tests=100 us=40180
+G 80.6 pass=100 fail=0 tests=100 us=40913
+G 80.7 pass=100 fail=0 tests=100 us=40233
+G 81.0 pass=100 fail=0 tests=100 us=42491
+G 81.1 pass=100 fail=0 tests=100 us=42748
+G 81.2 pass=100 fail=0 tests=100 us=41763
+G 81.3 pass=100 fail=0 tests=100 us=41790
+G 81.4 pass=100 fail=0 tests=100 us=42844
+G 81.5 pass=100 fail=0 tests=100 us=40614
+G 81.6 pass=100 fail=0 tests=100 us=42068
+G 81.7 pass=100 fail=0 tests=100 us=42713
+G 82.0 pass=100 fail=0 tests=100 us=39083
+G 82.1 pass=100 fail=0 tests=100 us=40827
+G 82.2 pass=100 fail=0 tests=100 us=41974
+G 82.3 pass=100 fail=0 tests=100 us=39082
+G 82.4 pass=100 fail=0 tests=100 us=40893
+G 82.5 pass=100 fail=0 tests=100 us=41013
+G 82.6 pass=100 fail=0 tests=100 us=41509
+G 82.7 pass=100 fail=0 tests=100 us=40562
+G 83.0 pass=100 fail=0 tests=100 us=40643
+G 83.1 pass=100 fail=0 tests=100 us=42804
+G 83.2 pass=100 fail=0 tests=100 us=41502
+G 83.3 pass=100 fail=0 tests=100 us=42085
+G 83.4 pass=100 fail=0 tests=100 us=41805
+G 83.5 pass=100 fail=0 tests=100 us=41064
+G 83.6 pass=100 fail=0 tests=100 us=41863
+G 83.7 pass=100 fail=0 tests=100 us=42120
+G 84 pass=100 fail=0 tests=100 us=39257
+G 85 pass=100 fail=0 tests=100 us=43205
+G 86 pass=100 fail=0 tests=100 us=41717
+G 87 pass=100 fail=0 tests=100 us=42471
+G 88 pass=100 fail=0 tests=100 us=40570
+G 89 pass=100 fail=0 tests=100 us=41944
+G 8A pass=100 fail=0 tests=100 us=39745
+G 8B pass=100 fail=0 tests=100 us=41089
+G 8C pass=100 fail=0 tests=100 us=40805
+G 8D pass=100 fail=0 tests=100 us=29352
+G 8E pass=100 fail=0 tests=100 us=41804
+G 8F pass=100 fail=0 tests=100 us=59473
+G 90 pass=100 fail=0 tests=100 us=29002
+G 91 pass=100 fail=0 tests=100 us=28957
+G 92 pass=100 fail=0 tests=100 us=29102
+G 93 pass=100 fail=0 tests=100 us=29078
+G 94 pass=100 fail=0 tests=100 us=28948
+G 95 pass=100 fail=0 tests=100 us=28935
+G 96 pass=100 fail=0 tests=100 us=28859
+G 97 pass=100 fail=0 tests=100 us=28852
+G 98 pass=100 fail=0 tests=100 us=29192
+G 99 pass=100 fail=0 tests=100 us=29098
+G 9A pass=100 fail=0 tests=100 us=50224
+G 9C pass=100 fail=0 tests=100 us=46553
+G 9D pass=100 fail=0 tests=100 us=45345
+G 9E pass=100 fail=0 tests=100 us=29228
+G 9F pass=100 fail=0 tests=100 us=28696
+G A0 pass=100 fail=0 tests=100 us=44453
+G A1 pass=100 fail=0 tests=100 us=45329
+G A2 pass=100 fail=0 tests=100 us=44489
+G A3 pass=100 fail=0 tests=100 us=46194
+G A4 pass=100 fail=0 tests=100 us=160497
+G A5 pass=100 fail=0 tests=100 us=281054
+G A6 pass=100 fail=0 tests=100 us=115306
+G A7 pass=100 fail=0 tests=100 us=134206
+G A8 pass=100 fail=0 tests=100 us=28709
+G A9 pass=100 fail=0 tests=100 us=29079
+G AA pass=100 fail=0 tests=100 us=105837
+G AB pass=100 fail=0 tests=100 us=155635
+G AC pass=100 fail=0 tests=100 us=75869
+G AD pass=100 fail=0 tests=100 us=89659
+G AE pass=100 fail=0 tests=100 us=56244
+G AF pass=100 fail=0 tests=100 us=92817
+G B0 pass=100 fail=0 tests=100 us=28720
+G B1 pass=100 fail=0 tests=100 us=29174
+G B2 pass=100 fail=0 tests=100 us=29103
+G B3 pass=100 fail=0 tests=100 us=28740
+G B4 pass=100 fail=0 tests=100 us=29454
+G B5 pass=100 fail=0 tests=100 us=29056
+G B6 pass=100 fail=0 tests=100 us=29164
+G B7 pass=100 fail=0 tests=100 us=28934
+G B8 pass=100 fail=0 tests=100 us=29031
+G B9 pass=100 fail=0 tests=100 us=28940
+G BA pass=100 fail=0 tests=100 us=28823
+G BB pass=100 fail=0 tests=100 us=28782
+G BC pass=100 fail=0 tests=100 us=29095
+G BD pass=100 fail=0 tests=100 us=28862
+G BE pass=100 fail=0 tests=100 us=29051
+G BF pass=100 fail=0 tests=100 us=28974
+G C0 pass=100 fail=0 tests=100 us=45425
+G C1 pass=100 fail=0 tests=100 us=45424
+G C2 pass=100 fail=0 tests=100 us=45783
+G C3 pass=100 fail=0 tests=100 us=45554
+G C4 pass=100 fail=0 tests=100 us=47642
+G C5 pass=100 fail=0 tests=100 us=47710
+G C6 pass=100 fail=0 tests=100 us=41002
+G C7 pass=100 fail=0 tests=100 us=43115
+G C8 pass=100 fail=0 tests=100 us=47958
+G C9 pass=100 fail=0 tests=100 us=47699
+G CA pass=100 fail=0 tests=100 us=47755
+G CB pass=100 fail=0 tests=100 us=47091
+G CC pass=100 fail=0 tests=100 us=74531
+G CD pass=100 fail=0 tests=100 us=73566
+G CE pass=100 fail=0 tests=100 us=53153
+G CF pass=100 fail=0 tests=100 us=49698
+G D0.0 pass=100 fail=0 tests=100 us=39953
+G D0.1 pass=100 fail=0 tests=100 us=40898
+G D0.2 pass=100 fail=0 tests=100 us=41276
+G D0.3 pass=100 fail=0 tests=100 us=39614
+G D0.4 pass=100 fail=0 tests=100 us=41358
+G D0.5 pass=100 fail=0 tests=100 us=40187
+G D0.6 pass=100 fail=0 tests=100 us=40707
+G D0.7 pass=100 fail=0 tests=100 us=41454
+G D1.0 pass=100 fail=0 tests=100 us=42185
+G D1.1 pass=100 fail=0 tests=100 us=41748
+G D1.2 pass=100 fail=0 tests=100 us=42051
+G D1.3 pass=100 fail=0 tests=100 us=42860
+G D1.4 pass=100 fail=0 tests=100 us=42790
+G D1.5 pass=100 fail=0 tests=100 us=42073
+G D1.6 pass=100 fail=0 tests=100 us=41912
+G D1.7 pass=100 fail=0 tests=100 us=41379
+G D2.0 pass=100 fail=0 tests=100 us=41581
+G D2.1 pass=100 fail=0 tests=100 us=41588
+G D2.2 pass=100 fail=0 tests=100 us=40442
+G D2.3 pass=100 fail=0 tests=100 us=41202
+G D2.4 pass=100 fail=0 tests=100 us=40664
+G D2.5 pass=100 fail=0 tests=100 us=40881
+G D2.6 pass=100 fail=0 tests=100 us=40423
+G D2.7 pass=100 fail=0 tests=100 us=41788
+G D3.0 pass=100 fail=0 tests=100 us=41397
+G D3.1 pass=100 fail=0 tests=100 us=42390
+G D3.2 pass=100 fail=0 tests=100 us=42475
+G D3.3 pass=100 fail=0 tests=100 us=42269
+G D3.4 pass=100 fail=0 tests=100 us=41315
+G D3.5 pass=100 fail=0 tests=100 us=42761
+G D3.6 pass=100 fail=0 tests=100 us=43361
+G D3.7 pass=100 fail=0 tests=100 us=43060
+G D4 pass=100 fail=0 tests=100 us=29418
+G D5 pass=100 fail=0 tests=100 us=29094
+G D6 pass=100 fail=0 tests=100 us=28811
+G D7 pass=100 fail=0 tests=100 us=44363
+G D8 pass=100 fail=0 tests=100 us=41258
+G D9 pass=100 fail=0 tests=100 us=41605
+G DA pass=100 fail=0 tests=100 us=40049
+G DB pass=100 fail=0 tests=100 us=42076
+G DC pass=100 fail=0 tests=100 us=42656
+G DD pass=100 fail=0 tests=100 us=42824
+G DE pass=100 fail=0 tests=100 us=41321
+G DF pass=100 fail=0 tests=100 us=41021
+G E0 pass=100 fail=0 tests=100 us=28937
+G E1 pass=100 fail=0 tests=100 us=28846
+G E2 pass=100 fail=0 tests=100 us=29084
+G E3 pass=100 fail=0 tests=100 us=28988
+G E4 pass=100 fail=0 tests=100 us=28937
+G E5 pass=100 fail=0 tests=100 us=28818
+G E6 pass=100 fail=0 tests=100 us=28981
+G E7 pass=100 fail=0 tests=100 us=28893
+G E8 pass=100 fail=0 tests=100 us=46401
+G E9 pass=100 fail=0 tests=100 us=29169
+G EA pass=100 fail=0 tests=100 us=29137
+G EB pass=100 fail=0 tests=100 us=28877
+G EC pass=100 fail=0 tests=100 us=29252
+G ED pass=100 fail=0 tests=100 us=29079
+G EE pass=100 fail=0 tests=100 us=29251
+G EF pass=100 fail=0 tests=100 us=28994
+G F5 pass=100 fail=0 tests=100 us=28853
+G F6.0 pass=100 fail=0 tests=100 us=39662
+G F6.1 pass=100 fail=0 tests=100 us=41215
+G F6.2 pass=100 fail=0 tests=100 us=41574
+G F6.3 pass=100 fail=0 tests=100 us=41003
+G F6.4 pass=100 fail=0 tests=100 us=40899
+G F6.5 pass=100 fail=0 tests=100 us=40181
+G F6.6 pass=100 fail=0 tests=100 us=59720
+G F6.7 pass=100 fail=0 tests=100 us=76790
+G F7.0 pass=100 fail=0 tests=100 us=43021
+G F7.1 pass=100 fail=0 tests=100 us=40607
+G F7.2 pass=100 fail=0 tests=100 us=42113
+G F7.3 pass=100 fail=0 tests=100 us=42097
+G F7.4 pass=100 fail=0 tests=100 us=41507
+G F7.5 pass=100 fail=0 tests=100 us=41882
+G F7.6 pass=100 fail=0 tests=100 us=63400
+G F7.7 pass=100 fail=0 tests=100 us=75088
+G F8 pass=100 fail=0 tests=100 us=28907
+G F9 pass=100 fail=0 tests=100 us=28840
+G FA pass=100 fail=0 tests=100 us=28789
+G FB pass=100 fail=0 tests=100 us=28969
+G FC pass=100 fail=0 tests=100 us=29245
+G FD pass=100 fail=0 tests=100 us=29080
+F 0 flags got=0F016 want=0F006   [inc byte [ss:bp+di]]
+F 2 flags got=0F487 want=0F497   [inc byte [es:si]]
+F 3 flags got=0F097 want=0F087   [inc byte [ds:bp+si]]
+F 5 flags got=0F097 want=0F087   [inc byte [ss:bp+si+76h]]
+F 7 flags got=0F496 want=0F486   [inc byte [ss:bp+di]]
+F 9 flags got=0F016 want=0F006   [inc byte [cs:bp+55h]]
+G FE.0 pass=46 fail=54 tests=100 us=41565
+F 0 flags got=0F416 want=0F406   [dec byte [ss:bp+di-1Dh]]
+F 1 flags got=0F492 want=0F482   [dec byte [ss:bp+si]]
+F 2 flags got=0F416 want=0F406   [dec byte [ss:si+10F0h]]
+F 3 flags got=0F412 want=0F402   [dec byte [cs:bx]]
+F 4 flags got=0F093 want=0F083   [dec byte [cs:di]]
+F 5 flags got=0F096 want=0F086   [dec byte [ds:bx+di-334h]]
+G FE.1 pass=50 fail=50 tests=100 us=41077
+F 0 flags got=0F017 want=0F007   [inc word [ss:bp+4Ch]]
+F 1 flags got=0F012 want=0F002   [inc bx]
+F 5 flags got=0F003 want=0F013   [inc word [cs:bp+si]]
+F 10 flags got=0F412 want=0F402   [inc ax]
+F 11 flags got=0F092 want=0F082   [inc word [es:bx+si-BECh]]
+F 12 flags got=0F413 want=0F403   [inc word [ds:bx]]
+G FF.0 pass=51 fail=49 tests=100 us=42781
+F 0 flags got=0F012 want=0F002   [dec word [es:si-3AE9h]]
+F 5 flags got=0F013 want=0F003   [dec word [ds:bx-Dh]]
+F 9 flags got=0F016 want=0F006   [dec bp]
+F 12 flags got=0F417 want=0F407   [dec word [ss:bx+di]]
+F 13 flags got=0F087 want=0F097   [dec ax]
+F 14 flags got=0F097 want=0F087   [dec ax]
+G FF.1 pass=51 fail=49 tests=100 us=39892
+G FF.2 pass=100 fail=0 tests=100 us=58969
+G FF.3 pass=100 fail=0 tests=100 us=68290
+G FF.4 pass=100 fail=0 tests=100 us=40902
+G FF.5 pass=100 fail=0 tests=100 us=47467
+G FF.6 pass=100 fail=0 tests=100 us=58824
+G FF.7 pass=100 fail=0 tests=100 us=59922
+TOTAL pass=31266 fail=1034
+vectors FAIL
+host: 323 files, 32300 tests, 3197267 bytes in 43.6 s
+host: groups with failures: 40 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4F FE.0 FE.1 FF.0 FF.1

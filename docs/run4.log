@@ -1,0 +1,1278 @@
+8086 vectors clk_sys kHz=200000 timing=0 asm-tail=1
+READY
+F 4 ip got=09085 want=09087   [add byte [ds:bx], ah]
+F 16 ip got=06D05 want=06D07   [add byte [cs:bx], ch]
+F 20 ip got=0698E want=06990   [add byte [es:si], ch]
+F 24 ip got=06CE6 want=06CE8   [add byte [ds:bx], ch]
+F 42 ip got=0FAF9 want=0FAFB   [add byte [ds:si], dh]
+F 64 ip got=0A23A want=0A23C   [add byte [ss:bx], ch]
+G 00 pass=92 fail=8 tests=100 us=41055
+F 22 ip got=0AAB7 want=0AAB9   [add word [ss:si], bx]
+F 44 ip got=0B308 want=0B30A   [add word [ds:di], ax]
+F 46 ip got=03007 want=03009   [add word [es:bx], ax]
+F 68 ip got=0F317 want=0F319   [add word [ds:di], bx]
+F 98 ip got=081ED want=081EF   [add word [ds:di], sp]
+F 99 ip got=04CA6 want=04CA8   [add word [ds:bx], si]
+G 01 pass=94 fail=6 tests=100 us=42729
+F 2 ip got=06301 want=06303   [add ah, byte [ds:si]]
+F 9 ip got=03807 want=03809   [add al, byte [ds:bx]]
+F 10 ip got=099E3 want=099E5   [add bh, byte [ss:si]]
+F 12 ip got=02764 want=02766   [add cl, byte [ds:bx]]
+F 19 ip got=0A2E6 want=0A2E8   [add bl, byte [ds:si]]
+F 26 ip got=0496D want=0496F   [add ch, byte [es:bx]]
+G 02 pass=87 fail=13 tests=100 us=41168
+F 16 ip got=0EC17 want=0EC19   [add cx, word [ds:si]]
+F 18 ip got=022EC want=022EE   [add bx, word [ds:bx]]
+F 21 ip got=0FBBA want=0FBBC   [add ax, word [ss:di]]
+F 23 ip got=046B3 want=046B5   [add dx, word [ds:di]]
+F 26 ip got=0E861 want=0E863   [add dx, word [ds:di]]
+F 53 ip got=067F0 want=067F2   [add ax, word [ss:di]]
+G 03 pass=88 fail=12 tests=100 us=41800
+G 04 pass=100 fail=0 tests=100 us=28960
+G 05 pass=100 fail=0 tests=100 us=28912
+G 06 pass=100 fail=0 tests=100 us=46325
+G 07 pass=100 fail=0 tests=100 us=45175
+F 2 ip got=06301 want=06303   [or byte [ds:si], ah]
+F 9 ip got=03807 want=03809   [or byte [ds:bx], al]
+F 10 ip got=099E3 want=099E5   [or byte [ss:si], bh]
+F 12 ip got=02764 want=02766   [or byte [ds:bx], cl]
+F 19 ip got=0A2E6 want=0A2E8   [or byte [ds:si], bl]
+F 26 ip got=0496D want=0496F   [or byte [es:bx], ch]
+G 08 pass=87 fail=13 tests=100 us=41319
+F 16 ip got=0EC17 want=0EC19   [or word [ds:si], cx]
+F 18 ip got=022EC want=022EE   [or word [ds:bx], bx]
+F 21 ip got=0FBBA want=0FBBC   [or word [ss:di], ax]
+F 23 ip got=046B3 want=046B5   [or word [ds:di], dx]
+F 26 ip got=0E861 want=0E863   [or word [ds:di], dx]
+F 53 ip got=067F0 want=067F2   [or word [ss:di], ax]
+G 09 pass=88 fail=12 tests=100 us=42309
+F 8 ip got=01C6C want=01C6E   [or ch, byte [cs:bx]]
+F 10 ip got=00560 want=00562   [or ah, byte [ds:bx]]
+F 52 ip got=00450 want=00452   [or dh, byte [ss:di]]
+F 54 ip got=06A0E want=06A10   [or bl, byte [es:di]]
+F 56 ip got=0335E want=03360   [or ch, byte [ds:bx]]
+F 69 ip got=02C24 want=02C26   [or ch, byte [ds:bx]]
+G 0A pass=91 fail=9 tests=100 us=41585
+F 0 ip got=09170 want=09172   [or di, word [ds:si]]
+F 17 ip got=0D3FB want=0D3FD   [or di, word [es:si]]
+F 31 ip got=0F25D want=0F25F   [or bp, word [ds:bx]]
+F 41 ip got=0077A want=0077C   [or ax, word [ds:bx]]
+F 44 ip got=018C8 want=018CA   [or ax, word [es:bx]]
+F 75 ip got=0D7BB want=0D7BD   [or ax, word [ds:si]]
+G 0B pass=93 fail=7 tests=100 us=42521
+G 0C pass=100 fail=0 tests=100 us=29102
+G 0D pass=100 fail=0 tests=100 us=28763
+G 0E pass=100 fail=0 tests=100 us=46179
+F 5 ip got=0AAA6 want=0AAA8   [adc byte [ds:di], ch]
+F 8 ip got=03CCC want=03CCE   [adc byte [ds:di], cl]
+F 10 ip got=07D92 want=07D94   [adc byte [cs:si], ch]
+F 13 ip got=07F11 want=07F13   [adc byte [ss:di], dl]
+F 26 ip got=08018 want=0801A   [adc byte [ss:di], cl]
+F 49 ip got=042CF want=042D1   [adc byte [ds:bx], al]
+G 10 pass=89 fail=11 tests=100 us=40012
+F 14 ip got=0DD5A want=0DD5C   [adc word [ds:di], cx]
+F 18 ip got=0C7C2 want=0C7C4   [adc word [ds:si], bx]
+F 19 ip got=0C9FB want=0C9FD   [adc word [es:di], di]
+F 39 ip got=00FD6 want=00FD8   [adc word [ds:bx], ax]
+F 48 ip got=0245E want=02460   [adc word [cs:bx], ax]
+F 75 ip got=004FC want=004FE   [adc word [ds:di], dx]
+G 11 pass=93 fail=7 tests=100 us=42739
+F 17 ip got=02358 want=0235A   [adc dh, byte [ds:di]]
+F 33 ip got=0071B want=0071D   [adc bl, byte [ds:bx]]
+F 64 ip got=01B83 want=01B85   [adc ah, byte [ds:bx]]
+F 75 ip got=0F778 want=0F77A   [adc ah, byte [ds:di]]
+F 90 ip got=0C4C5 want=0C4C7   [adc cl, byte [ds:bx]]
+G 12 pass=95 fail=5 tests=100 us=41121
+F 23 ip got=0722D want=0722F   [adc si, word [ds:di]]
+F 24 ip got=0EB71 want=0EB73   [adc bp, word [ds:si]]
+F 34 ip got=0A6D2 want=0A6D4   [adc sp, word [ds:bx]]
+F 51 ip got=0CF0C want=0CF0E   [adc ax, word [ds:si]]
+F 57 ip got=049D6 want=049D8   [adc cx, word [ss:bx]]
+F 83 ip got=0245E want=02460   [adc ax, word [ss:bx]]
+G 13 pass=93 fail=7 tests=100 us=43227
+G 14 pass=100 fail=0 tests=100 us=28975
+G 15 pass=100 fail=0 tests=100 us=29141
+G 16 pass=100 fail=0 tests=100 us=46677
+G 17 pass=100 fail=0 tests=100 us=45742
+F 4 ip got=03C22 want=03C24   [sbb byte [es:si], bl]
+F 13 ip got=0D73B want=0D73D   [sbb byte [ds:di], ch]
+F 16 ip got=0245F want=02461   [sbb byte [ds:bx], ch]
+F 21 ip got=00209 want=0020B   [sbb byte [ds:si], dh]
+F 62 ip got=0EB2A want=0EB2C   [sbb byte [ss:bx], dh]
+F 66 ip got=098EE want=098F0   [sbb byte [ds:di], dl]
+G 18 pass=89 fail=11 tests=100 us=39962
+F 0 ip got=0CBE6 want=0CBE8   [sbb word [ds:di], sp]
+F 9 ip got=01F79 want=01F7B   [sbb word [ds:si], si]
+F 10 ip got=0439E want=043A0   [sbb word [ss:si], ax]
+F 31 ip got=03E6B want=03E6D   [sbb word [ds:bx], si]
+F 61 ip got=009FD want=009FF   [sbb word [cs:di], bx]
+F 72 ip got=0D148 want=0D14A   [sbb word [ss:bx], ax]
+G 19 pass=92 fail=8 tests=100 us=42369
+F 4 ip got=041EB want=041ED   [sbb bh, byte [cs:si]]
+F 9 ip got=02FA6 want=02FA8   [sbb dl, byte [ds:bx]]
+F 17 ip got=0BEA0 want=0BEA2   [sbb ah, byte [es:bx]]
+F 27 ip got=04C64 want=04C66   [sbb bh, byte [es:bx]]
+F 44 ip got=00C61 want=00C63   [sbb cl, byte [cs:di]]
+F 45 ip got=0584A want=0584C   [sbb dh, byte [ds:di]]
+G 1A pass=88 fail=12 tests=100 us=40064
+F 10 ip got=022BF want=022C1   [sbb bp, word [ds:bx]]
+F 31 ip got=0C746 want=0C748   [sbb dx, word [es:bx]]
+F 52 ip got=0A6E8 want=0A6EA   [sbb sp, word [ds:di]]
+F 78 ip got=096B6 want=096B8   [sbb cx, word [ds:bx]]
+F 99 ip got=08644 want=08646   [sbb di, word [ds:bx]]
+G 1B pass=95 fail=5 tests=100 us=41998
+G 1C pass=100 fail=0 tests=100 us=29026
+G 1D pass=100 fail=0 tests=100 us=29247
+G 1E pass=100 fail=0 tests=100 us=47081
+G 1F pass=100 fail=0 tests=100 us=45461
+F 10 ip got=0E49A want=0E49C   [and byte [es:di], dh]
+F 11 ip got=02C87 want=02C89   [and byte [ds:bx], ah]
+F 24 ip got=02DCB want=02DCD   [and byte [ds:bx], ah]
+F 36 ip got=0B1CF want=0B1D1   [and byte [ds:si], ah]
+F 37 ip got=08666 want=08668   [and byte [ds:bx], bl]
+F 45 ip got=064F9 want=064FB   [and byte [cs:si], dh]
+G 20 pass=91 fail=9 tests=100 us=40550
+F 7 ip got=0E9B1 want=0E9B3   [and word [ds:bx], di]
+F 14 ip got=0DFE1 want=0DFE3   [and word [ds:si], sp]
+F 32 ip got=06EF2 want=06EF4   [and word [es:di], cx]
+F 47 ip got=02734 want=02736   [and word [cs:bx], ax]
+F 48 ip got=0129A want=0129C   [and word [cs:si], ax]
+F 60 ip got=04699 want=0469B   [and word [ds:si], dx]
+G 21 pass=91 fail=9 tests=100 us=40729
+F 17 ip got=054EB want=054ED   [and ch, byte [ss:di]]
+F 31 ip got=071B9 want=071BB   [and bh, byte [ds:si]]
+F 45 ip got=0908A want=0908C   [and ah, byte [cs:si]]
+F 50 ip got=0B2BA want=0B2BC   [and bh, byte [ds:si]]
+F 61 ip got=070F0 want=070F2   [and bh, byte [ds:di]]
+F 66 ip got=01DF8 want=01DFA   [and dl, byte [es:bx]]
+G 22 pass=89 fail=11 tests=100 us=40733
+F 7 ip got=07D11 want=07D13   [and bp, word [ss:si]]
+F 19 ip got=0A9FF want=0AA01   [and sp, word [ss:si]]
+F 29 ip got=076CB want=076CD   [and bx, word [ds:si]]
+F 48 ip got=05154 want=05156   [and ax, word [ss:si]]
+F 90 ip got=06892 want=06894   [and dx, word [ds:bx]]
+G 23 pass=95 fail=5 tests=100 us=40142
+G 24 pass=100 fail=0 tests=100 us=29335
+G 25 pass=100 fail=0 tests=100 us=28976
+G 27 pass=100 fail=0 tests=100 us=28995
+F 1 ip got=0F8C7 want=0F8C9   [sub byte [ds:si], bl]
+F 6 ip got=0B435 want=0B437   [sub byte [ds:si], bh]
+F 16 ip got=0859B want=0859D   [sub byte [ds:bx], bl]
+F 26 ip got=0F2E6 want=0F2E8   [sub byte [ds:di], dh]
+F 32 ip got=0DA1E want=0DA20   [sub byte [cs:si], al]
+F 60 ip got=0D32A want=0D32C   [sub byte [cs:di], cl]
+G 28 pass=90 fail=10 tests=100 us=41405
+F 4 ip got=08DFC want=08DFE   [sub word [es:bx], cx]
+F 29 ip got=0D49C want=0D49E   [sub word [es:di], sp]
+F 42 ip got=05908 want=0590A   [sub word [ss:bx], dx]
+F 61 ip got=0655B want=0655D   [sub word [es:si], dx]
+F 75 ip got=072E9 want=072EB   [sub word [ds:si], cx]
+F 84 ip got=02821 want=02823   [sub word [ds:si], di]
+G 29 pass=91 fail=9 tests=100 us=42045
+F 1 ip got=011BC want=011BE   [sub bh, byte [ss:di]]
+F 7 ip got=0BA54 want=0BA56   [sub bl, byte [ds:di]]
+F 14 ip got=0D8A3 want=0D8A5   [sub dh, byte [es:di]]
+F 39 ip got=070CB want=070CD   [sub ch, byte [ds:di]]
+F 47 ip got=03897 want=03899   [sub dh, byte [ds:bx]]
+F 50 ip got=0087B want=0087D   [sub al, byte [ds:bx]]
+G 2A pass=92 fail=8 tests=100 us=41558
+F 27 ip got=04011 want=04013   [sub ax, word [ss:si]]
+F 40 ip got=0F64B want=0F64D   [sub cx, word [cs:si]]
+F 64 ip got=034F8 want=034FA   [sub sp, word [ds:di]]
+F 80 ip got=01E9A want=01E9C   [sub ax, word [ds:si]]
+F 89 ip got=02926 want=02928   [sub di, word [es:bx]]
+G 2B pass=95 fail=5 tests=100 us=40702
+G 2C pass=100 fail=0 tests=100 us=28728
+G 2D pass=100 fail=0 tests=100 us=28799
+G 2F pass=100 fail=0 tests=100 us=28907
+F 3 ip got=04365 want=04367   [xor byte [ds:si], al]
+F 9 ip got=0C415 want=0C417   [xor byte [ss:si], ch]
+F 24 ip got=006C7 want=006C9   [xor byte [cs:bx], bh]
+F 28 ip got=0957D want=0957F   [xor byte [ds:si], ah]
+F 31 ip got=03111 want=03113   [xor byte [cs:di], cl]
+F 38 ip got=0E7B9 want=0E7BB   [xor byte [ds:di], dl]
+G 30 pass=86 fail=14 tests=100 us=40797
+F 18 ip got=0314C want=0314E   [xor word [ds:si], sp]
+F 23 ip got=088EF want=088F1   [xor word [ds:di], si]
+F 26 ip got=0F482 want=0F484   [xor word [es:si], ax]
+F 39 ip got=09E6E want=09E70   [xor word [ds:bx], sp]
+F 73 ip got=0BD8E want=0BD90   [xor word [cs:si], bp]
+F 79 ip got=0390F want=03911   [xor word [ds:si], bp]
+G 31 pass=94 fail=6 tests=100 us=43039
+F 25 ip got=024B0 want=024B2   [xor ch, byte [ds:bx]]
+F 38 ip got=0B744 want=0B746   [xor cl, byte [ds:di]]
+F 40 ip got=00AD9 want=00ADB   [xor al, byte [ds:bx]]
+F 45 ip got=038B2 want=038B4   [xor bh, byte [ds:si]]
+F 90 ip got=00CC1 want=00CC3   [xor dl, byte [ds:si]]
+F 95 ip got=00FF2 want=00FF4   [xor cl, byte [ds:si]]
+G 32 pass=94 fail=6 tests=100 us=39365
+F 1 ip got=07461 want=07463   [xor ax, word [ds:bx]]
+F 13 ip got=01DF1 want=01DF3   [xor cx, word [ds:si]]
+F 89 ip got=0BC6F want=0BC71   [xor cx, word [ds:bx]]
+F 91 ip got=0CF0D want=0CF0F   [xor dx, word [es:si]]
+G 33 pass=96 fail=4 tests=100 us=40317
+G 34 pass=100 fail=0 tests=100 us=29169
+G 35 pass=100 fail=0 tests=100 us=29112
+G 37 pass=100 fail=0 tests=100 us=29007
+F 5 ip got=0898A want=0898C   [cmp byte [ds:di], cl]
+F 19 ip got=06C99 want=06C9B   [cmp byte [ds:di], al]
+F 37 ip got=0C2A8 want=0C2AA   [cmp byte [ss:si], dl]
+F 46 ip got=02BAE want=02BB0   [cmp byte [cs:bx], dl]
+F 49 ip got=08AF9 want=08AFB   [cmp byte [ds:si], bl]
+F 63 ip got=0BCD5 want=0BCD7   [cmp byte [es:bx], bl]
+G 38 pass=91 fail=9 tests=100 us=41648
+F 1 ip got=05933 want=05935   [cmp word [es:bx], bx]
+F 13 ip got=0C1A7 want=0C1A9   [cmp word [ss:di], sp]
+F 14 ip got=07B2F want=07B31   [cmp word [es:di], si]
+F 27 ip got=03BCF want=03BD1   [cmp word [ds:bx], bp]
+F 30 ip got=059FA want=059FC   [cmp word [ds:si], ax]
+F 34 ip got=0619C want=0619E   [cmp word [es:si], sp]
+G 39 pass=89 fail=11 tests=100 us=42130
+F 30 ip got=09B60 want=09B62   [cmp cl, byte [ds:bx]]
+F 37 ip got=02D9D want=02D9F   [cmp ch, byte [ds:di]]
+F 57 ip got=02173 want=02175   [cmp dl, byte [ds:di]]
+F 60 ip got=07E4A want=07E4C   [cmp al, byte [ds:si]]
+F 61 ip got=0985C want=0985E   [cmp bh, byte [cs:bx]]
+F 65 ip got=0E591 want=0E593   [cmp cl, byte [es:di]]
+G 3A pass=91 fail=9 tests=100 us=40446
+F 38 ip got=08311 want=08313   [cmp ax, word [ds:bx]]
+F 60 ip got=0BEF9 want=0BEFB   [cmp di, word [es:bx]]
+F 61 ip got=08137 want=08139   [cmp bx, word [ss:si]]
+F 62 ip got=0A18A want=0A18C   [cmp si, word [ss:bx]]
+F 67 ip got=0BAE8 want=0BAEA   [cmp cx, word [ds:di]]
+F 79 ip got=0C70E want=0C710   [cmp cx, word [ds:di]]
+G 3B pass=91 fail=9 tests=100 us=40564
+G 3C pass=100 fail=0 tests=100 us=28984
+G 3D pass=100 fail=0 tests=100 us=28691
+G 3F pass=100 fail=0 tests=100 us=29001
+F 1 flags got=0F496 want=0F486   [inc ax]
+F 2 flags got=0F416 want=0F406   [inc ax]
+F 3 flags got=0F016 want=0F006   [inc ax]
+F 4 flags got=0F412 want=0F402   [inc ax]
+F 6 flags got=0F402 want=0F412   [inc ax]
+F 8 flags got=0F412 want=0F402   [inc ax]
+G 40 pass=48 fail=52 tests=100 us=29127
+F 0 flags got=0F017 want=0F007   [inc cx]
+F 3 flags got=0F497 want=0F487   [inc cx]
+F 4 flags got=0F017 want=0F007   [inc cx]
+F 5 flags got=0F093 want=0F083   [inc cx]
+F 6 flags got=0F493 want=0F483   [inc cx]
+F 7 flags got=0F096 want=0F086   [inc cx]
+G 41 pass=57 fail=43 tests=100 us=29187
+F 0 flags got=0F493 want=0F483   [inc dx]
+F 1 flags got=0F417 want=0F407   [inc dx]
+F 2 flags got=0F092 want=0F082   [inc dx]
+F 3 flags got=0F403 want=0F413   [inc dx]
+F 4 flags got=0F412 want=0F402   [inc dx]
+F 5 flags got=0F497 want=0F487   [inc dx]
+G 42 pass=49 fail=51 tests=100 us=29118
+F 2 flags got=0F012 want=0F002   [inc bx]
+F 5 flags got=0F017 want=0F007   [inc bx]
+F 8 flags got=0F496 want=0F486   [inc bx]
+F 9 flags got=0F496 want=0F486   [inc bx]
+F 10 flags got=0F092 want=0F082   [inc bx]
+F 12 flags got=0F012 want=0F002   [inc bx]
+G 43 pass=58 fail=42 tests=100 us=29229
+F 0 flags got=0F416 want=0F406   [inc sp]
+F 3 flags got=0F093 want=0F083   [inc sp]
+F 4 flags got=0F412 want=0F402   [inc sp]
+F 6 flags got=0F013 want=0F003   [inc sp]
+F 8 flags got=0F017 want=0F007   [inc sp]
+F 9 flags got=0F416 want=0F406   [inc sp]
+G 44 pass=52 fail=48 tests=100 us=29153
+F 0 flags got=0F012 want=0F002   [inc bp]
+F 1 flags got=0F482 want=0F492   [inc bp]
+F 3 flags got=0F492 want=0F482   [inc bp]
+F 5 flags got=0F097 want=0F087   [inc bp]
+F 6 flags got=0F096 want=0F086   [inc bp]
+F 7 flags got=0F096 want=0F086   [inc bp]
+G 45 pass=49 fail=51 tests=100 us=29085
+F 0 flags got=0F496 want=0F486   [inc si]
+F 3 flags got=0F496 want=0F486   [inc si]
+F 5 flags got=0F493 want=0F483   [inc si]
+F 6 flags got=0F096 want=0F086   [inc si]
+F 10 flags got=0F416 want=0F406   [inc si]
+F 11 flags got=0F407 want=0F417   [inc si]
+G 46 pass=54 fail=46 tests=100 us=29258
+F 1 flags got=0F496 want=0F486   [inc di]
+F 4 flags got=0F416 want=0F406   [inc di]
+F 5 flags got=0F413 want=0F403   [inc di]
+F 6 flags got=0F492 want=0F482   [inc di]
+F 13 flags got=0F496 want=0F486   [inc di]
+F 14 flags got=0F497 want=0F487   [inc di]
+G 47 pass=53 fail=47 tests=100 us=29387
+F 3 flags got=0F413 want=0F403   [dec ax]
+F 6 flags got=0F493 want=0F483   [dec ax]
+F 7 flags got=0F087 want=0F097   [dec ax]
+F 11 flags got=0F096 want=0F086   [dec ax]
+F 12 flags got=0F497 want=0F487   [dec ax]
+F 13 flags got=0F096 want=0F086   [dec ax]
+G 48 pass=47 fail=53 tests=100 us=29172
+F 0 flags got=0F493 want=0F483   [dec cx]
+F 1 flags got=0F013 want=0F003   [dec cx]
+F 6 flags got=0F487 want=0F497   [dec cx]
+F 9 flags got=0F493 want=0F483   [dec cx]
+F 10 flags got=0F093 want=0F083   [dec cx]
+F 11 flags got=0F093 want=0F083   [dec cx]
+G 49 pass=44 fail=56 tests=100 us=29170
+F 0 flags got=0F017 want=0F007   [dec dx]
+F 1 flags got=0F492 want=0F482   [dec dx]
+F 2 flags got=0F417 want=0F407   [dec dx]
+F 3 flags got=0F016 want=0F006   [dec dx]
+F 4 flags got=0F017 want=0F007   [dec dx]
+F 5 flags got=0F493 want=0F483   [dec dx]
+G 4A pass=44 fail=56 tests=100 us=29006
+F 0 flags got=0F096 want=0F086   [dec bx]
+F 3 flags got=0F413 want=0F403   [dec bx]
+F 4 flags got=0F093 want=0F083   [dec bx]
+F 5 flags got=0F497 want=0F487   [dec bx]
+F 9 flags got=0F017 want=0F007   [dec bx]
+F 10 flags got=0F096 want=0F086   [dec bx]
+G 4B pass=44 fail=56 tests=100 us=29079
+F 0 flags got=0F403 want=0F413   [dec sp]
+F 2 flags got=0F496 want=0F486   [dec sp]
+F 3 flags got=0F413 want=0F403   [dec sp]
+F 4 flags got=0F417 want=0F407   [dec sp]
+F 7 flags got=0F016 want=0F006   [dec sp]
+F 8 flags got=0F413 want=0F403   [dec sp]
+G 4C pass=49 fail=51 tests=100 us=29286
+F 1 flags got=0F486 want=0F496   [dec bp]
+F 2 flags got=0F093 want=0F083   [dec bp]
+F 3 flags got=0F493 want=0F483   [dec bp]
+F 5 flags got=0F487 want=0F497   [dec bp]
+F 6 flags got=0F413 want=0F403   [dec bp]
+F 7 flags got=0F013 want=0F003   [dec bp]
+G 4D pass=41 fail=59 tests=100 us=28728
+F 0 flags got=0F492 want=0F482   [dec si]
+F 1 flags got=0F492 want=0F482   [dec si]
+F 4 flags got=0F497 want=0F487   [dec si]
+F 7 flags got=0F493 want=0F483   [dec si]
+F 8 flags got=0F402 want=0F412   [dec si]
+F 9 flags got=0F493 want=0F483   [dec si]
+G 4E pass=38 fail=62 tests=100 us=28900
+F 0 flags got=0F413 want=0F403   [dec di]
+F 1 flags got=0F017 want=0F007   [dec di]
+F 2 flags got=0F097 want=0F087   [dec di]
+F 5 flags got=0F096 want=0F086   [dec di]
+F 6 flags got=0F093 want=0F083   [dec di]
+F 7 flags got=0F096 want=0F086   [dec di]
+G 4F pass=41 fail=59 tests=100 us=29305
+G 50 pass=100 fail=0 tests=100 us=46179
+G 51 pass=100 fail=0 tests=100 us=46331
+G 52 pass=100 fail=0 tests=100 us=46167
+G 53 pass=100 fail=0 tests=100 us=46537
+G 54 pass=100 fail=0 tests=100 us=46466
+G 55 pass=100 fail=0 tests=100 us=46415
+G 56 pass=100 fail=0 tests=100 us=46280
+G 57 pass=100 fail=0 tests=100 us=46265
+G 58 pass=100 fail=0 tests=100 us=45607
+G 59 pass=100 fail=0 tests=100 us=45583
+G 5A pass=100 fail=0 tests=100 us=45543
+G 5B pass=100 fail=0 tests=100 us=45305
+G 5C pass=100 fail=0 tests=100 us=45399
+G 5D pass=100 fail=0 tests=100 us=45312
+G 5E pass=100 fail=0 tests=100 us=46032
+G 5F pass=100 fail=0 tests=100 us=45467
+G 60 pass=100 fail=0 tests=100 us=29134
+G 61 pass=100 fail=0 tests=100 us=29108
+G 62 pass=100 fail=0 tests=100 us=29116
+G 63 pass=100 fail=0 tests=100 us=28894
+G 64 pass=100 fail=0 tests=100 us=29319
+G 65 pass=100 fail=0 tests=100 us=28962
+G 66 pass=100 fail=0 tests=100 us=28617
+G 67 pass=100 fail=0 tests=100 us=28577
+G 68 pass=100 fail=0 tests=100 us=29094
+G 69 pass=100 fail=0 tests=100 us=28847
+G 6A pass=100 fail=0 tests=100 us=29092
+G 6B pass=100 fail=0 tests=100 us=28809
+G 6C pass=100 fail=0 tests=100 us=28888
+G 6D pass=100 fail=0 tests=100 us=28754
+G 6E pass=100 fail=0 tests=100 us=28906
+G 6F pass=100 fail=0 tests=100 us=28830
+G 70 pass=100 fail=0 tests=100 us=29063
+G 71 pass=100 fail=0 tests=100 us=28980
+G 72 pass=100 fail=0 tests=100 us=28988
+G 73 pass=100 fail=0 tests=100 us=28983
+G 74 pass=100 fail=0 tests=100 us=28984
+G 75 pass=100 fail=0 tests=100 us=28668
+G 76 pass=100 fail=0 tests=100 us=28946
+G 77 pass=100 fail=0 tests=100 us=28753
+G 78 pass=100 fail=0 tests=100 us=29037
+G 79 pass=100 fail=0 tests=100 us=29054
+G 7A pass=100 fail=0 tests=100 us=28885
+G 7B pass=100 fail=0 tests=100 us=29193
+G 7C pass=100 fail=0 tests=100 us=28623
+G 7D pass=100 fail=0 tests=100 us=29023
+G 7E pass=100 fail=0 tests=100 us=29116
+G 7F pass=100 fail=0 tests=100 us=28914
+F 23 ip got=08B6B want=08B6D   [add byte [es:bx], 12h]
+F 23 flags got=0FC03 want=0F403   [add byte [es:bx], 12h]
+F 23 mem got=32170 want=32102   [add byte [es:bx], 12h]
+F 25 ip got=0656A want=0656C   [add byte [ds:bx], 0h]
+F 25 flags got=0FC03 want=0F486   [add byte [ds:bx], 0h]
+F 25 mem got=3712F want=371AF   [add byte [ds:bx], 0h]
+G 80.0 pass=94 fail=17 tests=100 us=42371
+F 3 ip got=01D58 want=01D5A   [or byte [es:si], 5h]
+F 3 flags got=0F082 want=0F002   [or byte [es:si], 5h]
+F 3 mem got=E66FB want=E667F   [or byte [es:si], 5h]
+F 36 ip got=07FFD want=07FFF   [or byte [cs:bx], 5Eh]
+F 36 flags got=0F082 want=0F086   [or byte [cs:bx], 5Eh]
+F 36 mem got=98686 want=986DE   [or byte [cs:bx], 5Eh]
+G 80.1 pass=90 fail=27 tests=100 us=41485
+F 18 ip got=05CD4 want=05CD6   [adc byte [ds:si], D2h]
+F 18 flags got=0FC07 want=0FC03   [adc byte [ds:si], D2h]
+F 18 mem got=1CB1B want=1CB6D   [adc byte [ds:si], D2h]
+F 20 ip got=0948B want=0948D   [adc byte [ds:si], 34h]
+F 20 flags got=0F803 want=0F086   [adc byte [ds:si], 34h]
+F 20 mem got=6DB45 want=6DBF9   [adc byte [ds:si], 34h]
+G 80.2 pass=90 fail=29 tests=100 us=41789
+F 3 ip got=0BF07 want=0BF09   [sbb byte [ss:si], 78h]
+F 3 flags got=0FC87 want=0F493   [sbb byte [ss:si], 78h]
+F 3 mem got=4DCE1 want=4DCE9   [sbb byte [ss:si], 78h]
+F 4 ip got=067C4 want=067C6   [sbb byte [ds:bx], 3Ch]
+F 4 flags got=0FC87 want=0F412   [sbb byte [ds:bx], 3Ch]
+F 4 mem got=913F0 want=91334   [sbb byte [ds:bx], 3Ch]
+G 80.3 pass=92 fail=24 tests=100 us=41390
+F 1 ip got=0AC51 want=0AC53   [and byte [ds:si], 69h]
+F 1 flags got=0F082 want=0F002   [and byte [ds:si], 69h]
+F 1 mem got=C3480 want=C3440   [and byte [ds:si], 69h]
+F 10 ip got=027AD want=027AF   [and byte [ds:di], 8Ch]
+F 10 flags got=0F082 want=0F086   [and byte [ds:di], 8Ch]
+F 10 mem got=66180 want=66188   [and byte [ds:di], 8Ch]
+G 80.4 pass=86 fail=39 tests=100 us=40929
+F 6 ip got=0529D want=0529F   [sub byte [ds:bx], E4h]
+F 6 flags got=0F002 want=0F087   [sub byte [ds:bx], E4h]
+F 6 mem got=C264F want=C26EB   [sub byte [ds:bx], E4h]
+F 26 ip got=06A5E want=06A60   [sub byte [ss:di], 91h]
+F 26 mem got=78A43 want=78A32   [sub byte [ss:di], 91h]
+F 56 ip got=0E45A want=0E45C   [sub byte [ds:si], 36h]
+G 80.5 pass=92 fail=23 tests=100 us=40788
+F 21 ip got=0AE35 want=0AE37   [xor byte [cs:si], 7h]
+F 21 flags got=0F086 want=0F006   [xor byte [cs:si], 7h]
+F 21 mem got=74EC3 want=74E44   [xor byte [cs:si], 7h]
+F 25 ip got=05774 want=05776   [xor byte [ds:di], 9Dh]
+F 25 mem got=9C17D want=9C160   [xor byte [ds:di], 9Dh]
+F 34 ip got=0C618 want=0C61A   [xor byte [es:di], B9h]
+G 80.6 pass=90 fail=27 tests=100 us=41247
+F 16 ip got=0A5F3 want=0A5F5   [cmp byte [ds:di], E3h]
+F 16 flags got=0F883 want=0F003   [cmp byte [ds:di], E3h]
+F 17 ip got=01D82 want=01D84   [cmp byte [ds:di], 95h]
+F 19 ip got=0FB5D want=0FB5F   [cmp byte [es:si], 21h]
+F 19 flags got=0F887 want=0F083   [cmp byte [es:si], 21h]
+F 27 ip got=08559 want=0855B   [cmp byte [ds:di], 35h]
+G 80.7 pass=85 fail=27 tests=100 us=40489
+F 5 ip got=04DE8 want=04DEA   [add word [ss:si], E8Ch]
+F 5 flags got=0F082 want=0F086   [add word [ss:si], E8Ch]
+F 5 mem got=69423 want=6942E   [add word [ss:si], E8Ch]
+F 5 mem got=69594 want=6959E   [add word [ss:si], E8Ch]
+F 6 ip got=00100 want=00102   [add word [es:di], 27h]
+F 6 flags got=0F482 want=0F486   [add word [es:di], 27h]
+G 81.0 pass=89 fail=42 tests=100 us=42006
+F 67 ip got=047EE want=047F0   [or word [cs:bx], 1E2Bh]
+F 67 mem got=52491 want=5243B   [or word [cs:bx], 1E2Bh]
+F 67 mem got=525AF want=525BF   [or word [cs:bx], 1E2Bh]
+F 77 ip got=03CAD want=03CAF   [or word [cs:di], 88B0h]
+F 77 flags got=0F406 want=0F486   [or word [cs:di], 88B0h]
+F 77 mem got=E8F9F want=E8FBE   [or word [cs:di], 88B0h]
+G 81.1 pass=96 fail=13 tests=100 us=43110
+F 6 ip got=0141B want=0141D   [adc word [ss:bx], C6F0h]
+F 6 flags got=0F882 want=0F003   [adc word [ss:bx], C6F0h]
+F 6 mem got=5826D want=582DC   [adc word [ss:bx], C6F0h]
+F 6 mem got=58393 want=58342   [adc word [ss:bx], C6F0h]
+F 30 ip got=0B753 want=0B755   [adc word [ds:di], BE3Ah]
+F 30 flags got=0F002 want=0F013   [adc word [ds:di], BE3Ah]
+G 81.2 pass=92 fail=32 tests=100 us=42100
+F 8 ip got=06373 want=06375   [sbb word [ds:si], 1196h]
+F 8 mem got=83A48 want=83A33   [sbb word [ds:si], 1196h]
+F 8 mem got=83B1B want=83B26   [sbb word [ds:si], 1196h]
+F 25 ip got=0EA42 want=0EA44   [sbb word [es:di], 7D8Bh]
+F 25 flags got=0F082 want=0F812   [sbb word [es:di], 7D8Bh]
+F 25 mem got=70020 want=70016   [sbb word [es:di], 7D8Bh]
+G 81.3 pass=91 fail=34 tests=100 us=42883
+F 1 ip got=0D2F0 want=0D2F2   [and word [ds:si], 9ED5h]
+F 1 mem got=9E580 want=9E5C4   [and word [ds:si], 9ED5h]
+F 1 mem got=9E624 want=9E60E   [and word [ds:si], 9ED5h]
+F 3 ip got=0C66F want=0C671   [and word [es:bx], 4B40h]
+F 3 mem got=03B80 want=03B40   [and word [es:bx], 4B40h]
+F 3 mem got=03C21 want=03C01   [and word [es:bx], 4B40h]
+G 81.4 pass=85 fail=51 tests=100 us=43698
+F 7 ip got=0F9DF want=0F9E1   [sub word [ds:di], 7D26h]
+F 7 flags got=0F406 want=0F483   [sub word [ds:di], 7D26h]
+F 7 mem got=5028B want=502E6   [sub word [ds:di], 7D26h]
+F 7 mem got=5033A want=503EA   [sub word [ds:di], 7D26h]
+F 9 ip got=0339E want=033A0   [sub word [ds:di], B095h]
+F 9 flags got=0F086 want=0F002   [sub word [ds:di], B095h]
+G 81.5 pass=93 fail=26 tests=100 us=41002
+F 7 ip got=0DB49 want=0DB4B   [xor word [es:si], 138Dh]
+F 7 mem got=A84FE want=A84F2   [xor word [es:si], 138Dh]
+F 7 mem got=A855F want=A8578   [xor word [es:si], 138Dh]
+F 12 ip got=0F7C1 want=0F7C3   [xor word [ds:si], 82B6h]
+F 12 flags got=0F482 want=0F406   [xor word [ds:si], 82B6h]
+F 12 mem got=8D257 want=8D260   [xor word [ds:si], 82B6h]
+G 81.6 pass=94 fail=21 tests=100 us=42130
+F 7 ip got=07EC7 want=07EC9   [cmp word [ds:bx], 8ED6h]
+F 7 flags got=0F086 want=0F006   [cmp word [ds:bx], 8ED6h]
+F 12 ip got=032E5 want=032E7   [cmp word [ds:bx], 3397h]
+F 12 flags got=0F483 want=0F487   [cmp word [ds:bx], 3397h]
+F 15 ip got=0B658 want=0B65A   [cmp word [ds:bx], FF91h]
+F 15 flags got=0F483 want=0F403   [cmp word [ds:bx], FF91h]
+G 81.7 pass=87 fail=24 tests=100 us=42853
+F 25 ip got=0A2DF want=0A2E1   [add byte [ds:di], CFh]
+F 25 flags got=0F486 want=0F413   [add byte [ds:di], CFh]
+F 25 mem got=A87C3 want=A8710   [add byte [ds:di], CFh]
+F 34 ip got=0151E want=01520   [add byte [ss:si], C8h]
+F 34 flags got=0F486 want=0F482   [add byte [ss:si], C8h]
+F 34 mem got=28587 want=285CD   [add byte [ss:si], C8h]
+G 82.0 pass=91 fail=27 tests=100 us=39586
+F 53 ip got=08E83 want=08E85   [or byte [ds:di], FDh]
+F 53 flags got=0F482 want=0F486   [or byte [ds:di], FDh]
+F 53 mem got=81A83 want=81AFF   [or byte [ds:di], FDh]
+F 80 ip got=0EEFA want=0EEFC   [or byte [ds:si], 8Dh]
+F 80 mem got=63BE2 want=63BED   [or byte [ds:si], 8Dh]
+F 96 ip got=0C33F want=0C341   [or byte [ds:di], B5h]
+G 82.1 pass=97 fail=7 tests=100 us=41058
+F 7 ip got=07EC6 want=07EC8   [adc byte [ds:bx], D6h]
+F 7 flags got=0F813 want=0F093   [adc byte [ds:bx], D6h]
+F 7 mem got=BA031 want=BA085   [adc byte [ds:bx], D6h]
+F 12 ip got=032E4 want=032E6   [adc byte [ds:bx], 97h]
+F 12 flags got=0F482 want=0F492   [adc byte [ds:bx], 97h]
+F 12 mem got=4979B want=497B0   [adc byte [ds:bx], 97h]
+G 82.2 pass=87 fail=38 tests=100 us=41912
+F 25 ip got=0A2DF want=0A2E1   [sbb byte [ds:di], CFh]
+F 25 flags got=0FC97 want=0F417   [sbb byte [ds:di], CFh]
+F 25 mem got=A87BE want=A8771   [sbb byte [ds:di], CFh]
+F 34 ip got=0151E want=01520   [sbb byte [ss:si], C8h]
+F 34 flags got=0FC83 want=0F413   [sbb byte [ss:si], C8h]
+F 34 mem got=28583 want=2853D   [sbb byte [ss:si], C8h]
+G 82.3 pass=91 fail=26 tests=100 us=39386
+F 53 ip got=08E83 want=08E85   [and byte [ds:di], FDh]
+F 53 mem got=81A82 want=81A81   [and byte [ds:di], FDh]
+F 80 ip got=0EEFA want=0EEFC   [and byte [ds:si], 8Dh]
+F 96 ip got=0C33F want=0C341   [and byte [ds:di], B5h]
+F 96 flags got=0F486 want=0F482   [and byte [ds:di], B5h]
+F 96 mem got=9B282 want=9B294   [and byte [ds:di], B5h]
+G 82.4 pass=97 fail=6 tests=100 us=40982
+F 3 ip got=0414E want=04150   [sub byte [ds:di], E3h]
+F 3 flags got=0F887 want=0F007   [sub byte [ds:di], E3h]
+F 3 mem got=2D3A9 want=2D348   [sub byte [ds:di], E3h]
+F 10 ip got=02FB4 want=02FB6   [sub byte [ds:si], 95h]
+F 10 flags got=0F406 want=0F487   [sub byte [ds:si], 95h]
+F 10 mem got=BD206 want=BD2F3   [sub byte [ds:si], 95h]
+G 82.5 pass=86 fail=41 tests=100 us=41494
+F 4 ip got=0A58F want=0A591   [xor byte [ds:di], 18h]
+F 4 flags got=0F082 want=0F002   [xor byte [ds:di], 18h]
+F 4 mem got=0C4AB want=0C431   [xor byte [ds:di], 18h]
+F 8 ip got=01C6C want=01C6E   [xor byte [ds:si], E2h]
+F 8 mem got=EFF54 want=EFF34   [xor byte [ds:si], E2h]
+F 10 ip got=00561 want=00563   [xor byte [ds:si], DAh]
+G 82.6 pass=87 fail=34 tests=100 us=41909
+F 10 ip got=0025F want=00261   [cmp byte [ds:si], Ah]
+F 10 flags got=0F416 want=0F496   [cmp byte [ds:si], Ah]
+F 27 ip got=09FCF want=09FD1   [cmp byte [ds:di], 2Dh]
+F 27 flags got=0F002 want=0F096   [cmp byte [ds:di], 2Dh]
+F 57 ip got=00E80 want=00E82   [cmp byte [ds:bx], 16h]
+F 57 flags got=0FC87 want=0F497   [cmp byte [ds:bx], 16h]
+G 82.7 pass=93 fail=14 tests=100 us=40812
+F 24 ip got=01685 want=01687   [add word [cs:bx], 50h]
+F 24 flags got=0F417 want=0F402   [add word [cs:bx], 50h]
+F 24 mem got=41AE1 want=41AAE   [add word [cs:bx], 50h]
+F 24 mem got=41B57 want=41B58   [add word [cs:bx], 50h]
+F 35 ip got=00BC1 want=00BC3   [add word [ds:bx], FFFAh]
+F 35 flags got=0F417 want=0F413   [add word [ds:bx], FFFAh]
+G 83.0 pass=93 fail=24 tests=100 us=41258
+F 1 ip got=0B9ED want=0B9EF   [or word [ss:si], 24h]
+F 1 flags got=0F482 want=0F486   [or word [ss:si], 24h]
+F 1 mem got=740D3 want=740F5   [or word [ss:si], 24h]
+F 1 mem got=741FF want=741A3   [or word [ss:si], 24h]
+F 8 ip got=00E80 want=00E82   [or word [ds:bx], FFA6h]
+F 8 flags got=0F486 want=0F482   [or word [ds:bx], FFA6h]
+G 83.1 pass=85 fail=47 tests=100 us=43250
+F 2 ip got=0F935 want=0F937   [adc word [ds:bx], 1Ch]
+F 2 flags got=0F083 want=0F096   [adc word [ds:bx], 1Ch]
+F 2 mem got=0DFFD want=0DF96   [adc word [ds:bx], 1Ch]
+F 2 mem got=0E0EF want=0E0F0   [adc word [ds:bx], 1Ch]
+F 10 ip got=01E83 want=01E85   [adc word [ds:bx], 52h]
+F 10 flags got=0F017 want=0F012   [adc word [ds:bx], 52h]
+G 83.2 pass=92 fail=28 tests=100 us=42006
+F 0 ip got=06AEE want=06AF0   [sbb word [ds:di], Eh]
+F 0 flags got=0F487 want=0F496   [sbb word [ds:di], Eh]
+F 0 mem got=D403A want=D40AF   [sbb word [ds:di], Eh]
+F 0 mem got=D4182 want=D4181   [sbb word [ds:di], Eh]
+F 7 ip got=04A76 want=04A78   [sbb word [ds:si], 30h]
+F 7 flags got=0F487 want=0F482   [sbb word [ds:si], 30h]
+G 83.3 pass=91 fail=28 tests=100 us=42661
+F 7 ip got=0B8C3 want=0B8C5   [and word [es:di], FFCAh]
+F 7 flags got=0F486 want=0F482   [and word [es:di], FFCAh]
+F 7 mem got=27600 want=27640   [and word [es:di], FFCAh]
+F 15 ip got=07A18 want=07A1A   [and word [cs:bx], FFCBh]
+F 15 flags got=0F402 want=0F406   [and word [cs:bx], FFCBh]
+F 15 mem got=2F683 want=2F68B   [and word [cs:bx], FFCBh]
+G 83.4 pass=88 fail=40 tests=100 us=42341
+F 6 ip got=05C5E want=05C60   [sub word [ds:si], 2h]
+F 6 flags got=0F083 want=0F082   [sub word [ds:si], 2h]
+F 6 mem got=CC704 want=CC785   [sub word [ds:si], 2h]
+F 6 mem got=CC8E0 want=CC8DF   [sub word [ds:si], 2h]
+F 22 ip got=04765 want=04767   [sub word [es:di], FFDBh]
+F 22 flags got=0F003 want=0F017   [sub word [es:di], FFDBh]
+G 83.5 pass=94 fail=21 tests=100 us=41173
+F 45 ip got=0C9EF want=0C9F1   [xor word [ds:di], FFFCh]
+F 45 flags got=0F082 want=0F086   [xor word [ds:di], FFFCh]
+F 45 mem got=65840 want=6583F   [xor word [ds:di], FFFCh]
+F 63 ip got=08B1A want=08B1C   [xor word [ds:si], FFA6h]
+F 63 flags got=0F082 want=0F086   [xor word [ds:si], FFA6h]
+F 63 mem got=33A0B want=33A2E   [xor word [ds:si], FFA6h]
+G 83.6 pass=95 fail=17 tests=100 us=42113
+F 1 ip got=0F121 want=0F123   [cmp word [es:bx], Bh]
+F 1 flags got=0F483 want=0F482   [cmp word [es:bx], Bh]
+F 6 ip got=0B5D5 want=0B5D7   [cmp word [ds:bx], 27h]
+F 6 flags got=0F483 want=0F482   [cmp word [ds:bx], 27h]
+F 10 ip got=06842 want=06844   [cmp word [ds:bx], 8h]
+F 10 flags got=0F487 want=0F486   [cmp word [ds:bx], 8h]
+G 83.7 pass=88 fail=21 tests=100 us=42196
+F 26 ip got=02194 want=02196   [test byte [ss:bx], bh]
+F 28 ip got=08D42 want=08D44   [test byte [ds:bx], ah]
+F 29 ip got=0A951 want=0A953   [test byte [ss:si], al]
+F 40 ip got=0BF4F want=0BF51   [test byte [ds:si], bl]
+F 65 ip got=0C2F9 want=0C2FB   [test byte [es:bx], cl]
+F 71 ip got=03B97 want=03B99   [test byte [ds:bx], al]
+G 84 pass=93 fail=7 tests=100 us=40032
+F 2 ip got=03C92 want=03C94   [test word [ds:si], ax]
+F 10 ip got=05E98 want=05E9A   [test word [ds:si], bx]
+F 16 ip got=04EC0 want=04EC2   [test word [ds:si], bx]
+F 22 ip got=09C84 want=09C86   [test word [cs:bx], sp]
+F 48 ip got=00BED want=00BEF   [test word [ss:bx], di]
+F 49 ip got=043B5 want=043B7   [test word [ss:di], si]
+G 85 pass=86 fail=14 tests=100 us=43186
+F 14 ip got=0CDAB want=0CDAD   [xchg dh, byte [ds:si]]
+F 16 ip got=01F2C want=01F2E   [xchg bh, byte [es:si]]
+F 17 ip got=0B59E want=0B5A0   [xchg bh, byte [ds:bx]]
+F 33 ip got=0E65E want=0E660   [xchg bl, byte [es:si]]
+F 36 ip got=005DF want=005E1   [xchg dl, byte [ds:di]]
+F 39 ip got=04A30 want=04A32   [xchg cl, byte [ds:di]]
+G 86 pass=88 fail=12 tests=100 us=42032
+F 24 ip got=04D8F want=04D91   [xchg bp, word [ds:bx]]
+F 31 ip got=0B879 want=0B87B   [xchg sp, word [cs:si]]
+F 36 ip got=0025F want=00261   [xchg cx, word [ds:di]]
+F 39 ip got=0B726 want=0B728   [xchg ax, word [ds:bx]]
+F 54 ip got=0C3A7 want=0C3A9   [xchg ax, word [ss:di]]
+F 62 ip got=0EB29 want=0EB2B   [xchg bx, word [ds:bx]]
+G 87 pass=91 fail=9 tests=100 us=42406
+F 6 ip got=034AF want=034B1   [mov byte [ds:si], cl]
+F 22 ip got=099EF want=099F1   [mov byte [ds:bx], ch]
+F 34 ip got=033C9 want=033CB   [mov byte [ds:di], dh]
+F 37 ip got=0ADF6 want=0ADF8   [mov byte [ds:di], al]
+F 43 ip got=04945 want=04947   [mov byte [ds:bx], bh]
+F 49 ip got=0A8C7 want=0A8C9   [mov byte [cs:si], dl]
+G 88 pass=91 fail=9 tests=100 us=40464
+F 4 ip got=041EB want=041ED   [mov word [cs:bx], bp]
+F 6 ip got=0185F want=01861   [mov word [ds:bx], ax]
+F 7 ip got=0543D want=0543F   [mov word [ss:bx], bp]
+F 11 ip got=069AF want=069B1   [mov word [ds:bx], cx]
+F 14 ip got=02952 want=02954   [mov word [ds:di], bp]
+F 15 ip got=0427C want=0427E   [mov word [ds:si], dx]
+G 89 pass=87 fail=13 tests=100 us=42705
+F 14 ip got=0BCF3 want=0BCF5   [mov al, byte [es:bx]]
+F 25 ip got=02385 want=02387   [mov dl, byte [es:si]]
+F 54 ip got=001DF want=001E1   [mov ch, byte [cs:di]]
+F 56 ip got=0373F want=03741   [mov al, byte [ds:bx]]
+F 62 ip got=0552B want=0552D   [mov bh, byte [ds:si]]
+F 67 ip got=0B516 want=0B518   [mov dh, byte [ss:di]]
+G 8A pass=92 fail=8 tests=100 us=39786
+F 34 ip got=0EA87 want=0EA89   [mov sp, word [ss:di]]
+F 36 ip got=0EB65 want=0EB67   [mov di, word [ss:bx]]
+F 63 ip got=02521 want=02523   [mov si, word [ss:bx]]
+F 84 ip got=04EAF want=04EB1   [mov sp, word [es:bx]]
+F 86 ip got=0717A want=0717C   [mov cx, word [ds:si]]
+F 91 ip got=05DC1 want=05DC3   [mov si, word [cs:di]]
+G 8B pass=93 fail=7 tests=100 us=41504
+F 5 ip got=0E8D0 want=0E8D2   [mov word [ds:di], ds]
+F 11 ip got=0D18A want=0D18C   [mov word [ds:di], ss]
+F 13 ip got=07FC5 want=07FC7   [mov word [es:di], ss]
+F 15 ip got=08F80 want=08F82   [mov word [ds:bx], ss]
+F 29 ip got=0A6E4 want=0A6E6   [mov word [ds:si], ss]
+F 36 ip got=07368 want=0736A   [mov word [cs:di], ss]
+G 8C pass=88 fail=12 tests=100 us=40160
+F 1 ip got=086F2 want=086F4   [lea bp, [ds:si]]
+F 14 ip got=06A4C want=06A4E   [lea di, [ds:di]]
+F 35 ip got=0A3C8 want=0A3CA   [lea bp, [cs:bx]]
+F 58 ip got=07F8F want=07F91   [lea dx, [es:si]]
+F 60 ip got=07E60 want=07E62   [lea sp, [cs:bx]]
+F 61 ip got=01D86 want=01D88   [lea sp, [ds:bx]]
+G 8D pass=89 fail=11 tests=100 us=29379
+F 14 ip got=0B059 want=0B05B   [mov ds, word [ds:si]]
+F 23 ip got=064C4 want=064C6   [mov ss, word [ds:bx]]
+F 41 ip got=009FE want=00A00   [mov ss, word [ds:bx]]
+F 43 ip got=0E193 want=0E195   [mov ss, word [ds:bx]]
+F 67 ip got=0B6C2 want=0B6C4   [mov ss, word [cs:si]]
+F 88 ip got=077AF want=077B1   [mov ds, word [ds:si]]
+G 8E pass=93 fail=7 tests=100 us=41433
+F 2 ip got=0A9FF want=0AA01   [pop word [es:bx]]
+F 14 ip got=00404 want=00406   [pop word [ds:si]]
+F 17 ip got=06512 want=06514   [pop word [ds:si]]
+F 20 ip got=00DFE want=00E00   [pop word [ds:di]]
+F 30 ip got=0FC8D want=0FC8F   [pop word [ds:di]]
+F 74 ip got=05104 want=05106   [pop word [ds:si]]
+G 8F pass=89 fail=11 tests=100 us=59324
+G 90 pass=100 fail=0 tests=100 us=28911
+G 91 pass=100 fail=0 tests=100 us=29032
+G 92 pass=100 fail=0 tests=100 us=28944
+G 93 pass=100 fail=0 tests=100 us=28865
+G 94 pass=100 fail=0 tests=100 us=28845
+G 95 pass=100 fail=0 tests=100 us=28791
+G 96 pass=100 fail=0 tests=100 us=29170
+G 97 pass=100 fail=0 tests=100 us=28836
+G 98 pass=100 fail=0 tests=100 us=28781
+G 99 pass=100 fail=0 tests=100 us=28939
+G 9A pass=100 fail=0 tests=100 us=50066
+G 9C pass=100 fail=0 tests=100 us=46512
+G 9D pass=100 fail=0 tests=100 us=45494
+G 9E pass=100 fail=0 tests=100 us=29151
+G 9F pass=100 fail=0 tests=100 us=29250
+G A0 pass=100 fail=0 tests=100 us=44453
+G A1 pass=100 fail=0 tests=100 us=45627
+G A2 pass=100 fail=0 tests=100 us=44646
+G A3 pass=100 fail=0 tests=100 us=46450
+G A4 pass=100 fail=0 tests=100 us=160029
+G A5 pass=100 fail=0 tests=100 us=280767
+G A6 pass=100 fail=0 tests=100 us=114179
+G A7 pass=100 fail=0 tests=100 us=134026
+G A8 pass=100 fail=0 tests=100 us=28635
+G A9 pass=100 fail=0 tests=100 us=29135
+G AA pass=100 fail=0 tests=100 us=105478
+G AB pass=100 fail=0 tests=100 us=155052
+G AC pass=100 fail=0 tests=100 us=76629
+G AD pass=100 fail=0 tests=100 us=90085
+G AE pass=100 fail=0 tests=100 us=56049
+G AF pass=100 fail=0 tests=100 us=92564
+G B0 pass=100 fail=0 tests=100 us=29208
+G B1 pass=100 fail=0 tests=100 us=29313
+G B2 pass=100 fail=0 tests=100 us=29026
+G B3 pass=100 fail=0 tests=100 us=29510
+G B4 pass=100 fail=0 tests=100 us=28914
+G B5 pass=100 fail=0 tests=100 us=29058
+G B6 pass=100 fail=0 tests=100 us=28626
+G B7 pass=100 fail=0 tests=100 us=28913
+G B8 pass=100 fail=0 tests=100 us=29468
+G B9 pass=100 fail=0 tests=100 us=28992
+G BA pass=100 fail=0 tests=100 us=29204
+G BB pass=100 fail=0 tests=100 us=28912
+G BC pass=100 fail=0 tests=100 us=29072
+G BD pass=100 fail=0 tests=100 us=28909
+G BE pass=100 fail=0 tests=100 us=29044
+G BF pass=100 fail=0 tests=100 us=29178
+G C0 pass=100 fail=0 tests=100 us=45491
+G C1 pass=100 fail=0 tests=100 us=45197
+G C2 pass=100 fail=0 tests=100 us=45929
+G C3 pass=100 fail=0 tests=100 us=45515
+F 16 ip got=0CCBE want=0CCC0   [les bx, dword [ds:bx]]
+F 25 ip got=0A909 want=0A90B   [les di, dword [ds:bx]]
+F 27 ip got=080F7 want=080F9   [les dx, dword [cs:di]]
+F 30 ip got=0ED7F want=0ED81   [les di, dword [ds:si]]
+F 32 ip got=0A928 want=0A92A   [les si, dword [ds:di]]
+F 50 ip got=033C2 want=033C4   [les sp, dword [ss:bx]]
+G C4 pass=88 fail=12 tests=100 us=47501
+F 8 ip got=087D2 want=087D4   [lds di, dword [cs:bx]]
+F 10 ip got=07E1F want=07E21   [lds si, dword [ds:bx]]
+F 25 ip got=00DAC want=00DAE   [lds bp, dword [ds:di]]
+F 32 ip got=0673D want=0673F   [lds dx, dword [cs:di]]
+F 37 ip got=04F7C want=04F7E   [lds si, dword [cs:di]]
+F 38 ip got=0D478 want=0D47A   [lds ax, dword [es:si]]
+G C5 pass=85 fail=15 tests=100 us=47971
+F 2 ip got=01A99 want=01A9B   [mov byte [ds:di], 4h]
+F 2 mem got=DFEC6 want=DFE04   [mov byte [ds:di], 4h]
+F 6 ip got=0C5CF want=0C5D1   [mov byte [ds:bx], 58h]
+F 6 mem got=165C6 want=16558   [mov byte [ds:bx], 58h]
+F 7 ip got=02930 want=02932   [mov byte [ds:bx], FCh]
+F 7 mem got=02BC6 want=02BFC   [mov byte [ds:bx], FCh]
+G C6 pass=89 fail=22 tests=100 us=41234
+F 4 ip got=04951 want=04953   [mov word [cs:si], 3374h]
+F 4 mem got=3EDC7 want=3ED74   [mov word [cs:si], 3374h]
+F 4 mem got=3EE34 want=3EE33   [mov word [cs:si], 3374h]
+F 12 ip got=0C1A7 want=0C1A9   [mov word [ss:si], 248Bh]
+F 12 mem got=66EC7 want=66E8B   [mov word [ss:si], 248Bh]
+F 12 mem got=66F3C want=66F24   [mov word [ss:si], 248Bh]
+G C7 pass=90 fail=30 tests=100 us=43525
+G C8 pass=100 fail=0 tests=100 us=47873
+G C9 pass=100 fail=0 tests=100 us=47688
+G CA pass=100 fail=0 tests=100 us=47601
+G CB pass=100 fail=0 tests=100 us=47429
+G CC pass=100 fail=0 tests=100 us=74303
+G CD pass=100 fail=0 tests=100 us=73914
+G CE pass=100 fail=0 tests=100 us=53313
+G CF pass=100 fail=0 tests=100 us=49902
+F 13 ip got=0928E want=09290   [rol byte [ds:si]]
+F 14 ip got=03E87 want=03E89   [rol byte [ds:di]]
+F 18 ip got=0254B want=0254D   [rol byte [cs:bx]]
+F 51 ip got=0D001 want=0D003   [rol byte [ds:bx]]
+F 65 ip got=02CEE want=02CF0   [rol byte [ss:si]]
+F 79 ip got=05A86 want=05A88   [rol byte [cs:si]]
+G D0.0 pass=93 fail=7 tests=100 us=39633
+F 19 ip got=091BB want=091BD   [ror byte [ds:bx]]
+F 23 ip got=01C44 want=01C46   [ror byte [ds:bx]]
+F 39 ip got=0D15E want=0D160   [ror byte [ds:si]]
+F 56 ip got=02AE5 want=02AE7   [ror byte [ds:di]]
+F 57 ip got=045AB want=045AD   [ror byte [ds:di]]
+F 65 ip got=0DDBD want=0DDBF   [ror byte [ds:bx]]
+G D0.1 pass=90 fail=10 tests=100 us=41014
+F 9 ip got=02F25 want=02F27   [rcl byte [es:bx]]
+F 26 ip got=00E49 want=00E4B   [rcl byte [ds:di]]
+F 31 ip got=0626F want=06271   [rcl byte [ds:di]]
+F 32 ip got=06FA8 want=06FAA   [rcl byte [ds:si]]
+F 35 ip got=0BA9C want=0BA9E   [rcl byte [ds:di]]
+F 40 ip got=0502B want=0502D   [rcl byte [ds:si]]
+G D0.2 pass=89 fail=11 tests=100 us=41204
+F 21 ip got=08B74 want=08B76   [rcr byte [cs:bx]]
+F 25 ip got=03D41 want=03D43   [rcr byte [ds:di]]
+F 55 ip got=09960 want=09962   [rcr byte [ds:di]]
+F 56 ip got=0FA93 want=0FA95   [rcr byte [ds:si]]
+F 77 ip got=0050F want=00511   [rcr byte [es:si]]
+F 79 ip got=004A5 want=004A7   [rcr byte [ds:bx]]
+G D0.3 pass=94 fail=6 tests=100 us=39743
+F 40 ip got=0D980 want=0D982   [shl byte [ds:si]]
+F 41 ip got=0BE4F want=0BE51   [shl byte [ds:bx]]
+F 42 ip got=0C47E want=0C480   [shl byte [ds:bx]]
+F 83 ip got=0C5A5 want=0C5A7   [shl byte [ds:di]]
+F 93 ip got=0BE9F want=0BEA1   [shl byte [cs:bx]]
+F 96 ip got=01133 want=01135   [shl byte [ds:di]]
+G D0.4 pass=94 fail=6 tests=100 us=41451
+F 19 ip got=0AB7E want=0AB80   [shr byte [ds:bx]]
+F 23 ip got=0908F want=09091   [shr byte [ds:di]]
+F 44 ip got=0BCE2 want=0BCE4   [shr byte [ds:di]]
+F 52 ip got=0D9F2 want=0D9F4   [shr byte [ds:si]]
+F 54 ip got=020C6 want=020C8   [shr byte [cs:si]]
+F 59 ip got=0877D want=0877F   [shr byte [ss:di]]
+G D0.5 pass=91 fail=9 tests=100 us=40722
+F 0 ip got=007EE want=007F0   [setmo byte [ds:bx]]
+F 14 ip got=0A00E want=0A010   [setmo byte [es:si]]
+F 20 ip got=02828 want=0282A   [setmo byte [cs:si]]
+F 26 ip got=0989A want=0989C   [setmo byte [cs:si]]
+F 38 ip got=00DE2 want=00DE4   [setmo byte [cs:di]]
+F 43 ip got=04F70 want=04F72   [setmo byte [cs:bx]]
+G D0.6 pass=88 fail=12 tests=100 us=40746
+F 1 ip got=03392 want=03394   [sar byte [ss:di]]
+F 4 ip got=0692C want=0692E   [sar byte [ds:si]]
+F 8 ip got=0E09C want=0E09E   [sar byte [es:si]]
+F 22 ip got=0EAE0 want=0EAE2   [sar byte [ds:di]]
+F 37 ip got=0CA81 want=0CA83   [sar byte [ds:di]]
+F 38 ip got=01C80 want=01C82   [sar byte [ds:di]]
+G D0.7 pass=90 fail=10 tests=100 us=41630
+F 11 ip got=08F22 want=08F24   [rol word [es:di]]
+F 16 ip got=04E0D want=04E0F   [rol word [ds:di]]
+F 32 ip got=057CE want=057D0   [rol word [cs:si]]
+F 40 ip got=0ED27 want=0ED29   [rol word [ss:di]]
+F 44 ip got=051D9 want=051DB   [rol word [ss:si]]
+F 49 ip got=08FDE want=08FE0   [rol word [es:di]]
+G D1.0 pass=90 fail=10 tests=100 us=42818
+F 1 ip got=0BBBB want=0BBBD   [ror word [es:si]]
+F 11 ip got=02DAA want=02DAC   [ror word [ds:si]]
+F 24 ip got=08C97 want=08C99   [ror word [ds:bx]]
+F 25 ip got=090AC want=090AE   [ror word [ds:di]]
+F 32 ip got=05787 want=05789   [ror word [ds:di]]
+F 44 ip got=074AF want=074B1   [ror word [cs:si]]
+G D1.1 pass=89 fail=11 tests=100 us=42274
+F 1 ip got=0863B want=0863D   [rcl word [es:bx]]
+F 25 ip got=025BA want=025BC   [rcl word [ds:si]]
+F 41 ip got=03DBE want=03DC0   [rcl word [ds:si]]
+F 58 ip got=05CE5 want=05CE7   [rcl word [cs:bx]]
+F 63 ip got=04A88 want=04A8A   [rcl word [ds:di]]
+F 66 ip got=0AAC6 want=0AAC8   [rcl word [cs:di]]
+G D1.2 pass=89 fail=11 tests=100 us=42581
+F 0 ip got=07FC4 want=07FC6   [rcr word [ss:di]]
+F 3 ip got=0115F want=01161   [rcr word [es:di]]
+F 4 ip got=07BAD want=07BAF   [rcr word [cs:si]]
+F 14 ip got=064F4 want=064F6   [rcr word [ss:di]]
+F 62 ip got=02C09 want=02C0B   [rcr word [ds:bx]]
+F 68 ip got=04737 want=04739   [rcr word [ds:si]]
+G D1.3 pass=92 fail=8 tests=100 us=42798
+F 1 ip got=07B70 want=07B72   [shl word [cs:si]]
+F 22 ip got=0AFF7 want=0AFF9   [shl word [ss:si]]
+F 32 ip got=0555F want=05561   [shl word [ds:di]]
+F 49 ip got=0D490 want=0D492   [shl word [ds:si]]
+F 50 ip got=02DA9 want=02DAB   [shl word [es:di]]
+F 77 ip got=0F966 want=0F968   [shl word [ds:di]]
+G D1.4 pass=92 fail=8 tests=100 us=42884
+F 7 ip got=09ACE want=09AD0   [shr word [ds:di]]
+F 19 ip got=04307 want=04309   [shr word [ds:di]]
+F 39 ip got=09B07 want=09B09   [shr word [ds:bx]]
+F 44 ip got=0B1F9 want=0B1FB   [shr word [ds:bx]]
+F 45 ip got=0233E want=02340   [shr word [es:di]]
+F 65 ip got=09550 want=09552   [shr word [ds:di]]
+G D1.5 pass=91 fail=9 tests=100 us=41602
+F 2 ip got=098C4 want=098C6   [setmo word [ds:si]]
+F 14 ip got=0DC92 want=0DC94   [setmo word [ds:si]]
+F 20 ip got=02D18 want=02D1A   [setmo word [ds:bx]]
+F 22 ip got=0A124 want=0A126   [setmo word [cs:bx]]
+F 28 ip got=0B76A want=0B76C   [setmo word [cs:bx]]
+F 36 ip got=0D524 want=0D526   [setmo word [ss:si]]
+G D1.6 pass=87 fail=13 tests=100 us=42048
+F 12 ip got=09E54 want=09E56   [sar word [ds:bx]]
+F 37 ip got=003D4 want=003D6   [sar word [es:si]]
+F 38 ip got=016D5 want=016D7   [sar word [cs:di]]
+F 48 ip got=09D53 want=09D55   [sar word [cs:di]]
+F 56 ip got=07CAF want=07CB1   [sar word [es:bx]]
+F 60 ip got=03311 want=03313   [sar word [ds:si]]
+G D1.7 pass=91 fail=9 tests=100 us=41649
+F 14 ip got=0CBE3 want=0CBE5   [rol byte [ds:si], cl]
+F 24 ip got=0730D want=0730F   [rol byte [ds:bx], cl]
+F 27 ip got=06C9C want=06C9E   [rol byte [es:di], cl]
+F 28 ip got=02D27 want=02D29   [rol byte [ds:si], cl]
+F 55 ip got=059B8 want=059BA   [rol byte [ds:si], cl]
+F 58 ip got=02213 want=02215   [rol byte [ds:si], cl]
+G D2.0 pass=87 fail=13 tests=100 us=41937
+F 20 ip got=02543 want=02545   [ror byte [es:bx], cl]
+F 38 ip got=0AF6D want=0AF6F   [ror byte [ss:di], cl]
+F 41 ip got=01F99 want=01F9B   [ror byte [ds:bx], cl]
+F 56 ip got=0D359 want=0D35B   [ror byte [cs:di], cl]
+F 69 ip got=0976A want=0976C   [ror byte [ds:si], cl]
+F 73 ip got=0A5C2 want=0A5C4   [ror byte [es:bx], cl]
+G D2.1 pass=94 fail=6 tests=100 us=41882
+F 9 ip got=046BF want=046C1   [rcl byte [ds:di], cl]
+F 13 ip got=09EF6 want=09EF8   [rcl byte [ds:si], cl]
+F 19 ip got=03E26 want=03E28   [rcl byte [ss:si], cl]
+F 22 ip got=028F5 want=028F7   [rcl byte [ds:si], cl]
+F 30 ip got=0EB4B want=0EB4D   [rcl byte [ss:bx], cl]
+F 32 ip got=08837 want=08839   [rcl byte [ds:si], cl]
+G D2.2 pass=88 fail=12 tests=100 us=40420
+F 12 ip got=00FE9 want=00FEB   [rcr byte [ss:si], cl]
+F 37 ip got=0F1EE want=0F1F0   [rcr byte [ds:si], cl]
+F 52 ip got=06F7A want=06F7C   [rcr byte [cs:bx], cl]
+F 73 ip got=0214E want=02150   [rcr byte [es:di], cl]
+F 98 ip got=0214A want=0214C   [rcr byte [ds:bx], cl]
+G D2.3 pass=95 fail=5 tests=100 us=41140
+F 2 ip got=065CD want=065CF   [shl byte [ds:si], cl]
+F 21 ip got=0C78D want=0C78F   [shl byte [cs:si], cl]
+F 27 ip got=0A6BC want=0A6BE   [shl byte [ds:di], cl]
+F 31 ip got=09FFC want=09FFE   [shl byte [cs:si], cl]
+F 33 ip got=062F7 want=062F9   [shl byte [ds:bx], cl]
+F 44 ip got=040D8 want=040DA   [shl byte [ds:di], cl]
+G D2.4 pass=88 fail=12 tests=100 us=41292
+F 15 ip got=0F006 want=0F008   [shr byte [ds:bx], cl]
+F 16 ip got=01345 want=01347   [shr byte [ds:si], cl]
+F 28 ip got=0C0BB want=0C0BD   [shr byte [es:si], cl]
+F 43 ip got=0C844 want=0C846   [shr byte [es:di], cl]
+F 58 ip got=00AAB want=00AAD   [shr byte [cs:si], cl]
+F 61 ip got=0506C want=0506E   [shr byte [ds:di], cl]
+G D2.5 pass=87 fail=13 tests=100 us=40821
+F 5 ip got=092C4 want=092C6   [setmoc byte [cs:si], cl]
+F 9 ip got=0687D want=0687F   [setmoc byte [ds:si], cl]
+F 10 ip got=033D5 want=033D7   [setmoc byte [ds:si], cl]
+F 25 ip got=0CC12 want=0CC14   [setmoc byte [ds:si], cl]
+F 52 ip got=05100 want=05102   [setmoc byte [ds:si], cl]
+F 71 ip got=0FF98 want=0FF9A   [setmoc byte [es:si], cl]
+G D2.6 pass=93 fail=7 tests=100 us=40578
+F 17 ip got=0BF93 want=0BF95   [sar byte [ds:di], cl]
+F 20 ip got=0551D want=0551F   [sar byte [ds:si], cl]
+F 26 ip got=0D620 want=0D622   [sar byte [ds:bx], cl]
+F 41 ip got=0BD06 want=0BD08   [sar byte [ss:bx], cl]
+F 59 ip got=063C0 want=063C2   [sar byte [ds:di], cl]
+F 77 ip got=0E368 want=0E36A   [sar byte [ss:bx], cl]
+G D2.7 pass=93 fail=7 tests=100 us=41801
+F 10 ip got=0290A want=0290C   [rol word [ds:bx], cl]
+F 11 ip got=0172B want=0172D   [rol word [ss:di], cl]
+F 40 ip got=0BE1A want=0BE1C   [rol word [ds:di], cl]
+F 46 ip got=07CEF want=07CF1   [rol word [ss:si], cl]
+F 60 ip got=0F0C4 want=0F0C6   [rol word [ds:di], cl]
+F 62 ip got=0BBBC want=0BBBE   [rol word [ds:bx], cl]
+G D3.0 pass=88 fail=12 tests=100 us=41694
+F 4 ip got=07CD0 want=07CD2   [ror word [ds:si], cl]
+F 12 ip got=08D8C want=08D8E   [ror word [es:di], cl]
+F 13 ip got=0BEFB want=0BEFD   [ror word [ds:di], cl]
+F 39 ip got=0B578 want=0B57A   [ror word [ss:bx], cl]
+F 44 ip got=0F9A0 want=0F9A2   [ror word [ds:di], cl]
+F 45 ip got=02824 want=02826   [ror word [cs:bx], cl]
+G D3.1 pass=89 fail=11 tests=100 us=42322
+F 22 ip got=05DB1 want=05DB3   [rcl word [ds:bx], cl]
+F 26 ip got=0A28A want=0A28C   [rcl word [ds:si], cl]
+F 28 ip got=00BAE want=00BB0   [rcl word [es:si], cl]
+F 29 ip got=06BFE want=06C00   [rcl word [ds:bx], cl]
+F 31 ip got=0E8E5 want=0E8E7   [rcl word [ds:di], cl]
+F 41 ip got=0B754 want=0B756   [rcl word [cs:di], cl]
+G D3.2 pass=84 fail=16 tests=100 us=42895
+F 5 ip got=0F3EB want=0F3ED   [rcr word [ds:bx], cl]
+F 9 ip got=04688 want=0468A   [rcr word [ds:di], cl]
+F 20 ip got=0264D want=0264F   [rcr word [es:di], cl]
+F 56 ip got=0A17D want=0A17F   [rcr word [ss:di], cl]
+F 70 ip got=09E75 want=09E77   [rcr word [ds:si], cl]
+F 71 ip got=051AF want=051B1   [rcr word [ds:bx], cl]
+G D3.3 pass=94 fail=6 tests=100 us=42265
+F 8 ip got=0A165 want=0A167   [shl word [ds:bx], cl]
+F 9 ip got=0D8F2 want=0D8F4   [shl word [ds:si], cl]
+F 10 ip got=0CA82 want=0CA84   [shl word [ds:bx], cl]
+F 11 ip got=090B1 want=090B3   [shl word [ds:bx], cl]
+F 15 ip got=00D02 want=00D04   [shl word [es:bx], cl]
+F 19 ip got=0E668 want=0E66A   [shl word [ds:bx], cl]
+G D3.4 pass=89 fail=11 tests=100 us=41558
+F 0 ip got=04E35 want=04E37   [shr word [ds:si], cl]
+F 10 ip got=0F9DB want=0F9DD   [shr word [cs:bx], cl]
+F 12 ip got=02AB4 want=02AB6   [shr word [ds:di], cl]
+F 23 ip got=05049 want=0504B   [shr word [ds:bx], cl]
+F 24 ip got=02D9E want=02DA0   [shr word [ds:bx], cl]
+F 29 ip got=00148 want=0014A   [shr word [cs:bx], cl]
+G D3.5 pass=86 fail=14 tests=100 us=43275
+F 4 ip got=0FAC8 want=0FACA   [setmoc word [ds:di], cl]
+F 22 ip got=0FFA4 want=0FFA6   [setmoc word [ds:bx], cl]
+F 33 ip got=0FD79 want=0FD7B   [setmoc word [ds:si], cl]
+F 38 ip got=04910 want=04912   [setmoc word [ds:si], cl]
+F 63 ip got=077CC want=077CE   [setmoc word [ds:di], cl]
+F 67 ip got=0A017 want=0A019   [setmoc word [ds:bx], cl]
+G D3.6 pass=89 fail=11 tests=100 us=43509
+F 1 ip got=0B3FB want=0B3FD   [sar word [ss:di], cl]
+F 5 ip got=0E576 want=0E578   [sar word [ds:bx], cl]
+F 8 ip got=04BFF want=04C01   [sar word [ds:di], cl]
+F 10 ip got=08E0F want=08E11   [sar word [ds:di], cl]
+F 17 ip got=0440F want=04411   [sar word [ds:bx], cl]
+F 38 ip got=0C065 want=0C067   [sar word [ds:si], cl]
+G D3.7 pass=89 fail=11 tests=100 us=43147
+G D4 pass=100 fail=0 tests=100 us=29618
+G D5 pass=100 fail=0 tests=100 us=28996
+G D6 pass=100 fail=0 tests=100 us=28767
+G D7 pass=100 fail=0 tests=100 us=44229
+F 0 ip got=00120 want=00122   [esc word [ds:si]]
+F 6 ip got=03474 want=03476   [esc word [cs:di]]
+F 21 ip got=0CF60 want=0CF62   [esc word [ds:si]]
+F 23 ip got=0C2C3 want=0C2C5   [esc word [ss:si]]
+F 24 ip got=0A433 want=0A435   [esc word [ds:si]]
+F 34 ip got=0D2B1 want=0D2B3   [esc word [ss:si]]
+G D8 pass=90 fail=10 tests=100 us=41625
+F 37 ip got=07276 want=07278   [esc word [ds:bx]]
+F 41 ip got=05C3E want=05C40   [esc word [ds:di]]
+F 46 ip got=07BB1 want=07BB3   [esc word [ds:bx]]
+F 57 ip got=0B5D9 want=0B5DB   [esc word [ds:bx]]
+F 64 ip got=06ECE want=06ED0   [esc word [ds:si]]
+F 82 ip got=05EE6 want=05EE8   [esc word [cs:bx]]
+G D9 pass=92 fail=8 tests=100 us=41707
+F 21 ip got=0FC55 want=0FC57   [esc word [es:si]]
+F 22 ip got=0FF5F want=0FF61   [esc word [ds:bx]]
+F 87 ip got=00F08 want=00F0A   [esc word [ss:si]]
+F 97 ip got=023FE want=02400   [esc word [ss:si]]
+F 99 ip got=0470E want=04710   [esc word [ds:si]]
+G DA pass=95 fail=5 tests=100 us=40334
+F 1 ip got=0DDD6 want=0DDD8   [esc word [ds:bx]]
+F 16 ip got=09F75 want=09F77   [esc word [ds:di]]
+F 42 ip got=024D0 want=024D2   [esc word [cs:si]]
+F 49 ip got=0A3AF want=0A3B1   [esc word [cs:si]]
+F 51 ip got=08233 want=08235   [esc word [ds:si]]
+F 56 ip got=0FAF7 want=0FAF9   [esc word [ds:di]]
+G DB pass=92 fail=8 tests=100 us=41714
+F 0 ip got=0DB67 want=0DB69   [esc word [ds:di]]
+F 5 ip got=0BF0B want=0BF0D   [esc word [ds:si]]
+F 16 ip got=08662 want=08664   [esc word [ds:di]]
+F 38 ip got=01BA4 want=01BA6   [esc word [ds:si]]
+F 40 ip got=070C0 want=070C2   [esc word [ds:bx]]
+F 43 ip got=03CB5 want=03CB7   [esc word [ds:di]]
+G DC pass=86 fail=14 tests=100 us=42627
+F 15 ip got=0594C want=0594E   [esc word [ss:si]]
+F 20 ip got=01CAE want=01CB0   [esc word [ds:bx]]
+F 28 ip got=068B5 want=068B7   [esc word [ds:si]]
+F 40 ip got=06BDB want=06BDD   [esc word [es:di]]
+F 48 ip got=06CB5 want=06CB7   [esc word [ds:bx]]
+F 51 ip got=0660C want=0660E   [esc word [es:si]]
+G DD pass=90 fail=10 tests=100 us=42398
+F 1 ip got=05F01 want=05F03   [esc word [ds:di]]
+F 2 ip got=0418A want=0418C   [esc word [ds:si]]
+F 8 ip got=0C0B6 want=0C0B8   [esc word [ss:bx]]
+F 11 ip got=04041 want=04043   [esc word [ds:bx]]
+F 16 ip got=0ED96 want=0ED98   [esc word [ds:si]]
+F 20 ip got=0D5D6 want=0D5D8   [esc word [ss:di]]
+G DE pass=87 fail=13 tests=100 us=41638
+F 6 ip got=0701B want=0701D   [esc word [es:si]]
+F 9 ip got=0FB09 want=0FB0B   [esc word [es:si]]
+F 25 ip got=0ED61 want=0ED63   [esc word [ds:bx]]
+F 27 ip got=0ECB8 want=0ECBA   [esc word [ds:bx]]
+F 74 ip got=086D1 want=086D3   [esc word [cs:di]]
+F 95 ip got=0FBB0 want=0FBB2   [esc word [ds:di]]
+G DF pass=93 fail=7 tests=100 us=41408
+G E0 pass=100 fail=0 tests=100 us=29014
+G E1 pass=100 fail=0 tests=100 us=29245
+G E2 pass=100 fail=0 tests=100 us=28884
+G E3 pass=100 fail=0 tests=100 us=28751
+G E4 pass=100 fail=0 tests=100 us=28935
+G E5 pass=100 fail=0 tests=100 us=28889
+G E6 pass=100 fail=0 tests=100 us=29000
+G E7 pass=100 fail=0 tests=100 us=28779
+G E8 pass=100 fail=0 tests=100 us=46557
+G E9 pass=100 fail=0 tests=100 us=29101
+G EA pass=100 fail=0 tests=100 us=29195
+G EB pass=100 fail=0 tests=100 us=28930
+G EC pass=100 fail=0 tests=100 us=29041
+G ED pass=100 fail=0 tests=100 us=29033
+G EE pass=100 fail=0 tests=100 us=29187
+G EF pass=100 fail=0 tests=100 us=28955
+G F5 pass=100 fail=0 tests=100 us=29072
+F 5 ip got=0EED8 want=0EEDA   [test byte [ds:di], D4h]
+F 12 ip got=00306 want=00308   [test byte [ds:di], B4h]
+F 30 ip got=0E2D4 want=0E2D6   [test byte [ds:bx], B6h]
+F 30 flags got=0F006 want=0F002   [test byte [ds:bx], B6h]
+F 32 ip got=0DBD5 want=0DBD7   [test byte [ds:bx], A7h]
+F 32 flags got=0F082 want=0F086   [test byte [ds:bx], A7h]
+G F6.0 pass=93 fail=10 tests=100 us=39528
+F 10 ip got=0B881 want=0B883   [test byte [cs:bx], 27h]
+F 10 flags got=0F002 want=0F006   [test byte [cs:bx], 27h]
+F 18 ip got=0FF01 want=0FF03   [test byte [ss:si], 15h]
+F 24 ip got=0039D want=0039F   [test byte [es:si], 52h]
+F 24 flags got=0F402 want=0F446   [test byte [es:si], 52h]
+F 33 ip got=00AEC want=00AEE   [test byte [ds:bx], 88h]
+G F6.1 pass=93 fail=12 tests=100 us=41641
+F 10 ip got=0C002 want=0C004   [not byte [cs:si]]
+F 11 ip got=017D8 want=017DA   [not byte [ds:bx]]
+F 16 ip got=07399 want=0739B   [not byte [ss:si]]
+F 32 ip got=09044 want=09046   [not byte [ds:bx]]
+F 40 ip got=05AC0 want=05AC2   [not byte [ds:si]]
+F 54 ip got=07CE3 want=07CE5   [not byte [es:bx]]
+G F6.2 pass=89 fail=11 tests=100 us=41754
+F 11 ip got=0796F want=07971   [neg byte [cs:si]]
+F 16 ip got=01CA6 want=01CA8   [neg byte [es:si]]
+F 62 ip got=05C2B want=05C2D   [neg byte [ds:bx]]
+F 66 ip got=05DD8 want=05DDA   [neg byte [ss:si]]
+F 77 ip got=06A52 want=06A54   [neg byte [cs:si]]
+F 87 ip got=05EF4 want=05EF6   [neg byte [cs:si]]
+G F6.3 pass=94 fail=6 tests=100 us=40810
+F 23 ip got=00142 want=00144   [mul byte [ds:bx]]
+F 42 ip got=0E67C want=0E67E   [mul byte [ds:bx]]
+F 49 ip got=0B602 want=0B604   [mul byte [ds:bx]]
+F 63 ip got=0BCD5 want=0BCD7   [mul byte [ds:bx]]
+F 70 ip got=02181 want=02183   [mul byte [cs:si]]
+F 76 ip got=0DC09 want=0DC0B   [mul byte [cs:di]]
+G F6.4 pass=94 fail=6 tests=100 us=40756
+F 8 ip got=09E94 want=09E96   [imul byte [ds:di]]
+F 13 ip got=05212 want=05214   [imul byte [ds:si]]
+F 14 ip got=0EF34 want=0EF36   [imul byte [ds:si]]
+F 39 ip got=0A1A6 want=0A1A8   [imul byte [ss:di]]
+F 42 ip got=00DCB want=00DCD   [imul byte [ds:bx]]
+F 45 ip got=05583 want=05585   [imul byte [ds:di]]
+G F6.5 pass=86 fail=14 tests=100 us=40477
+F 0 ip got=08096 want=08098   [div byte [ds:bx]]
+F 10 ip got=09D01 want=09D03   [div byte [ds:di]]
+F 15 ip got=096A0 want=096A2   [div byte [ds:di]]
+F 30 ip got=08546 want=08548   [div byte [ds:bx]]
+F 37 ip got=0C369 want=0C36B   [div byte [es:si]]
+F 44 mem got=F751F want=F7521   [div byte [ds:si]]
+G F6.6 pass=94 fail=6 tests=100 us=60156
+F 7 mem got=15CDA want=15CDC   [idiv byte [ds:di]]
+F 11 mem got=05596 want=05598   [idiv byte [ds:di]]
+F 19 mem got=22C2F want=22C31   [idiv byte [ds:di]]
+F 21 mem got=C2E8A want=C2E8C   [idiv byte [ds:si]]
+F 24 ip got=047F2 want=047F4   [idiv byte [cs:bx]]
+F 27 mem got=15D94 want=15D96   [idiv byte [ds:si]]
+G F6.7 pass=92 fail=9 tests=100 us=77348
+F 24 ip got=00181 want=00183   [test word [cs:bx], CFB6h]
+F 24 flags got=0F402 want=0F406   [test word [cs:bx], CFB6h]
+F 47 ip got=049B9 want=049BB   [test word [ds:bx], A609h]
+F 47 flags got=0F002 want=0F082   [test word [ds:bx], A609h]
+F 71 ip got=01C5F want=01C61   [test word [ds:si], B720h]
+F 71 flags got=0F006 want=0F086   [test word [ds:si], B720h]
+G F7.0 pass=93 fail=13 tests=100 us=43571
+F 6 ip got=0EA42 want=0EA44   [test word [ds:di], 8904h]
+F 10 ip got=0B8DB want=0B8DD   [test word [ds:si], 9636h]
+F 10 flags got=0F402 want=0F406   [test word [ds:si], 9636h]
+F 12 ip got=058B5 want=058B7   [test word [ds:si], 433Fh]
+F 29 ip got=005B5 want=005B7   [test word [ss:bx], E027h]
+F 34 ip got=078E4 want=078E6   [test word [es:di], B901h]
+G F7.1 pass=88 fail=19 tests=100 us=41217
+F 1 ip got=0B9EE want=0B9F0   [not word [ds:di]]
+F 17 ip got=03B13 want=03B15   [not word [ds:di]]
+F 30 ip got=00FA5 want=00FA7   [not word [ds:di]]
+F 32 ip got=0BC41 want=0BC43   [not word [cs:di]]
+F 47 ip got=0C7DB want=0C7DD   [not word [ds:di]]
+F 50 ip got=0F877 want=0F879   [not word [ds:di]]
+G F7.2 pass=84 fail=16 tests=100 us=42458
+F 2 ip got=0713B want=0713D   [neg word [es:di]]
+F 6 ip got=072AB want=072AD   [neg word [ds:si]]
+F 24 ip got=0BAEB want=0BAED   [neg word [ds:di]]
+F 35 ip got=089D5 want=089D7   [neg word [ds:si]]
+F 46 ip got=0839A want=0839C   [neg word [cs:si]]
+F 49 ip got=0F048 want=0F04A   [neg word [es:bx]]
+G F7.3 pass=91 fail=9 tests=100 us=42304
+F 9 ip got=0EB5E want=0EB60   [mul word [ds:di]]
+F 23 ip got=0B0DC want=0B0DE   [mul word [ds:bx]]
+F 68 ip got=0A4C0 want=0A4C2   [mul word [es:di]]
+F 78 ip got=0F231 want=0F233   [mul word [ds:di]]
+F 87 ip got=0C10F want=0C111   [mul word [ds:di]]
+F 89 ip got=03F91 want=03F93   [mul word [cs:di]]
+G F7.4 pass=93 fail=7 tests=100 us=41289
+F 0 ip got=06013 want=06015   [imul word [cs:si]]
+F 2 ip got=067DC want=067DE   [imul word [ds:di]]
+F 7 ip got=08567 want=08569   [imul word [ss:bx]]
+F 16 ip got=05AF6 want=05AF8   [imul word [ds:di]]
+F 40 ip got=0B5A8 want=0B5AA   [imul word [ss:di]]
+F 45 ip got=0A7B2 want=0A7B4   [imul word [ss:si]]
+G F7.5 pass=90 fail=10 tests=100 us=41850
+F 5 ip got=0FC55 want=0FC57   [div word [ds:di]]
+F 14 ip got=0A2BF want=0A2C1   [div word [ss:bx]]
+F 31 ip got=0A5E9 want=0A5EB   [div word [ss:di]]
+F 33 ip got=0C350 want=0C352   [div word [ds:bx]]
+F 43 mem got=EF985 want=EF987   [div word [es:di]]
+F 62 mem got=270CE want=270D0   [div word [ds:bx]]
+G F7.6 pass=89 fail=11 tests=100 us=63631
+F 5 ip got=0DCDA want=0DCDC   [idiv word [ds:di]]
+F 28 mem got=4B2BD want=4B2BF   [idiv word [ds:bx]]
+F 30 mem got=46F82 want=46F84   [idiv word [ds:di]]
+F 39 mem got=A20BE want=A20C0   [idiv word [ds:si]]
+F 55 mem got=088C7 want=088C9   [idiv word [ds:bx]]
+F 90 mem got=4A2F2 want=4A2F4   [idiv word [ds:bx]]
+G F7.7 pass=92 fail=8 tests=100 us=76162
+G F8 pass=100 fail=0 tests=100 us=29030
+G F9 pass=100 fail=0 tests=100 us=28922
+G FA pass=100 fail=0 tests=100 us=28910
+G FB pass=100 fail=0 tests=100 us=28647
+G FC pass=100 fail=0 tests=100 us=28941
+G FD pass=100 fail=0 tests=100 us=28889
+F 0 flags got=0F016 want=0F006   [inc byte [ss:bp+di]]
+F 2 ip got=08691 want=08693   [inc byte [es:si]]
+F 2 flags got=0F487 want=0F497   [inc byte [es:si]]
+F 3 flags got=0F097 want=0F087   [inc byte [ds:bp+si]]
+F 5 flags got=0F097 want=0F087   [inc byte [ss:bp+si+76h]]
+F 7 flags got=0F496 want=0F486   [inc byte [ss:bp+di]]
+G FE.0 pass=41 fail=65 tests=100 us=41653
+F 0 flags got=0F416 want=0F406   [dec byte [ss:bp+di-1Dh]]
+F 1 flags got=0F492 want=0F482   [dec byte [ss:bp+si]]
+F 2 flags got=0F416 want=0F406   [dec byte [ss:si+10F0h]]
+F 3 ip got=0F0AB want=0F0AD   [dec byte [cs:bx]]
+F 3 flags got=0F412 want=0F402   [dec byte [cs:bx]]
+F 4 ip got=03479 want=0347B   [dec byte [cs:di]]
+G FE.1 pass=48 fail=57 tests=100 us=41343
+F 0 flags got=0F017 want=0F007   [inc word [ss:bp+4Ch]]
+F 1 flags got=0F012 want=0F002   [inc bx]
+F 5 flags got=0F003 want=0F013   [inc word [cs:bp+si]]
+F 7 ip got=07EC5 want=07EC7   [inc word [ds:bx]]
+F 10 flags got=0F412 want=0F402   [inc ax]
+F 11 flags got=0F092 want=0F082   [inc word [es:bx+si-BECh]]
+G FF.0 pass=48 fail=62 tests=100 us=42743
+F 0 flags got=0F012 want=0F002   [dec word [es:si-3AE9h]]
+F 5 flags got=0F013 want=0F003   [dec word [ds:bx-Dh]]
+F 9 flags got=0F016 want=0F006   [dec bp]
+F 12 flags got=0F417 want=0F407   [dec word [ss:bx+di]]
+F 13 flags got=0F087 want=0F097   [dec ax]
+F 14 flags got=0F097 want=0F087   [dec ax]
+G FF.1 pass=45 fail=58 tests=100 us=40081
+F 53 mem got=06782 want=06784   [call word [ds:di]]
+F 80 mem got=F17F9 want=F17FB   [call word [ds:si]]
+F 96 mem got=4F93E want=4F940   [call word [ds:di]]
+G FF.2 pass=97 fail=3 tests=100 us=58873
+F 2 mem got=7DA7C want=7DA7E   [callf word [ss:bx]]
+F 16 mem got=78004 want=78006   [callf word [ds:bx]]
+F 22 mem got=2E509 want=2E50B   [callf word [cs:di]]
+F 34 mem got=EA4D6 want=EA4D8   [callf word [ds:si]]
+F 45 mem got=49C38 want=49C3A   [callf word [ds:si]]
+F 51 mem got=D20E2 want=D20E4   [callf word [es:bx]]
+G FF.3 pass=89 fail=11 tests=100 us=68738
+G FF.4 pass=100 fail=0 tests=100 us=40573
+G FF.5 pass=100 fail=0 tests=100 us=47340
+F 18 ip got=022EC want=022EE   [push word [ss:di]]
+F 27 ip got=0F382 want=0F384   [push word [ds:bx]]
+F 35 ip got=0F4A3 want=0F4A5   [push word [ds:di]]
+F 52 ip got=0EBD9 want=0EBDB   [push word [ds:si]]
+F 92 ip got=0A70F want=0A711   [push word [cs:si]]
+F 95 ip got=0E058 want=0E05A   [push word [ds:bx]]
+G FF.6 pass=93 fail=7 tests=100 us=58726
+F 0 ip got=0F8A4 want=0F8A6   [push word [cs:bx]]
+F 13 ip got=00F86 want=00F88   [push word [es:di]]
+F 14 ip got=09B25 want=09B27   [push word [ds:si]]
+F 45 ip got=00385 want=00387   [push word [ds:bx]]
+F 51 ip got=089DA want=089DC   [push word [cs:si]]
+F 72 ip got=063FF want=06401   [push word [ds:si]]
+G FF.7 pass=91 fail=9 tests=100 us=60521
+TOTAL pass=29936 fail=2364
+vectors FAIL
+host: 323 files, 32300 tests, 3197267 bytes in 43.8 s
+host: groups with failures: 00 01 02 03 08 09 0A 0B 10 11 12 13 18 19 1A 1B 20 21 22 23 28 29 2A 2B 30 31 32 33 38 39 3A 3B 40 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4F 80.0 80.1 80.2 80.3 80.4 80.5 80.6 80.7 81.0 81.1 81.2 81.3 81.4 81.5 81.6 81.7 82.0 82.1 82.2 82.3 82.4 82.5 82.6 82.7 83.0 83.1 83.2 83.3 83.4 83.5 83.6 83.7 84 85 86 87 88 89 8A 8B 8C 8D 8E 8F C4 C5 C6 C7 D0.0 D0.1 D0.2 D0.3 D0.4 D0.5 D0.6 D0.7 D1.0 D1.1 D1.2 D1.3 D1.4 D1.5 D1.6 D1.7 D2.0 D2.1 D2.2 D2.3 D2.4 D2.5 D2.6 D2.7 D3.0 D3.1 D3.2 D3.3 D3.4 D3.5 D3.6 D3.7 D8 D9 DA DB DC DD DE DF F6.0 F6.1 F6.2 F6.3 F6.4 F6.5 F6.6 F6.7 F7.0 F7.1 F7.2 F7.3 F7.4 F7.5 F7.6 F7.7 FE.0 FE.1 FF.0 FF.1 FF.2 FF.3 FF.6 FF.7
