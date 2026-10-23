@@ -1,0 +1,11 @@
+; 8086 API, interrupt and memory-map checks for the Pico W (RP2040). See api_body.pmi.
+#CLOCK_KHZ = 200000
+#CPU_TIMING = 0
+#CPU_ASM_TAIL = 1
+XIncludeFile "RP2040/Lib/clocks.pico"
+XIncludeFile "RP2040/Lib/timer.pico"
+XIncludeFile "RP2040/Lib/uart.pico"
+XIncludeFile "RP2040/Lib/usb_serial.pico"
+XIncludeFile "RP2040/Lib/safety.pico"
+XIncludeFile "../src/cpu86.pico"
+XIncludeFile "api_body.pmi"

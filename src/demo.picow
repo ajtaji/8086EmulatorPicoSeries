@@ -1,0 +1,13 @@
+; 8086 demo and benchmark for the Pico W (RP2040).
+#CLOCK_KHZ = 200000
+#CPU_TIMING = 0
+#CPU_ASM_TAIL = 1
+#GUEST_KB = 88
+#GUEST2_KB = 56
+XIncludeFile "RP2040/Lib/clocks.pico"
+XIncludeFile "RP2040/Lib/timer.pico"
+XIncludeFile "RP2040/Lib/uart.pico"
+XIncludeFile "RP2040/Lib/usb_serial.pico"
+XIncludeFile "RP2040/Lib/safety.pico"
+XIncludeFile "cpu86.pico"
+XIncludeFile "demo_body.pmi"

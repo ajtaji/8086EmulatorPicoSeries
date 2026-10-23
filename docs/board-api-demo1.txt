@@ -1,0 +1,175 @@
+lease held: 8080-core 2026-10-23T17:00:20-05:00 - waiting 30 s
+lease held: 8080-core 2026-10-23T17:00:20-05:00 - waiting 30 s
+lease held: 8080-core 2026-10-23T17:00:20-05:00 - waiting 30 s
+lease held: 8080-core 2026-10-23T17:00:20-05:00 - waiting 30 s
+lease held: 8080-core 2026-10-23T17:00:20-05:00 - waiting 30 s
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 57498 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api.uf2.asm
+> RP2040 ASSEMBLER: 94552 bytes of code run from SRAM at $20000000-$20017157, copied from flash at boot; 86448 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2040|112092|2097152
+CYCLES_TOTAL_RP2040|68797|straight-line, not-taken branches
+REGMAP_RP2040|7244|353|263|416|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1346|frame-slot loads taken from a register
+pmfc: api.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 112092 bytes into 438 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api.uf2
+pmfc: OK
+image ends at 0x1001B600
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    A4FB5A8DAC1D39E14594FD768E22940B183EB6CD9426744AB6A532CDD4CAD6F0 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 57498 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api.uf2.asm
+> RP2040 ASSEMBLER: 94552 bytes of code run from SRAM at $20000000-$20017157, copied from flash at boot; 86448 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2040|112092|2097152
+CYCLES_TOTAL_RP2040|68797|straight-line, not-taken branches
+REGMAP_RP2040|7244|353|263|416|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1346|frame-slot loads taken from a register
+pmfc: api.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 112092 bytes into 438 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api.uf2
+pmfc: uploading api.uf2 (RP2040) through COM7
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
+> [TOUCH] The open of COM7 at 1200 baud failed with error 31, which is what a board that takes the touch during the open itself gives. Looking for it where it goes next.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
+> [NATIVE UPLOADER] Found BOOTSEL drive at H:\
+> [NATIVE UPLOADER] Writing image: 65536 of 224256 bytes (29%)
+> [NATIVE UPLOADER] Writing image: 131072 of 224256 bytes (58%)
+> [NATIVE UPLOADER] Writing image: 196608 of 224256 bytes (87%)
+> [NATIVE UPLOADER] Writing image: 224256 of 224256 bytes (100%)
+> [NATIVE UPLOADER] Wrote api.uf2 to H:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+> [NATIVE UPLOADER] Serial monitor: board found on COM7 (USB vendor ID 2E8A), on the same USB connection it was flashed through.
+pmfc: reading COM7 at 9600 baud for 12 s (the port opened 2 ms after the upload, attempt 1).
+8086 API checks timing=0 asm-tail=1
+API checks=64 failures=0 PASS
+pmfc: read COM7 for 12 s: 68 bytes.
+pmfc: OK
+lease released
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 55964 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2.asm
+> RP2040 ASSEMBLER: 94552 bytes of code run from SRAM at $20000000-$20017157, copied from flash at boot; 12732 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2040|108148|2097152
+CYCLES_TOTAL_RP2040|66296|straight-line, not-taken branches
+REGMAP_RP2040|6888|277|264|318|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1336|frame-slot loads taken from a register
+pmfc: 8086-picow.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 108148 bytes into 423 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: OK
+image ends at 0x1001A700
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    FDE9461DC46D0DE45979EBBB11F0245FFA7022AFC83A175FBBCAEB63A241F506 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 55964 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2.asm
+> RP2040 ASSEMBLER: 94552 bytes of code run from SRAM at $20000000-$20017157, copied from flash at boot; 12732 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2040|108148|2097152
+CYCLES_TOTAL_RP2040|66296|straight-line, not-taken branches
+REGMAP_RP2040|6888|277|264|318|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1336|frame-slot loads taken from a register
+pmfc: 8086-picow.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 108148 bytes into 423 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: uploading 8086-picow.uf2 (RP2040) through COM7
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
+> [NATIVE UPLOADER] Found BOOTSEL drive at H:\
+> [NATIVE UPLOADER] Writing image: 65536 of 216576 bytes (30%)
+> [NATIVE UPLOADER] Writing image: 131072 of 216576 bytes (60%)
+> [NATIVE UPLOADER] Writing image: 196608 of 216576 bytes (90%)
+> [NATIVE UPLOADER] Writing image: 216576 of 216576 bytes (100%)
+> [NATIVE UPLOADER] Wrote 8086-picow.uf2 to H:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+> [NATIVE UPLOADER] Serial monitor: board found on COM7 (USB vendor ID 2E8A), on the same USB connection it was flashed through.
+pmfc: reading COM7 at 9600 baud for 40 s (the port opened 2 ms after the upload, attempt 1).
+8086 PureMetal clk_sys kHz=200000 guest RAM KB=144 timing=0 asm-tail=1
+sum test AX=5050 CX=0 instructions=203 PASS
+register/branch instructions=1000000 us=260002 instructions/s=3846124
+alu instructions=1000000 us=437146 instructions/s=2287565
+memory instructions=1000000 us=590913 instructions/s=1692296
+call/stack instructions=1000000 us=474379 instructions/s=2108019
+rep movsw bytes=524288 us=253167 bytes/s=2070917
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474376 instructions/s=2108032
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590912 instructions/s=1692299
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253165 bytes/s=2070933
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590912 instructions/s=1692299
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253165 bytes/s=2070933
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590912 instructions/s=1692299
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474376 instructions/s=2108032
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590912 instructions/s=1692299
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253165 bytes/s=2070933
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+alu instructions=1000000 us=437145 instructions/s=2287570
+memory instructions=1000000 us=590911 instructions/s=1692302
+call/stack instructions=1000000 us=474377 instructions/s=2108028
+rep movsw bytes=524288 us=253164 bytes/s=2070942
+register/branch instructions=1000000 us=260001 instructions/s=3846139
+pmfc: read COM7 for 40 s: 4192 bytes.
+pmfc: OK
+lease released

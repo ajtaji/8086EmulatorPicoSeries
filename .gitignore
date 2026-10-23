@@ -1,0 +1,14 @@
+# The SingleStepTests corpus (~180 MB) is fetched by tools/fetch_tests.py
+Diagnostics/upstream/8086-v1/
+Diagnostics/vectors-bin/
+Diagnostics/build/
+Diagnostics/fetch.log
+# Compiler side outputs; the .uf2 firmware in firmware/ is kept
+*.asm
+*.dbg
+*.sym
+*.sym.meta
+*.cycles.txt
+*.build.log
+*.stderr.log
+__pycache__/

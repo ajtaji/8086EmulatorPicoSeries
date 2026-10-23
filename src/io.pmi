@@ -1,0 +1,79 @@
+; USB serial text helpers shared by the demo and the diagnostics.
+Procedure Say(*text.i)
+  Protected p.i, c.i
+  p = *text
+  c = PeekA(p) & 255
+  While c
+    UsbSerialWrite(c)
+    p = p + 1
+    c = PeekA(p) & 255
+  Wend
+EndProcedure
+
+Procedure Num(v.i)
+  Protected d.i
+  If v < 0
+    UsbSerialWrite(45)
+    v = 0 - v
+  EndIf
+  d = 1
+  While v / d >= 10
+    d = d * 10
+  Wend
+  While d > 0
+    UsbSerialWrite(48 + (v / d) % 10)
+    d = d / 10
+  Wend
+EndProcedure
+
+Procedure Hex(v.i, digits.i)
+  Protected k.i, c.i
+  k = (digits - 1) * 4
+  While k >= 0
+    c = (v >> k) & 15
+    If c < 10
+      UsbSerialWrite(48 + c)
+    Else
+      UsbSerialWrite(55 + c)
+    EndIf
+    k = k - 4
+  Wend
+EndProcedure
+
+Procedure Eol()
+  UsbSerialWrite(13) : UsbSerialWrite(10)
+  UsbSerialFlush() : UsbSerialTask()
+EndProcedure
+
+Procedure WaitUs(us.i)
+  Protected t.i
+  t = Micros()
+  While Micros() - t < us
+    UsbSerialTask() : SafetyPet()
+  Wend
+EndProcedure
+
+; Wait up to 30 s for the host to open the port (DTR), then settle.
+Procedure WaitHost()
+  Protected t.i
+  t = Micros()
+  While UsbSerialReady() = 0
+    UsbSerialTask() : SafetyPet()
+    If Micros() - t > 30000000
+      Break
+    EndIf
+  Wend
+  WaitUs(200000)
+EndProcedure
+
+; Instructions per second from count and microseconds, without overflowing 32 bits.
+Procedure.i Rate(count.i, us.i)
+  Protected q.i, remainder.i, digit.i
+  q = count / us : remainder = count % us
+  For digit = 1 To 6
+    remainder = remainder * 10
+    q = q * 10 + remainder / us
+    remainder = remainder % us
+  Next
+  ProcedureReturn q
+EndProcedure

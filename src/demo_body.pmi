@@ -1,0 +1,149 @@
+; 8086 demo and benchmark, shared by the Pico W and Pico 2 W builds.
+; Guest memory: #GUEST_KB + #GUEST2_KB of RAM from linear 0, the rest of the
+; 1 MB unmapped (reads $FF, writes ignored). Two host arrays, because the
+; RP2040's SRAM is split by the USB library's fixed buffers at $20030000; the
+; 4 KB page table joins them into one guest range. A smoke test, then four measured mixes, forever.
+EnableExplicit
+XIncludeFile "io.pmi"
+
+Global Dim Guest.l(#GUEST_KB * 256)       ; .l keeps it word aligned
+CompilerIf #GUEST2_KB > 0
+  Global Dim Guest2.l(#GUEST2_KB * 256)
+CompilerEndIf
+Global Steps.i, T0.i, Elapsed.i, I.i, Bad.i
+
+Procedure.i Cpu86HookRead(lin.i)
+  ProcedureReturn 255
+EndProcedure
+
+Procedure Cpu86HookWrite(lin.i, v.i)
+EndProcedure
+
+Procedure.i Cpu86PortIn(port.i, wide.i)
+  If wide
+    ProcedureReturn $FFFF
+  EndIf
+  ProcedureReturn $FF
+EndProcedure
+
+Procedure Cpu86PortOut(port.i, v.i, wide.i)
+EndProcedure
+
+; Copy n bytes of a DataSection program to guest 0000:0100.
+Procedure Load(*src.i, n.i)
+  Protected k.i
+  For k = 0 To n - 1
+    PokeA(@Guest(0) + $100 + k, PeekA(*src + k))
+  Next
+EndProcedure
+
+Procedure Start()
+  Protected k.i
+  Cpu86Reset()
+  For k = 0 To 3
+    Cpu86SetSeg(k, 0)
+  Next
+  R(4) = $FFFE
+  Cpu86SetIP($100)
+EndProcedure
+
+Procedure Report(count.i)
+  Say(" instructions=") : Num(Steps) : Say(" us=") : Num(Elapsed)
+  Say(" instructions/s=")
+  If Elapsed > 0
+    Num(Rate(count, Elapsed))
+  EndIf
+  Eol()
+EndProcedure
+
+Procedure Main()
+  SafetyBoot()
+  ClockInitKhz(#CLOCK_KHZ)
+  TimerInit()
+  UsbSerialInit()
+  WaitHost()
+  Cpu86MapNone(0, $100000)
+  Cpu86MapRam(0, #GUEST_KB * 1024, @Guest(0))
+  CompilerIf #GUEST2_KB > 0
+    Cpu86MapRam(#GUEST_KB * 1024, #GUEST2_KB * 1024, @Guest2(0))
+  CompilerEndIf
+  Say("8086 PureMetal clk_sys kHz=") : Num(ClockSysKhz())
+  Say(" guest RAM KB=") : Num(#GUEST_KB + #GUEST2_KB)
+  Say(" timing=") : Num(#CPU_TIMING) : Say(" asm-tail=") : Num(#CPU_ASM_TAIL) : Eol()
+  ; Smoke test: sum 1..100 into AX, then HLT.
+  Load(?Smoke, ?SmokeEnd - ?Smoke)
+  Start()
+  Steps = Cpu86Run(10000)
+  Say("sum test AX=") : Num(R(0)) : Say(" CX=") : Num(R(1)) : Say(" instructions=") : Num(Steps)
+  If R(0) = 5050 And R(1) = 0 And Halted = 1 And Steps = 203 And Cpu86GetIP() = $10A
+    Say(" PASS")
+  Else
+    Say(" FAIL")
+  EndIf
+  Eol()
+  Repeat
+    Load(?MixLoop, ?MixLoopEnd - ?MixLoop)
+    Start()
+    T0 = Micros() : Steps = Cpu86Run(1000000) : Elapsed = Micros() - T0
+    Say("register/branch") : Report(Steps)
+    Load(?MixAlu, ?MixAluEnd - ?MixAlu)
+    Start()
+    T0 = Micros() : Steps = Cpu86Run(1000000) : Elapsed = Micros() - T0
+    Say("alu") : Report(Steps)
+    Load(?MixMem, ?MixMemEnd - ?MixMem)
+    Start()
+    R(6) = $4000 : R(7) = $8000
+    T0 = Micros() : Steps = Cpu86Run(1000000) : Elapsed = Micros() - T0
+    Say("memory") : Report(Steps)
+    Load(?MixCall, ?MixCallEnd - ?MixCall)
+    Start()
+    T0 = Micros() : Steps = Cpu86Run(1000000) : Elapsed = Micros() - T0
+    Say("call/stack") : Report(Steps)
+    ; REP MOVSW of 16 KB, 64 times: bytes per second.
+    Load(?MixRep, ?MixRepEnd - ?MixRep)
+    Start()
+    For I = 0 To 8191
+      PokeA(@Guest(0) + $4000 + I, I ! $5A)
+    Next
+    T0 = Micros() : Steps = Cpu86Run(1000000) : Elapsed = Micros() - T0
+    Bad = 0
+    For I = 0 To 8191
+      If PeekA(@Guest(0) + $C000 + I) <> ((I ! $5A) & 255)
+        Bad = Bad + 1
+      EndIf
+    Next
+    Say("rep movsw bytes=") : Num(64 * 8192) : Say(" us=") : Num(Elapsed)
+    Say(" bytes/s=") : Num(Rate(64 * 8192, Elapsed))
+    If Bad Or Halted = 0
+      Say(" FAIL")
+    EndIf
+    Eol()
+    WaitUs(1000000)
+  ForEver
+EndProcedure
+
+DataSection
+Smoke:          ; MOV CX,100 / XOR AX,AX / L: ADD AX,CX / LOOP L / HLT
+  Data.a $B9, $64, $00, $31, $C0, $01, $C8, $E2, $FC, $F4
+SmokeEnd:
+MixLoop:        ; L: DEC CX / JNZ L / JMP L
+  Data.a $49, $75, $FD, $EB, $FB
+MixLoopEnd:
+MixAlu:         ; ADD AX,BX / XOR DX,AX / SHL AX,1 / ADC BX,DX / SUB SI,AX / INC DI / JMP
+  Data.a $01, $D8, $31, $C2, $D1, $E0, $11, $D3, $29, $C6, $47, $EB, $F3
+MixAluEnd:
+MixMem:         ; MOV AX,[SI] / ADD [DI],AX / MOV BX,[SI+2] / MOV [DI+2],BX
+                ; ADD SI,4 / ADD DI,4 / AND SI,3FFFh / OR SI,4000h / AND DI,3FFFh / OR DI,8000h / JMP
+  Data.a $8B, $04, $01, $05, $8B, $5C, $02, $89, $5D, $02
+  Data.a $83, $C6, $04, $83, $C7, $04, $81, $E6, $FF, $3F, $81, $CE, $00, $40
+  Data.a $81, $E7, $FF, $3F, $81, $CF, $00, $80, $EB, $DE
+MixMemEnd:
+MixCall:        ; L: PUSH AX / PUSH BX / CALL F / POP BX / POP AX / JMP L   F: INC AX / RET
+  Data.a $50, $53, $E8, $04, $00, $5B, $58, $EB, $F7, $40, $C3
+MixCallEnd:
+MixRep:         ; L: CLD / MOV SI,4000h / MOV DI,C000h / MOV CX,4096 / REP MOVSW / DEC DX
+                ; JNZ L / HLT     (DX counts 64 copies)
+  Data.a $BA, $40, $00
+  Data.a $FC, $BE, $00, $40, $BF, $00, $C0, $B9, $00, $10, $F3, $A5, $4A, $75, $F1, $F4
+MixRepEnd:
+EndDataSection
