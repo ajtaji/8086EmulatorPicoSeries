@@ -246,8 +246,13 @@ py -3 tools/make_pcprogram.py desktop/examples/bars.com          # writes src/pc
 .	oolsuild.ps1 -Source src/pc.picow -Output firmware/8086-pc-picow.uf2 -Port COM7
 ```
 
-- RAM: 128 KB from linear 0 (96 KB + 32 KB, around the USB buffers); CGA 16 KB at
+- RAM: 126 KB from linear 0 (96 KB + 30 KB, around the USB buffers); CGA 16 KB at
   B8000, mirrored at BC000. A .COM needs 64 KB above 0050:0000.
+- REP string instructions stop between elements when a scanline's clocks run out
+  (`Cpu86RepYield = 1`, set by the PC machine; clock-counted builds only), so the
+  timer interrupt and $3DA keep time through a long `REP STOSW`; an interrupt taken
+  there returns into the REP with all its prefixes. The reference tests count a whole
+  REP as one step, so for them it stays off.
 - Picture: the LAFVIN ST7796 (480 x 320) shows the 200 lines at half width,
   320 x 200, centred; core 1 converts and sends lines by DMA while core 0 runs the
   PC. Lines are drawn by `Pc86RenderHalf`, which writes the panel's pixels
@@ -269,10 +274,16 @@ On the board (COM7, `docs/pc-*-picow.log`, `docs/board-pc-run.log`):
 | `keytest.com`, typed `abz` | `1E 9E 30 B0 2C AC` | 4.78 M (60 frames/s) | 90% (81%), 80-column text |
 | `modes.com`, every CGA mode | all 40 mode/colour pairs, `PC EXIT code=0` at frame 1439 | 4.78 M | about 80% (50%) |
 | `bars.com`, $3D9 every line | runs | 4.78 M (60 frames/s) | 84% (43%), 320 x 200 |
+| `reptest_small.com`, REP strings under a 1 kHz IRQ0 | `S=17 M=30 C=40 A=26 OK` (as on the desktop) | | |
+| `demo/demo.com` (the 8086 back end's demo) | title, plasma + scroller, copper | 3.82 M in the title (0.80x), 4.78 M in the plasma and the copper | 100% (60%) in the title's 80-column text |
 
-So every mode runs at the real 4.77 MHz, with the least room in 80-column text:
-a program that keeps the CPU busy there will run a little slow. The image is
-built with 32 bytes of SRAM to spare.
+So every mode runs at the real 4.77 MHz while the CPU leaves room. 80-column text
+is the limit: drawing it takes 60% of core 0, so a program that keeps the CPU busy
+there (the demo's title, polling $3DA for its raster bars) runs at 0.8x, frames
+whole and music slower. The image is built with 1,056 bytes of SRAM to spare.
+The clock-counted reference suites still pass on the board with the REP change:
+32,300 of 32,300 (100 per file) and the API checks 77 of 77 (`docs/verify-timed.log`,
+`docs/board-timed-run.log`).
 
 ## Credits
 

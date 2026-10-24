@@ -57,6 +57,31 @@ def charge(c):
     if c:
         e(f'  Charge({c})')
 
+def count_prefix():
+    """A prefix counts itself, so a REP that yields can go back to its first prefix."""
+    e('  CompilerIf #CPU_TIMING = 1')
+    e('    NPre = NPre + 1')
+    e('  CompilerEndIf')
+
+def rep_yield(set_cx):
+    """Clock-counted builds, when the platform asks (Cpu86RepYield = 1, the PC machine):
+    a REP string instruction whose budget has run out between elements stops there with
+    CX holding the count left and IP back on its first prefix, as an interrupted 8086
+    REP does (less the 8086's habit of keeping only the last prefix). The next
+    Cpu86Run - or an interrupt and its IRET - carries on from there."""
+    e('  CompilerIf #CPU_TIMING = 1')
+    e('    If Cpu86RepYield')
+    e('      If cnt <> 0')
+    e('        If Left <= 0')
+    if set_cx:
+        e('          R(1) = cnt')
+    e('          PIP = PIP - 1 - NPre')
+    e('          Goto Done')
+    e('        EndIf')
+    e('      EndIf')
+    e('    EndIf')
+    e('  CompilerEndIf')
+
 def tail(cyc):
     if not DESKTOP:
         e(f'  NextOp({cyc})')
@@ -375,6 +400,7 @@ def generate(target):
     e('Global PIP.i, PEnd.i, FZS.i, FC.i, FO.i, Left.i, FA.i')
     e('Global PBase.i, PStart.i, PEndReal.i')
     e('Global SegD.i, SegS.i, Rep.i')
+    e('Global NPre.i, Cpu86RepYield.i  ; prefixes of this instruction; 1: a REP string op yields to the clock budget')
     e('Global FlagsHi.i, DirStep.i, DirStep2.i')
     e('Global EvPend.i, IrqVector.i, Halted.i')
     e('Global Budget.i, Ready.i, CpuCycles.i, InitIndex.i, Cpu86Fetching.i')
@@ -860,6 +886,9 @@ def emit_run_body():
     e(f'  SegD = SegB({DS})')
     e(f'  SegS = SegB({SS})')
     e('  Rep = 0')
+    e('  CompilerIf #CPU_TIMING = 1')
+    e('    NPre = 0')
+    e('  CompilerEndIf')
     e('  If EvPend Or Halted Or (FlagsHi & $100)')
     e('    If Cpu86Events() = 0')
     e('      Goto Done')
@@ -984,6 +1013,7 @@ def emit_handlers():
         e(f'  SegD = SegB({sr})')
         e(f'  SegS = SegB({sr})')
         charge(2)
+        count_prefix()
         e('  Goto PrefixNext')
     emit_bcd(op)
 
@@ -1444,14 +1474,17 @@ def emit_handlers():
     for n in (0xF0, 0xF1):
         op(n)
         charge(2)
+        count_prefix()
         e('  Goto PrefixNext')
     op(0xF2)
     e('  Rep = 1')
     charge(2)
+    count_prefix()
     e('  Goto PrefixNext')
     op(0xF3)
     e('  Rep = 2')
     charge(2)
+    count_prefix()
     e('  Goto PrefixNext')
     op(0xF4)  # HLT
     e('  PIP = PIP + 1')
@@ -1713,6 +1746,17 @@ def emit_rep_block(kind, w, iter_cyc):
     e('      If cnt < va')
     e('        va = cnt')
     e('      EndIf')
+    e('      CompilerIf #CPU_TIMING = 1')
+    e('        If Cpu86RepYield')
+    e(f'          vb = Left / {iter_cyc} + 1           ; no further than the budget reaches')
+    e('          If vb < 1')
+    e('            vb = 1')
+    e('          EndIf')
+    e('          If vb < va')
+    e('            va = vb')
+    e('          EndIf')
+    e('        EndIf')
+    e('      CompilerEndIf')
     e('      If va = 0')
     if kind == 'MOVS':
         if w:
@@ -1766,6 +1810,7 @@ def emit_rep_block(kind, w, iter_cyc):
     e('        cnt = cnt - va')
     charge(f'{iter_cyc} * va')
     e('      EndIf')
+    rep_yield(True)
     e('    Wend')
     e('    R(1) = 0')
     e('  EndIf')
@@ -1849,6 +1894,7 @@ def emit_strings(op):
             e('      Break')
             e('    EndIf')
             e('  EndIf')
+        rep_yield(False)
         e('  Wend')
         tail(once_cyc)
     loop(0xA4, 0, 'MOVS', 18, 17)

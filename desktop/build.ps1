@@ -1,5 +1,6 @@
 # Builds the desktop 8086 emulator: cpu86_desktop.exe (the window) and
-# cpu86_console.exe (the same program with a console, for --test / --bench / --run).
+# cpu86_console.exe (the same program with a console, for --test / --bench / --run);
+# cpu86_run.exe: the console modes without the engine (the gates' fast runner).
 # The core (cpu86_core.pbi) is generated from the same handlers as the Pico core.
 param(
     [string]$Compiler = 'C:\Program Files\PureBasic\Compilers\pbcompilerc.exe',
@@ -14,7 +15,7 @@ if ($LASTEXITCODE -ne 0) { throw 'tools/gen_cpu.py failed' }
 if ($LASTEXITCODE -ne 0) { throw 'tools/desktop_proc_variant.py failed' }
 & py -3 (Join-Path $here '..\tools\make_cgafont.py') | Out-Null
 $src = Join-Path $here 'cpu86_desktop.pb'
-foreach ($b in @(@('cpu86_desktop.exe', @('/CONSTANT', 'CPU_TIMING=1')), @('cpu86_pc.exe', @('/CONSOLE', '/CONSTANT', 'CPU_TIMING=1')), @('cpu86_console.exe', @('/CONSOLE')), @('cpu86_console_proctable.exe', @('/CONSOLE', '/CONSTANT', 'CPU86_PROCTABLE=1')))) {
+foreach ($b in @(@('cpu86_desktop.exe', @('/CONSTANT', 'CPU_TIMING=1')), @('cpu86_pc.exe', @('/CONSOLE', '/CONSTANT', 'CPU_TIMING=1')), @('cpu86_console.exe', @('/CONSOLE')), @('cpu86_run.exe', @('/CONSOLE', '/CONSTANT', 'CPU86_LEAN=1')), @('cpu86_console_proctable.exe', @('/CONSOLE', '/CONSTANT', 'CPU86_PROCTABLE=1')))) {
     $exe = Join-Path $here $b[0]
     $args = @($src, '/EXE', $exe, '/THREAD', '/DPIAWARE', '/OPTIMIZER', '/CONSTANT', "GL_ENGINE_DIR$=$Engine") + $b[1]
     # The 8086 back end's gates run cpu86_console.exe: while one runs, the linker cannot

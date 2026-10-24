@@ -12,6 +12,7 @@ The same Intel 8086 core as the Pico build, as a Windows program in PureBasic
 | `cpu86_desktop.exe` | the window |
 | `cpu86_console.exe` | the same program with a console: `--test`, `--bench`, `--run` |
 | `cpu86_pc.exe` | the console program with the core counting 8086 clocks: the PC machine headless (`--pc`) |
+| `cpu86_run.exe` | the console modes (`--com`/`--raw`, `--run`, `--test`, `--bench`; not `--pc`) without the engine or the window: it starts in milliseconds where the others spend seconds loading the engine's libraries; the compiler gates' runner |
 | `cpu86_console_proctable.exe` | the console build on the procedure-table core (for the dispatch measurement) |
 
 ```text
@@ -119,6 +120,13 @@ Checks (`desktop/examples`, made by `tools/make_examples.py`):
 | `beep.com` | PIT channel 2 through port 61h: 1000 Hz |
 | `bars.com` | raster bars in the window, about 0.9x real time |
 | `modes.com` | every mode with five colour selects, cursor, blink, start-address wrap; `--halfcheck`: 288,000 lines, 0 differing |
+| `reptest.com` | `REP STOSW`, `CS: REP MOVSW`, `CS: REPE CMPSW`, `REPE SCASW` of 32768 words under a 1 kHz IRQ0: `S=70 M=121 C=157 A=106 OK` (ticks during each; a REP that kept interrupts out, or lost its prefix on resuming, prints BAD - both planted and caught) |
+| `../demo/demo.com` | the 8086 back end's PureMetal demo: title with border bars, plasma and scroller, copper bars, speaker music |
+
+On the PC machine a REP string instruction stops between elements when the
+scanline's clocks run out and carries on at the next (`Cpu86RepYield`), as an 8086
+lets an interrupt in between elements; an interrupt taken there returns into the
+REP with all its prefixes (the 8086 itself keeps only the last).
 
 ## The core and its dispatch
 

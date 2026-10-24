@@ -90,6 +90,7 @@ Procedure.i RunVectorFile(path.s, *passed.Integer)
   ReadData(f, *VecStream, VecStreamLen)
   CloseFile(f)
   VecStreamPos = 0
+  Cpu86RepYield = 0                 ; the reference tests count a whole REP as one step
   TestMode = 1
   VecInit()
   TotalPass = 0 : TotalFail = 0
@@ -105,6 +106,7 @@ EndProcedure
 
 Procedure.i RunApiChecks()
   Protected f.i
+  Cpu86RepYield = 0                 ; the reference tests count a whole REP as one step
   TestMode = 2
   Say("8086 API checks (desktop core) timing=" + Str(#CPU_TIMING)) : Eol()
   f = ApiChecks()

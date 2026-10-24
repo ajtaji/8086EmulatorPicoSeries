@@ -42,6 +42,7 @@ Global Dim Buf.a(8)             ; instructions that cross a page or IP wrap
 Global PIP.i, PEnd.i, FZS.i, FC.i, FO.i, Left.i, FA.i
 Global PBase.i, PStart.i, PEndReal.i
 Global SegD.i, SegS.i, Rep.i
+Global NPre.i, Cpu86RepYield.i  ; prefixes of this instruction; 1: a REP string op yields to the clock budget
 Global FlagsHi.i, DirStep.i, DirStep2.i
 Global EvPend.i, IrqVector.i, Halted.i
 Global Budget.i, Ready.i, CpuCycles.i, InitIndex.i, Cpu86Fetching.i

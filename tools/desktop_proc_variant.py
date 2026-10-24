@@ -76,6 +76,24 @@ def convert(lines):
             out.append('  ProcedureReturn 0')
             i += 1
             continue
+        if l.strip() == 'CompilerIf #CPU_TIMING = 1':
+            # clock-counted-only code without an Else (prefix counting, REP yield):
+            # this variant is built instruction-counted only, so it is left out
+            j, depth, other = i + 1, 0, False
+            while True:
+                s = lines[j].strip()
+                if s.startswith('CompilerIf'):
+                    depth += 1
+                elif s == 'CompilerEndIf':
+                    if depth == 0:
+                        break
+                    depth -= 1
+                elif s == 'CompilerElse' and depth == 0:
+                    other = True
+                j += 1
+            if not other:
+                i = j + 1
+                continue
         if l.strip() == 'Goto PrefixNext':
             out.append(l.replace('Goto PrefixNext', 'ProcedureReturn 1'))
             i += 1

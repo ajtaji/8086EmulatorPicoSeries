@@ -1,27 +1,27 @@
 R=7 T=115
 
-PC EXIT code=7 frames=37
+PC EXIT code=7 frames=38
 
-PC frames=37 clocks/s=3008089 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=204 busy-us=572254 render-us=319369 panel-wait-us=2051
+PC frames=38 clocks/s=3087737 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=206 busy-us=585785 render-us=325178 panel-wait-us=689
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=129 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=121 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=124 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=144 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=121 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=121 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=121 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
 
-PC frames=37 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=38 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0

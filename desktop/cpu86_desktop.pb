@@ -9,6 +9,10 @@
 ;                                      default ../Diagnostics/vectors-bin/all.bin)
 ;   cpu86_console.exe --bench          instructions per second, in a console
 ;   cpu86_console.exe --run <file.com> run a program, print its console output
+;   cpu86_run.exe                      the same console modes (not --pc) built with
+;                                      /CONSTANT CPU86_LEAN=1: no engine, no window, no
+;                                      PC machine - it starts in milliseconds, where the
+;                                      engine's libraries cost seconds a launch
 ;   cpu86_console.exe --com <file> [--seg hex] [--max n] [--dump file]
 ;                                      the compiler gates' runner: bare CPU, 1 MB RAM,
 ;                                      E9h out = stdout, F4h out = exit; stops on HLT,
@@ -30,6 +34,9 @@
 CompilerIf Not Defined(CPU_TIMING, #PB_Constant)
   #CPU_TIMING = 0
 CompilerEndIf
+CompilerIf Not Defined(CPU86_LEAN, #PB_Constant)
+  #CPU86_LEAN = 0
+CompilerEndIf
 EnableExplicit
 
 ; The engine first: the test code's globals have plain names (K, Checks...)
@@ -37,12 +44,14 @@ EnableExplicit
 CompilerIf Not Defined(GL_ENGINE_DIR$, #PB_Constant)
   #GL_ENGINE_DIR$ = "C:/Users/ajtaj/Desktop/Neon-Arcade-Dispay-Engine/"
 CompilerEndIf
+CompilerIf #CPU86_LEAN = 0
 XIncludeFile #GL_ENGINE_DIR$ + "GlTypes.pbi"
 XIncludeFile #GL_ENGINE_DIR$ + "GlUtilities.pbi"
 XIncludeFile #GL_ENGINE_DIR$ + "GlMath.pbi"
 XIncludeFile #GL_ENGINE_DIR$ + "GlSpriteFunctions.pbi"
 XIncludeFile #GL_ENGINE_DIR$ + "GlUI.pbi"
 XIncludeFile #GL_ENGINE_DIR$ + "GlUIChrome.pbi"
+CompilerEndIf
 
 ; Dispatch: labels-as-values (the default), or with /CONSTANT CPU86_PROCTABLE=1
 ; the procedure-table core (cpu86_core_proc.pbi), kept to measure the two.
@@ -55,7 +64,9 @@ CompilerElse
 CompilerEndIf
 XIncludeFile "tests.pbi"
 XIncludeFile "machine.pbi"
+CompilerIf #CPU86_LEAN = 0
 XIncludeFile "pcmachine.pbi"
+CompilerEndIf
 XIncludeFile "hooks.pbi"
 XIncludeFile "disasm.pbi"
 
@@ -144,18 +155,21 @@ Procedure.i GateMain()
       Case "--frames" : i + 1 : frames = Val(ProgramParameter(i))
       Case "--screenshot" : i + 1 : shot = ProgramParameter(i)
       Case "--keys" : i + 1 : keys = ProgramParameter(i)
+      CompilerIf #CPU86_LEAN = 0
       Case "--halfcheck" : PcHalfCheck = 1
+      CompilerEndIf
       Case "--portlog" : i + 1 : PortLogFrom = Val(StringField(ProgramParameter(i), 1, ":")) : PortLogLeft = Val(StringField(ProgramParameter(i), 2, ":"))
     EndSelect
   Next
-  If pc And #CPU_TIMING = 0
-    PrintN("--pc needs the clock-counted build: run cpu86_pc.exe instead of cpu86_console.exe.") : ProcedureReturn 3
+  If pc And (#CPU_TIMING = 0 Or #CPU86_LEAN)
+    PrintN("--pc needs the clock-counted build with the PC machine: run cpu86_pc.exe.") : ProcedureReturn 3
   EndIf
   f = ReadFile(#PB_Any, file)
   If f = 0
     PrintN("Cannot read the program file '" + file + "'.") : ProcedureReturn 2
   EndIf
   n = Lof(f)
+  CompilerIf #CPU86_LEAN = 0
   If pc
     ; The PC machine (pc86.pmi), headless: frames of 262 scanlines until an OUT F4h,
     ; a HLT with IF = 0, or --frames (default 600 = 10 s of machine time).
@@ -203,6 +217,7 @@ Procedure.i GateMain()
     EndIf
     ProcedureReturn 0
   EndIf
+  CompilerEndIf
   MachineBare()
   GateMode = 1 : GateExit = 0 : TestMode = 0
   Cpu86Reset()
@@ -299,6 +314,19 @@ Procedure.i ConsoleMain()
   ProcedureReturn -1
 EndProcedure
 
+CompilerIf #CPU86_LEAN
+; cpu86_run.exe: the console modes only.
+DefaultStream$ = GetPathPart(ProgramFilename()) + #STREAM_DEFAULT$
+MachineMap()
+MachineReset()
+Define rc.i = ConsoleMain()
+If rc < 0
+  OpenConsole()
+  PrintN("cpu86_run.exe --com <file> [--seg hex] [--max n] [--dump file] | --raw <file> --at <lin> --entry SEG:OFF | --run <file.com> | --test [stream] | --bench")
+  rc = 3
+EndIf
+End rc
+CompilerElse
 ; ---------------------------------------------------------------------------
 ; The window
 ; ---------------------------------------------------------------------------
@@ -347,6 +375,7 @@ EndProcedure
 Procedure RunFor(budgetMs.i)
   Protected t0.q = ElapsedMilliseconds(), ran.i, k.i, ln.i, n.i
   If MachineKind = 1
+    Cpu86RepYield = 1                 ; the test runners turn it off
     While Running And n < 3
       For ln = 1 To #PC86_LINES
         ran + PcRunLine()
@@ -866,3 +895,4 @@ If startRun
   If showTests = 0 : LogTab = 0 : EndIf
 EndIf
 WindowMain()
+CompilerEndIf

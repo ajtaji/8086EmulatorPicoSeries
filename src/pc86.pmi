@@ -36,6 +36,7 @@ Procedure Pc86Reset()
   Port61 = 0 : KeyData = 0 : KeyFull = 0 : KeyHead = 0 : KeyTail = 0
   PcLineNo = 0 : PcCarry = 0 : PcFrames = 0 : PcClocks = 0
   Cpu86IrqCancel()
+  Cpu86RepYield = 1                           ; REP strings stop between elements when a scanline's clocks run out
 EndProcedure
 
 ; A key from the host: a set-1 scan code (make; OR $80 for the break).

@@ -23,6 +23,7 @@ EndProcedure
 ; each with its scanline and the clock within it (timing investigations).
 Global PortLogFrom.i = -1, PortLogLeft.i
 
+CompilerIf #CPU86_LEAN = 0
 Procedure PortLog(dir.s, port.i, v.i)
   If PortLogLeft > 0 And PortLogFrom >= 0 And PcFrames >= PortLogFrom
     PortLogLeft - 1
@@ -30,6 +31,7 @@ Procedure PortLog(dir.s, port.i, v.i)
            " clock " + Str(Pc86LineClock()) + "  at " + RSet(Hex(Cpu86GetSeg(1)), 4, "0") + ":" + RSet(Hex(Cpu86GetIP()), 4, "0") + "  IF " + Str(Bool(Cpu86Flags() & $200)))
   EndIf
 EndProcedure
+CompilerEndIf
 
 Procedure.i Cpu86PortIn(port.i, wide.i)
   Protected v.i
@@ -37,6 +39,7 @@ Procedure.i Cpu86PortIn(port.i, wide.i)
     Case 1 : ProcedureReturn VecPortIn(port, wide)
     Case 2 : ProcedureReturn ApiPortIn(port, wide)
   EndSelect
+  CompilerIf #CPU86_LEAN = 0                    ; cpu86_run.exe has no PC machine
   If MachineKind = 1 And GateMode = 0
     ProcedureReturn Pc86PortIn(port, wide)
   ElseIf MachineKind = 1
@@ -46,11 +49,13 @@ Procedure.i Cpu86PortIn(port.i, wide.i)
       ProcedureReturn v
     EndIf
   EndIf
+  CompilerEndIf
   ProcedureReturn MachinePortIn(port, wide)
 EndProcedure
 
 Procedure Cpu86PortOut(port.i, v.i, wide.i)
   If TestMode <> 0 : ProcedureReturn : EndIf
+  CompilerIf #CPU86_LEAN = 0
   If MachineKind = 1
     If PortLogLeft And GateMode : PortLog("OUT", port, v) : EndIf
     Select port & $FFFF
@@ -67,5 +72,6 @@ Procedure Cpu86PortOut(port.i, v.i, wide.i)
     EndSelect
     ProcedureReturn
   EndIf
+  CompilerEndIf
   MachinePortOut(port, v, wide)
 EndProcedure

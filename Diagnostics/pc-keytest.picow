@@ -5,7 +5,7 @@
 #CPU_TIMING = 1
 #CPU_ASM_TAIL = 1
 #PC_RAM_KB = 96
-#PC_RAM2_KB = 32
+#PC_RAM2_KB = 30
 XIncludeFile "RP2040/Lib/clocks.pico"
 XIncludeFile "RP2040/Lib/timer.pico"
 XIncludeFile "RP2040/Lib/uart.pico"

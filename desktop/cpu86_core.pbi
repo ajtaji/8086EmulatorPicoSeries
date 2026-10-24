@@ -40,6 +40,7 @@ Global Dim Buf.a(8)             ; instructions that cross a page or IP wrap
 Global PIP.i, PEnd.i, FZS.i, FC.i, FO.i, Left.i, FA.i
 Global PBase.i, PStart.i, PEndReal.i
 Global SegD.i, SegS.i, Rep.i
+Global NPre.i, Cpu86RepYield.i  ; prefixes of this instruction; 1: a REP string op yields to the clock budget
 Global FlagsHi.i, DirStep.i, DirStep2.i
 Global EvPend.i, IrqVector.i, Halted.i
 Global Budget.i, Ready.i, CpuCycles.i, InitIndex.i, Cpu86Fetching.i
@@ -535,6 +536,9 @@ Resync:
   SegD = SegB(3)
   SegS = SegB(2)
   Rep = 0
+  CompilerIf #CPU_TIMING = 1
+    NPre = 0
+  CompilerEndIf
   If EvPend Or Halted Or (FlagsHi & $100)
     If Cpu86Events() = 0
       Goto Done
@@ -3399,21 +3403,33 @@ Op26:
   SegD = SegB(0)
   SegS = SegB(0)
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 Op2E:
   SegD = SegB(1)
   SegS = SegB(1)
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 Op36:
   SegD = SegB(2)
   SegS = SegB(2)
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 Op3E:
   SegD = SegB(3)
   SegS = SegB(3)
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 Op27:
   va = PeekA(@R(0) + 0)
@@ -8496,6 +8512,17 @@ OpA4:
       If cnt < va
         va = cnt
       EndIf
+      CompilerIf #CPU_TIMING = 1
+        If Cpu86RepYield
+          vb = Left / 17 + 1           ; no further than the budget reaches
+          If vb < 1
+            vb = 1
+          EndIf
+          If vb < va
+            va = vb
+          EndIf
+        EndIf
+      CompilerEndIf
       If va = 0
         vb = Cpu86Rd8(SegD + R(6))
         Cpu86Wr8(SegB(0) + R(7), vb)
@@ -8517,6 +8544,17 @@ OpA4:
         cnt = cnt - va
   Charge(17 * va)
       EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          R(1) = cnt
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
     Wend
     R(1) = 0
   EndIf
@@ -8547,6 +8585,16 @@ OpA4:
   R(1) = R(1) - 1
   cnt = R(1)
   Charge(17)
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (18)
@@ -8598,6 +8646,17 @@ OpA5:
       If cnt < va
         va = cnt
       EndIf
+      CompilerIf #CPU_TIMING = 1
+        If Cpu86RepYield
+          vb = Left / 17 + 1           ; no further than the budget reaches
+          If vb < 1
+            vb = 1
+          EndIf
+          If vb < va
+            va = vb
+          EndIf
+        EndIf
+      CompilerEndIf
       If va = 0
         vb = Cpu86Rd16(SegD, R(6))
         Cpu86Wr16(SegB(0), R(7), vb)
@@ -8621,6 +8680,17 @@ OpA5:
         cnt = cnt - va
   Charge(17 * va)
       EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          R(1) = cnt
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
     Wend
     R(1) = 0
   EndIf
@@ -8658,6 +8728,16 @@ OpA5:
   R(1) = R(1) - 1
   cnt = R(1)
   Charge(17)
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (18)
@@ -8722,6 +8802,16 @@ OpA6:
       Break
     EndIf
   EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (22)
@@ -8792,6 +8882,16 @@ OpA7:
       Break
     EndIf
   EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (22)
@@ -8830,6 +8930,17 @@ OpAA:
       If cnt < va
         va = cnt
       EndIf
+      CompilerIf #CPU_TIMING = 1
+        If Cpu86RepYield
+          vb = Left / 10 + 1           ; no further than the budget reaches
+          If vb < 1
+            vb = 1
+          EndIf
+          If vb < va
+            va = vb
+          EndIf
+        EndIf
+      CompilerEndIf
       If va = 0
         Cpu86Wr8(SegB(0) + R(7), PeekA(@R(0)))
         R(7) = R(7) + 1
@@ -8847,6 +8958,17 @@ OpAA:
         cnt = cnt - va
   Charge(10 * va)
       EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          R(1) = cnt
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
     Wend
     R(1) = 0
   EndIf
@@ -8868,6 +8990,16 @@ OpAA:
   R(1) = R(1) - 1
   cnt = R(1)
   Charge(10)
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (11)
@@ -8906,6 +9038,17 @@ OpAB:
       If cnt < va
         va = cnt
       EndIf
+      CompilerIf #CPU_TIMING = 1
+        If Cpu86RepYield
+          vb = Left / 10 + 1           ; no further than the budget reaches
+          If vb < 1
+            vb = 1
+          EndIf
+          If vb < va
+            va = vb
+          EndIf
+        EndIf
+      CompilerEndIf
       If va = 0
         Cpu86Wr16(SegB(0), R(7), R(0))
         R(7) = R(7) + 2
@@ -8924,6 +9067,17 @@ OpAB:
         cnt = cnt - va
   Charge(10 * va)
       EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          R(1) = cnt
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
     Wend
     R(1) = 0
   EndIf
@@ -8949,6 +9103,16 @@ OpAB:
   R(1) = R(1) - 1
   cnt = R(1)
   Charge(10)
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (11)
@@ -8990,6 +9154,16 @@ OpAC:
   R(1) = R(1) - 1
   cnt = R(1)
   Charge(13)
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (12)
@@ -9034,6 +9208,16 @@ OpAD:
   R(1) = R(1) - 1
   cnt = R(1)
   Charge(13)
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (12)
@@ -9089,6 +9273,16 @@ OpAE:
       Break
     EndIf
   EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (15)
@@ -9147,6 +9341,16 @@ OpAF:
       Break
     EndIf
   EndIf
+  CompilerIf #CPU_TIMING = 1
+    If Cpu86RepYield
+      If cnt <> 0
+        If Left <= 0
+          PIP = PIP - 1 - NPre
+          Goto Done
+        EndIf
+      EndIf
+    EndIf
+  CompilerEndIf
   Wend
   CompilerIf #CPU_TIMING = 1
     Left = Left - (15)
@@ -13268,17 +13472,29 @@ OpEB:
   ! goto *cpu86_dsp[*(unsigned char*)g_pip];
 OpF0:
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 OpF1:
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 OpF2:
   Rep = 1
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 OpF3:
   Rep = 2
   Charge(2)
+  CompilerIf #CPU_TIMING = 1
+    NPre = NPre + 1
+  CompilerEndIf
   Goto PrefixNext
 OpF4:
   PIP = PIP + 1

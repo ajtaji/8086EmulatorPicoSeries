@@ -1,0 +1,285 @@
+﻿lease taken 23:35:45
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 66185 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2.asm
+> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2040|128704|2097152
+CYCLES_TOTAL_RP2040|74547|straight-line, not-taken branches
+REGMAP_RP2040|7338|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1463|frame-slot loads taken from a register
+pmfc: pc-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 128704 bytes into 503 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
+pmfc: OK
+image ends at 0x1001F700
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    AC7583D68C973C1E2D40B0AC462B3C2876CE9913D1CAA45343D6BC1624B354C4 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 66185 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2.asm
+> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2040|128704|2097152
+CYCLES_TOTAL_RP2040|74547|straight-line, not-taken branches
+REGMAP_RP2040|7338|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1463|frame-slot loads taken from a register
+pmfc: pc-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 128704 bytes into 503 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
+pmfc: uploading pc-demo.uf2 (RP2040) through COM7
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.1 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 257536 bytes (25%)
+> [NATIVE UPLOADER] Writing image: 131072 of 257536 bytes (50%)
+> [NATIVE UPLOADER] Writing image: 196608 of 257536 bytes (76%)
+> [NATIVE UPLOADER] Writing image: 257536 of 257536 bytes (100%)
+> [NATIVE UPLOADER] Writing image: 257536 of 257536 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc-demo.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+
+
+PC frames=49 clocks/s=3902765 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=49 late-us=111658 busy-us=1014222 render-us=614735 panel-wait-us=0
+
+
+
+PC frames=97 clocks/s=3823093 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=97 late-us=111058 busy-us=1006644 render-us=601269 panel-wait-us=0
+
+
+
+PC frames=145 clocks/s=3823105 CS:IP=0050:09B9 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=145 late-us=111243 busy-us=1007107 render-us=601405 panel-wait-us=0
+
+
+
+PC frames=193 clocks/s=3823102 CS:IP=0050:09BE mode=09 colour=00 PIT0=19886 IMR=FE panel frames=193 late-us=111174 busy-us=1006930 render-us=601324 panel-wait-us=0
+
+
+
+PC frames=241 clocks/s=3823104 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=241 late-us=111554 busy-us=1007457 render-us=601282 panel-wait-us=0
+
+
+
+PC frames=289 clocks/s=3823106 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=289 late-us=110997 busy-us=1006656 render-us=601319 panel-wait-us=0
+
+
+
+PC frames=337 clocks/s=3823102 CS:IP=0050:09BE mode=09 colour=00 PIT0=19886 IMR=FE panel frames=337 late-us=111613 busy-us=1007208 render-us=601244 panel-wait-us=0
+
+
+
+PC frames=385 clocks/s=3823110 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=385 late-us=111700 busy-us=1007035 render-us=601372 panel-wait-us=0
+
+
+
+PC frames=433 clocks/s=3823099 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=433 late-us=111150 busy-us=1005992 render-us=601277 panel-wait-us=0
+
+
+
+PC frames=481 clocks/s=3823105 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=481 late-us=111600 busy-us=1007520 render-us=601253 panel-wait-us=0
+
+
+
+PC frames=529 clocks/s=3823116 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=529 late-us=111478 busy-us=1006646 render-us=601421 panel-wait-us=0
+
+
+
+PC frames=577 clocks/s=3823095 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=577 late-us=111669 busy-us=1007248 render-us=601367 panel-wait-us=0
+
+
+
+PC frames=635 clocks/s=4619586 CS:IP=0050:145B mode=08 colour=01 PIT0=19886 IMR=FE panel frames=635 late-us=49112 busy-us=1008471 render-us=573989 panel-wait-us=0
+
+
+
+PC frames=697 clocks/s=4938171 CS:IP=0050:0F73 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=697 late-us=15500 busy-us=921622 render-us=498545 panel-wait-us=0
+
+
+
+PC frames=757 clocks/s=4778891 CS:IP=0050:0F61 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=757 late-us=15505 busy-us=892561 render-us=482511 panel-wait-us=0
+
+
+
+PC frames=818 clocks/s=4858547 CS:IP=0050:0F92 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=818 late-us=15211 busy-us=906722 render-us=490577 panel-wait-us=0
+
+
+
+PC frames=878 clocks/s=4778856 CS:IP=0050:0F68 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=878 late-us=15499 busy-us=891346 render-us=482465 panel-wait-us=0
+
+
+
+PC frames=938 clocks/s=4778880 CS:IP=0050:0F64 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=938 late-us=15495 busy-us=892476 render-us=482476 panel-wait-us=0
+
+
+
+PC frames=998 clocks/s=4778883 CS:IP=0050:105D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=998 late-us=14948 busy-us=891992 render-us=482397 panel-wait-us=0
+
+
+
+PC frames=1058 clocks/s=4778869 CS:IP=0050:0F43 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1058 late-us=14270 busy-us=891362 render-us=482499 panel-wait-us=0
+
+
+
+PC frames=1118 clocks/s=4778882 CS:IP=0050:0F1E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1118 late-us=15515 busy-us=892967 render-us=482498 panel-wait-us=0
+
+
+
+PC frames=1178 clocks/s=4778886 CS:IP=0050:0F78 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1178 late-us=15531 busy-us=892525 render-us=482400 panel-wait-us=0
+
+
+
+PC frames=1238 clocks/s=4778874 CS:IP=0050:0F6B mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1238 late-us=15285 busy-us=892209 render-us=482366 panel-wait-us=0
+
+
+
+PC frames=1299 clocks/s=4858525 CS:IP=0050:0F52 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1299 late-us=15481 busy-us=905149 render-us=490539 panel-wait-us=0
+
+
+
+PC frames=1359 clocks/s=4778887 CS:IP=0050:0FC5 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1359 late-us=15548 busy-us=893082 render-us=482493 panel-wait-us=0
+
+
+
+PC frames=1419 clocks/s=4778887 CS:IP=0050:0F61 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1419 late-us=15532 busy-us=892582 render-us=482430 panel-wait-us=0
+
+
+
+PC frames=1479 clocks/s=4778910 CS:IP=0050:0DFC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1479 late-us=14872 busy-us=891168 render-us=482390 panel-wait-us=0
+
+
+
+PC frames=1539 clocks/s=4778839 CS:IP=0050:0F33 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1539 late-us=14269 busy-us=891396 render-us=482426 panel-wait-us=0
+
+
+
+PC frames=1599 clocks/s=4778879 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1599 late-us=15529 busy-us=893024 render-us=482401 panel-wait-us=0
+
+
+
+PC frames=1659 clocks/s=4778883 CS:IP=0050:0F21 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1659 late-us=15469 busy-us=891775 render-us=482459 panel-wait-us=0
+
+
+
+PC frames=1719 clocks/s=4778882 CS:IP=0050:0FB8 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1719 late-us=15547 busy-us=892985 render-us=482603 panel-wait-us=0
+
+
+
+PC frames=1779 clocks/s=4778875 CS:IP=0050:0E31 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1779 late-us=14925 busy-us=891486 render-us=482587 panel-wait-us=0
+
+
+
+PC frames=1839 clocks/s=4778879 CS:IP=0050:0F43 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1839 late-us=14204 busy-us=891318 render-us=482496 panel-wait-us=0
+
+
+
+PC frames=1899 clocks/s=4778889 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1899 late-us=15523 busy-us=892567 render-us=482631 panel-wait-us=0
+
+
+
+PC frames=1959 clocks/s=4778870 CS:IP=0050:0F57 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1959 late-us=15543 busy-us=892558 render-us=482450 panel-wait-us=0
+
+
+
+PC frames=2019 clocks/s=4778882 CS:IP=0050:0F33 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=2019 late-us=15521 busy-us=893000 render-us=482416 panel-wait-us=0
+
+
+
+PC frames=2080 clocks/s=4858528 CS:IP=0050:0F5A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=2080 late-us=15416 busy-us=905519 render-us=490453 panel-wait-us=0
+
+
+
+PC frames=2140 clocks/s=4778881 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2140 late-us=16072 busy-us=876468 render-us=447779 panel-wait-us=275
+
+
+
+PC frames=2200 clocks/s=4778878 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2200 late-us=16088 busy-us=949362 render-us=430857 panel-wait-us=0
+
+
+
+PC frames=2260 clocks/s=4778879 CS:IP=0050:09BE mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2260 late-us=15887 busy-us=949662 render-us=430795 panel-wait-us=0
+
+
+
+PC frames=2320 clocks/s=4778895 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2320 late-us=16070 busy-us=949745 render-us=430774 panel-wait-us=0
+
+
+
+PC frames=2380 clocks/s=4778867 CS:IP=0050:09BB mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2380 late-us=16088 busy-us=949759 render-us=430843 panel-wait-us=0
+
+
+
+PC frames=2440 clocks/s=4778883 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2440 late-us=16088 busy-us=949788 render-us=430834 panel-wait-us=0
+
+
+
+PC frames=2500 clocks/s=4778886 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2500 late-us=16073 busy-us=949606 render-us=430791 panel-wait-us=0
+
+
+
+PC frames=2560 clocks/s=4778872 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2560 late-us=16074 busy-us=949831 render-us=430795 panel-wait-us=0
+
+
+
+PC frames=2620 clocks/s=4778884 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2620 late-us=16096 busy-us=950527 render-us=430786 panel-wait-us=0
+
+
+
+PC frames=2680 clocks/s=4778880 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2680 late-us=16073 busy-us=948838 render-us=430850 panel-wait-us=0
+
+
+
+PC frames=2733 clocks/s=4221352 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2733 late-us=47499 busy-us=1001986 render-us=562339 panel-wait-us=0
+
+
+
+PC frames=2781 clocks/s=3823090 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2781 late-us=46558 busy-us=1006343 render-us=601307 panel-wait-us=0
+
+
+
+PC frames=2829 clocks/s=3823103 CS:IP=0050:09BB mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2829 late-us=46428 busy-us=1006991 render-us=601322 panel-wait-us=0
+
+
+
+PC frames=2877 clocks/s=3823119 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2877 late-us=46594 busy-us=1007103 render-us=601373 panel-wait-us=0
+
+
+
+PC frames=2925 clocks/s=3823090 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2925 late-us=47429 busy-us=1007718 render-us=601362 panel-wait-us=0
+
+
+
+PC frames=2973 clocks/s=3823108 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2973 late-us=46903 busy-us=1006729 render-us=601382 panel-wait-us=0
+
+
+
+PC frames=3021 clocks/s=3823114 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3021 late-us=46963 busy-us=1006923 render-us=601443 panel-wait-us=0
+
+
+
+PC frames=3069 clocks/s=3823100 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3069 late-us=47115 busy-us=1007136 render-us=601264 panel-wait-us=0
+
+
+
+PC frames=3117 clocks/s=3823102 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3117 late-us=46554 busy-us=1006020 render-us=601288 panel-wait-us=0
+
+
+
+PC frames=3165 clocks/s=3823098 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3165 late-us=47470 busy-us=1007768 render-us=601340 panel-wait-us=0
+
+
+serial check PASS
+serial check exit 0
+lease released 23:37:32

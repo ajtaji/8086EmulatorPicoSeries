@@ -315,3 +315,92 @@ def modes():
 data = modes()
 (OUT / 'modes.com').write_bytes(data)
 print('modes.com', len(data), 'bytes')
+
+def reptest(words=0x8000, fill=0x4000, copy=0x3000, other=0x1000, stack=0x7000, sp=0xFFFE):
+    """Long REP strings under a 1 kHz timer interrupt: REP STOSW, CS: REP MOVSW,
+    CS: REPE CMPSW and REPE SCASW, 32768 words each. Each tick is counted at
+    0000:0400 by IRQ0, and the ticks during each instruction are printed:
+    S= M= C= A= (about 69, 117, 151 and 103 when a REP lets interrupts in between
+    its elements, as the 8086 does; 0 or 1 when it runs to the end in one go).
+    The copy and the compare run with DS on other data, so a REP resumed without
+    its CS: prefix shows as a mismatch; fewer than 10 ticks in one is a REP that kept
+    interrupts out. Prints OK and exits 0, or BAD and exits 1.
+    The stack is at 7000:FFFE, outside everything copied. reptest_small.com: 8192
+    words each, everything below 1C000h, for the Pico's 126 KB (about 17, 29, 37
+    and 25 ticks)."""
+    a = Asm()
+    def call(name):
+        a.emit(0xE8); a.fix.append(('rel16', len(a.b), name)); a.b += b'\0\0'
+    def jmp_bad():
+        a.emit(0xE9); a.fix.append(('rel16', len(a.b), 'bad')); a.b += b'\0\0'
+    def bad_if(jcc):                      # jcc taken -> bad
+        a.emit(jcc ^ 1, 3); jmp_bad()
+    def cx_zero(name):                    # CX <> 0 -> bad
+        a.jr(0xE3, name); jmp_bad(); a.label(name)
+    def show(ch, at):
+        putc(a, ' ') if ch != 'S' else None
+        putc(a, ch); putc(a, '=')
+        a.emit(0x1E, 0x31, 0xC0, 0x8E, 0xD8, 0xA1); a.w(at); a.emit(0x1F)   # ax = [0000:at]
+        call('printnum')
+    a.emit(0xFA, 0xB8); a.w(stack); a.emit(0x8E, 0xD0, 0xBC); a.w(sp)   # cli / ss = 7000 / sp = FFFE
+    a.emit(0x31, 0xC0, 0x8E, 0xC0)                                           # es = 0
+    a.emit(0x26, 0xC7, 0x06, 0x20, 0x00); a.wl('irq0')                       # vector 8
+    a.emit(0x8C, 0xC8, 0x26, 0xA3, 0x22, 0x00)
+    a.emit(0x26, 0xC7, 0x06, 0x00, 0x04); a.w(0)                             # ticks = 0
+    a.emit(0xB0, 0x34, 0xE6, 0x43, 0xB8); a.w(1193); a.emit(0xE6, 0x40, 0x88, 0xE0, 0xE6, 0x40)   # 1 kHz
+    a.emit(0xB0, 0xFC, 0xE6, 0x21, 0xFC, 0xFB)                               # IRQ0, IRQ1 / cld / sti
+    # S: REP STOSW, 4000:0000, 32768 x 1234h
+    call('tread')
+    a.emit(0xB8); a.w(fill); a.emit(0x8E, 0xC0, 0x31, 0xFF, 0xB9); a.w(words); a.emit(0xB8); a.w(0x1234)
+    a.emit(0xF3, 0xAB)
+    a.emit(0xBB); a.w(0x402); call('tstore')
+    bad_if(0x72)                                                             # under 10 ticks: no interrupt got in
+    cx_zero('s_ok')
+    # M: CS: REP MOVSW, CS:0000 -> 3000:0000, DS on other data
+    call('tread')
+    a.emit(0xB8); a.w(other); a.emit(0x8E, 0xD8, 0xB8); a.w(copy); a.emit(0x8E, 0xC0, 0x31, 0xF6, 0x31, 0xFF, 0xB9); a.w(words)
+    a.emit(0x2E, 0xF3, 0xA5)
+    a.emit(0x8C, 0xC8, 0x8E, 0xD8)                                           # ds = cs
+    a.emit(0xBB); a.w(0x404); call('tstore')
+    bad_if(0x72)                                                             # under 10 ticks: no interrupt got in
+    cx_zero('m_ok')
+    # C: CS: REPE CMPSW, the copy against its source
+    call('tread')
+    a.emit(0xB8); a.w(other); a.emit(0x8E, 0xD8, 0xB8); a.w(copy); a.emit(0x8E, 0xC0, 0x31, 0xF6, 0x31, 0xFF, 0xB9); a.w(words)
+    a.emit(0x2E, 0xF3, 0xA7)
+    a.emit(0x8C, 0xC8, 0x8E, 0xD8)
+    bad_if(0x75)                                                             # a word differed
+    cx_zero('c_ok')
+    a.emit(0xBB); a.w(0x406); call('tstore')
+    bad_if(0x72)                                                             # under 10 ticks: no interrupt got in
+    # A: REPE SCASW over the fill
+    call('tread')
+    a.emit(0xB8); a.w(fill); a.emit(0x8E, 0xC0, 0x31, 0xFF, 0xB9); a.w(words); a.emit(0xB8); a.w(0x1234)
+    a.emit(0xF3, 0xAF)
+    bad_if(0x75)
+    cx_zero('a_ok')
+    a.emit(0xBB); a.w(0x408); call('tstore')
+    bad_if(0x72)                                                             # under 10 ticks: no interrupt got in
+    a.emit(0xFA)
+    show('S', 0x402); show('M', 0x404); show('C', 0x406); show('A', 0x408)
+    putc(a, ' '); putc(a, 'O'); putc(a, 'K'); putc(a, '\n')
+    a.emit(0x31, 0xC0, 0xE7, 0xF4, 0xF4)
+    a.label('bad')
+    a.emit(0xFA); putc(a, 'B'); putc(a, 'A'); putc(a, 'D'); putc(a, '\n')
+    a.emit(0xB8); a.w(1); a.emit(0xE7, 0xF4, 0xF4)
+    a.label('tread')                      # bp = ticks
+    a.emit(0x1E, 0x31, 0xC0, 0x8E, 0xD8, 0x8B, 0x2E, 0x00, 0x04, 0x1F, 0xC3)
+    a.label('tstore')                     # [0000:bx] = ticks - bp
+    a.emit(0x1E, 0x31, 0xC0, 0x8E, 0xD8, 0xA1, 0x00, 0x04, 0x29, 0xE8, 0x89, 0x07)
+    a.emit(0x83, 0x3F, 10, 0x1F, 0xC3)   # cmp word [bx], 10 (CF: fewer ticks) / pop ds / ret
+    a.label('irq0')
+    a.emit(0x1E, 0x50, 0x31, 0xC0, 0x8E, 0xD8, 0xFF, 0x06, 0x00, 0x04, 0xB0, 0x20, 0xE6, 0x20, 0x58, 0x1F, 0xCF)
+    a.label('printnum'); printnum(a)
+    return a.done()
+
+data = reptest()
+(OUT / 'reptest.com').write_bytes(data)
+print('reptest.com', len(data), 'bytes')
+data = reptest(words=0x2000, fill=0x1000, copy=0x1400, other=0x0C00, stack=0x1800, sp=0x3FFE)
+(OUT / 'reptest_small.com').write_bytes(data)
+print('reptest_small.com', len(data), 'bytes')
