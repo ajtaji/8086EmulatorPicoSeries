@@ -32,7 +32,6 @@ Global Dim SpkFreq.i(#PC86_LINES) ; per line: tone in Hz (PIT channel 2), 0 = no
 Global Dim SpkLevel.a(#PC86_LINES) ; per line: the speaker's level when there is no tone
 Global PcVram.i                   ; host address of the 16 KB CGA memory
 Global PcCrtcIndex.i, PcMode.i, PcColor.i, PcLineNo.i, PcCarry.i, PcFrames.i
-Global PcRenderUs.i               ; panel platforms: microseconds spent drawing lines
 Global PicIrr.i, PicIsr.i, PicImr.i, PicBase.i, PicInitStep.i, PicNeed4.i, PicSingle.i, PicReadIsr.i
 Global PicOut.i                   ; the IRQ line given to the CPU and not yet taken, or -1
 Global Port61.i, KeyData.i, KeyFull.i, KeyHead.i, KeyTail.i, PcClocks.i

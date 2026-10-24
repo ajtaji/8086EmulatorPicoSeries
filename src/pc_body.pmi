@@ -17,9 +17,9 @@ CompilerIf #PC_RAM2_KB > 0
 CompilerEndIf
 Global Dim PcVramArr.l(4096)                     ; the CGA's 16 KB
 Global PcExit.i, PcExitCode.i, Core1Ready.i, StatusT.i, StatusClocks.i
-Global BusyUs.i, StatusWait.i
+Global BusyUs.i, StatusWait.i, StatusDraw.i
 
-#PC86_HALF = 1                                   ; lines drawn 320 wide straight into the panel's ring
+#PC86_HALF = 1                                   ; core 0 latches each line's registers, core 1 draws it 320 wide
 XIncludeFile "pc86_state.pmi"
 XIncludeFile "pc86.pmi"
 XIncludeFile "cgafont.pmi"
@@ -108,8 +108,8 @@ Procedure PcStatus()
   Say(" mode=") : Hex(PcMode, 2) : Say(" colour=") : Hex(PcColor, 2)
   Say(" PIT0=") : Num(PitReload(0)) : Say(" IMR=") : Hex(PicImr, 2) : Say(" panel frames=") : Num(VidFrames)
   Say(" late-us=") : Num(Micros() - NextFrame)
-  Say(" busy-us=") : Num(BusyUs) : Say(" render-us=") : Num(PcRenderUs) : Say(" panel-wait-us=") : Num(VidWaitUs - StatusWait) : Eol()
-  StatusT = Micros() : StatusClocks = PcClocks : BusyUs = 0 : PcRenderUs = 0 : StatusWait = VidWaitUs
+  Say(" busy-us=") : Num(BusyUs) : Say(" core1-draw-us=") : Num(VidDrawUs - StatusDraw) : Say(" panel-wait-us=") : Num(VidWaitUs - StatusWait) : Eol()
+  StatusT = Micros() : StatusClocks = PcClocks : BusyUs = 0 : StatusDraw = VidDrawUs : StatusWait = VidWaitUs
 EndProcedure
 
 Procedure PcKeys()

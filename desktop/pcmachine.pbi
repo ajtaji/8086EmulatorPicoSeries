@@ -23,9 +23,12 @@ Global Dim CgaRGBA.l(15)
 Global *PcVramMem
 Global PcTex.l, PcSprite.GLSprite, PcTexReady.i
 
-Declare Pc86RenderHalf(line.i, dest.i)
+Declare Pc86RenderHalf(line.i, dest.i, r.i, pal.i)
+Declare Pc86LatchRegs(r.i)
 Global Dim PcFull.a(#PC_W)
-Global Dim PcHalf.a(#PC_W / 2)
+Global Dim PcHalf.u(#PC_W / 2)
+Global Dim PcRegs.l(8)                    ; a latched line record, as the Pico's ring holds
+Global Dim PcIdPal.u(16)                  ; colour i -> i, so the half renderer's words compare with indices
 Global PcHalfCheck.i, PcHalfLines.i, PcHalfBad.i, PcHalfFirst.s
 
 Procedure Pc86PutLine(line.i)
@@ -35,7 +38,11 @@ Procedure Pc86PutLine(line.i)
   Next
   If PcHalfCheck                    ; --halfcheck: the Pico's renderer against this one, same registers
     CopyMemory(@PcLine(0), @PcFull(0), #PC_W)
-    Pc86RenderHalf(line, @PcHalf(0))
+    If PcIdPal(15) = 0
+      For x = 0 To 15 : PcIdPal(x) = x : Next
+    EndIf
+    Pc86LatchRegs(@PcRegs(0))
+    Pc86RenderHalf(line, @PcHalf(0), @PcRegs(0), @PcIdPal(0))
     PcHalfLines + 1
     For x = 0 To #PC_W / 2 - 1
       If PcHalf(x) <> PcFull(x * 2)

@@ -338,85 +338,127 @@ Procedure Pc86RenderLine(line.i)
   Next
 EndProcedure
 
-; The same scanline at half width, 320 colour indices straight to dest, four
-; pixels to a 32-bit store: pixel x is Pc86RenderLine's pixel 2x (cpu86_pc.exe
-; --halfcheck proves it on every line). For a panel 320 wide (the Pico); the
-; platform sets #PC86_HALF = 1 and supplies PlatformLine / PlatformLineDone.
-; PcLine() is its scratch: the line's four 320x200 colours, then 16 pixel pairs.
-Procedure Pc86RenderHalf(line.i, dest.i)
-  Protected x.i, b.i, p.i, c.i, k.i, start.i, src.i, addr.i, row.i, scan.i, cols.i
-  Protected ch.i, at.i, fg.i, bg.i, bits.i, curx.i, bon.i, f4.i, b4.i, pt.i, font.i
-  start = ((PcCrtc(12) << 8) | PcCrtc(13)) & $3FFF
-  If (PcMode & 8) = 0
-    For x = 0 To 79 : PokeL(dest + x * 4, 0) : Next
+; ---- a scanline's registers, latched for a renderer that runs later or elsewhere ----
+; mode, colour select, start address, cursor address, R10, R11, frame count: what a
+; line's picture depends on besides the CGA memory. 28 bytes; a record is 32.
+#PC86_REGS = 32
+Procedure Pc86LatchRegs(r.i)
+  PokeL(r, PcMode) : PokeL(r + 4, PcColor)
+  PokeL(r + 8, ((PcCrtc(12) << 8) | PcCrtc(13)) & $3FFF)
+  PokeL(r + 12, ((PcCrtc(14) << 8) | PcCrtc(15)) & $3FFF)
+  PokeL(r + 16, PcCrtc(10)) : PokeL(r + 20, PcCrtc(11)) : PokeL(r + 24, PcFrames)
+EndProcedure
+
+; The scanline at half width from a latched record r: 320 16-bit pixels to dest,
+; each colour looked up in pal (16 words: RGB565 on the Pico, the identity for
+; cpu86_pc.exe --halfcheck), two pixels to a 32-bit store. Pixel x is
+; Pc86RenderLine's pixel 2x (--halfcheck proves it on every line). On the Pico
+; core 1 runs it from the line ring while core 0 runs the PC (#PC86_HALF = 1;
+; the platform supplies PlatformLine / PlatformLineDone). PcLine() is its
+; scratch: the line's four 320x200 colours, then 16 pixel pairs.
+; On the Pico it runs from SRAM, so core 1 does not share the flash cache with core 0.
+Macro Pc86RenderHalfBody
+  Protected x.i, b.i, p.i, c.i, k.i, mode.i, colr.i, start.i, src.i, addr.i, row.i, scan.i, cols.i
+  Protected ch.i, at.i, fg.i, bg.i, bits.i, curx.i, bon.i, b2.i, pt.i, font.i, frames.i, last.i, d.i
+  mode = PeekL(r) : colr = PeekL(r + 4) : start = PeekL(r + 8) : frames = PeekL(r + 24)
+  If (mode & 8) = 0
+    b2 = PeekU(pal) * $10001
+    For x = 0 To 159 : PokeL(dest + x * 4, b2) : Next
     ProcedureReturn
   EndIf
-  If PcMode & 2
+  If mode & 2
     src = PcVram + ((line & 1) << 13)
     addr = (start << 1) + (line >> 1) * 80
-    If PcMode & $10                               ; 640 x 200 x 2: bits 7, 5, 3, 1
-      f4 = (PcColor & 15) * $01010101
+    If mode & $10                                 ; 640 x 200 x 2: bits 7, 5, 3, 1
+      pt = @PcLine(0)
+      bg = PeekU(pal) : fg = PeekU(pal + (colr & 15) * 2)
+      PokeL(pt, bg | (bg << 16)) : PokeL(pt + 4, bg | (fg << 16))
+      PokeL(pt + 8, fg | (bg << 16)) : PokeL(pt + 12, fg | (fg << 16))
+      d = dest
       For b = 0 To 79
-        p = PeekA(src + ((addr + b) & $1FFF))
-        PokeL(dest + b * 4, f4 & PeekL(?Pc86Nib + PeekA(?Pc86Even + p) * 4))
+        k = PeekA(?Pc86Even + PeekA(src + ((addr + b) & $1FFF)))
+        PokeL(d, PeekL(pt + (k >> 2) * 4)) : PokeL(d + 4, PeekL(pt + (k & 3) * 4))
+        d = d + 8
       Next
     Else                                          ; 320 x 200 x 4
       pt = @PcLine(0)
-      PokeA(pt, PcColor & 15)
+      PokeU(pt, PeekU(pal + (colr & 15) * 2))
       For c = 1 To 3
-        If PcMode & 4
+        If mode & 4
           k = PeekA(?Pc86Pal5 + c)
-        ElseIf PcColor & $20
+        ElseIf colr & $20
           k = c * 2 + 1
         Else
           k = c * 2
         EndIf
-        If PcColor & $10 : k = k | 8 : EndIf
-        PokeA(pt + c, k)
+        If colr & $10 : k = k | 8 : EndIf
+        PokeU(pt + c * 2, PeekU(pal + k * 2))
       Next
       For k = 0 To 15                             ; nibble -> two pixels
-        PokeU(pt + 4 + k * 2, PeekA(pt + (k >> 2)) | (PeekA(pt + (k & 3)) << 8))
+        PokeL(pt + 8 + k * 4, PeekU(pt + (k >> 2) * 2) | (PeekU(pt + (k & 3) * 2) << 16))
       Next
       For b = 0 To 79
         p = PeekA(src + ((addr + b) & $1FFF))
-        PokeL(dest + b * 4, PeekU(pt + 4 + (p >> 4) * 2) | (PeekU(pt + 4 + (p & 15) * 2) << 16))
+        PokeL(dest + b * 8, PeekL(pt + 8 + (p >> 4) * 4))
+        PokeL(dest + b * 8 + 4, PeekL(pt + 8 + (p & 15) * 4))
       Next
     EndIf
     ProcedureReturn
   EndIf
   ; text: what is the same for the whole line is worked out once
-  If PcMode & 1 : cols = 80 : Else : cols = 40 : EndIf
+  If mode & 1 : cols = 80 : Else : cols = 40 : EndIf
   row = line >> 3 : scan = line & 7
   addr = start + row * cols                       ; the line's first cell
   curx = -1                                       ; the cursor's column on this line, if it shows
-  If scan >= (PcCrtc(10) & 31) And scan <= (PcCrtc(11) & 31) And (PcCrtc(10) & $60) <> $20 And (PcFrames & 8)
-    curx = ((((PcCrtc(14) << 8) | PcCrtc(15)) & $3FFF) - addr) & $3FFF
+  c = PeekL(r + 16)
+  If scan >= (c & 31) And scan <= (PeekL(r + 20) & 31) And (c & $60) <> $20 And (frames & 8)
+    curx = (PeekL(r + 12) - addr) & $3FFF
   EndIf
   bon = 0                                         ; blink mode, in the phase that hides
-  If (PcMode & $20) And (PcFrames & 16) : bon = $80 : EndIf
+  If (mode & $20) And (frames & 16) : bon = $80 : EndIf
   font = ?CgaFont + scan
   src = PcVram
+  pt = @PcLine(0)                                 ; the attribute's four pixel pairs: bg bg, bg fg, fg bg, fg fg
+  last = -1
+  d = dest
   For x = 0 To cols - 1
     k = ((addr + x) << 1) & $3FFF
     ch = PeekA(src + k) : at = PeekA(src + k + 1)
-    fg = at & 15
-    If PcMode & $20
-      bg = (at >> 4) & 7
-      If at & bon : fg = bg : EndIf
-    Else
-      bg = at >> 4
+    If at <> last                                 ; along a row the attribute seldom changes
+      last = at
+      fg = at & 15
+      If mode & $20
+        bg = (at >> 4) & 7
+        If at & bon : fg = bg : EndIf
+      Else
+        bg = at >> 4
+      EndIf
+      bg = PeekU(pal + bg * 2) : fg = PeekU(pal + fg * 2)
+      PokeL(pt, bg | (bg << 16)) : PokeL(pt + 4, bg | (fg << 16))
+      PokeL(pt + 8, fg | (bg << 16)) : PokeL(pt + 12, fg | (fg << 16))
     EndIf
     bits = PeekA(font + ch * 8)
     If x = curx : bits = 255 : EndIf
-    f4 = fg * $01010101 : b4 = bg * $01010101 : fg = f4 ! b4
     If cols = 80
-      PokeL(dest + x * 4, b4 ! (fg & PeekL(?Pc86Nib + PeekA(?Pc86Even + bits) * 4)))
+      k = PeekA(?Pc86Even + bits)
+      PokeL(d, PeekL(pt + (k >> 2) * 4)) : PokeL(d + 4, PeekL(pt + (k & 3) * 4))
+      d = d + 8
     Else
-      PokeL(dest + x * 8, b4 ! (fg & PeekL(?Pc86Nib + (bits >> 4) * 4)))
-      PokeL(dest + x * 8 + 4, b4 ! (fg & PeekL(?Pc86Nib + (bits & 15) * 4)))
+      PokeL(d, PeekL(pt + (bits >> 6) * 4)) : PokeL(d + 4, PeekL(pt + ((bits >> 4) & 3) * 4))
+      PokeL(d + 8, PeekL(pt + ((bits >> 2) & 3) * 4)) : PokeL(d + 12, PeekL(pt + (bits & 3) * 4))
+      d = d + 16
     EndIf
   Next
+EndMacro
+CompilerIf #PC86_HALF
+ProcedureRAM Pc86RenderHalf(line.i, dest.i, r.i, pal.i)
+  Pc86RenderHalfBody
 EndProcedure
+CompilerElse
+Procedure Pc86RenderHalf(line.i, dest.i, r.i, pal.i)
+  Pc86RenderHalfBody
+EndProcedure
+CompilerEndIf
 
 ; ---- time ----
 ; One scanline: draw it (if visible) with the registers as they are now, run
@@ -425,10 +467,8 @@ Procedure.i Pc86RunLine()
   Protected budget.i, ran.i, ch.i
   If PcLineNo < #PC86_VISIBLE
     CompilerIf #PC86_HALF
-      ch = Micros()
-      Pc86RenderHalf(PcLineNo, PlatformLine(PcLineNo))
+      Pc86LatchRegs(PlatformLine(PcLineNo))     ; the platform draws it from these, elsewhere
       PlatformLineDone(PcLineNo)
-      PcRenderUs = PcRenderUs + Micros() - ch
     CompilerElse
       Pc86RenderLine(PcLineNo)
       Pc86PutLine(PcLineNo)
@@ -474,9 +514,6 @@ EndProcedure
 DataSection
   Pc86Pal5:
   Data.a 0, 3, 4, 7
-  Pc86Nib:                                        ; nibble -> four byte masks, its bit 3 first (lowest address)
-  Data.l $00000000, $FF000000, $00FF0000, $FFFF0000, $0000FF00, $FF00FF00, $00FFFF00, $FFFFFF00
-  Data.l $000000FF, $FF0000FF, $00FF00FF, $FFFF00FF, $0000FFFF, $FF00FFFF, $00FFFFFF, $FFFFFFFF
   Pc86Even:                                       ; a byte's bits 7, 5, 3, 1 as a nibble: the even pixels of 8
   Data.a 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3
   Data.a 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3

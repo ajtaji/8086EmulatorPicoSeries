@@ -1,619 +1,387 @@
-﻿lease taken 23:15:50
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-reptest.picow  ->  RP2040
+﻿lease taken 07:40:22
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65453 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-reptest.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
+pmfc: 65602 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2.asm
+> RP2040 ASSEMBLER: 96856 bytes of code run from SRAM at $20000000-$20017A57, copied from flash at boot; 3580 bytes of SRAM left free, stacks and reserved windows excluded.
 NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
 NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
 NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
 NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122848|2097152
-CYCLES_TOTAL_RP2040|74547|straight-line, not-taken branches
-REGMAP_RP2040|7338|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-reptest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122848 bytes into 480 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-reptest.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-reptest.uf2
+ROM_TOTAL_RP2040|122780|2097152
+CYCLES_TOTAL_RP2040|74810|straight-line, not-taken branches
+REGMAP_RP2040|7329|247|119|388|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1474|frame-slot loads taken from a register
+pmfc: pc-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122780 bytes into 480 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
 pmfc: OK
 image ends at 0x1001E000
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    E8FC90D9FF9429AC6B3F58AAD441A915342C02335C7CAAF1DEEAF7B9D0252E0A C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    F60EA6DE2F8B8F8E1B2B82B463A02A02F621FCEB7C95CF4D1130F174D28A5D1F C:\Users\ajtaj\Desktop\Github\8086Emulato...
 
 
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-reptest.picow  ->  RP2040
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65453 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-reptest.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
+pmfc: 65602 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2.asm
+> RP2040 ASSEMBLER: 96856 bytes of code run from SRAM at $20000000-$20017A57, copied from flash at boot; 3580 bytes of SRAM left free, stacks and reserved windows excluded.
 NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
 NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
 NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
 NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122848|2097152
-CYCLES_TOTAL_RP2040|74547|straight-line, not-taken branches
-REGMAP_RP2040|7338|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-reptest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122848 bytes into 480 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-reptest.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-reptest.uf2
-pmfc: uploading pc-reptest.uf2 (RP2040) through COM7
+ROM_TOTAL_RP2040|122780|2097152
+CYCLES_TOTAL_RP2040|74810|straight-line, not-taken branches
+REGMAP_RP2040|7329|247|119|388|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1474|frame-slot loads taken from a register
+pmfc: pc-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122780 bytes into 480 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
+pmfc: uploading pc-keytest.uf2 (RP2040) through COM7
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.1 s): the board is going to its boot loader.
 > [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
-> [NATIVE UPLOADER] Found BOOTSEL drive at H:\
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
 > [NATIVE UPLOADER] Writing image: 65536 of 245760 bytes (26%)
 > [NATIVE UPLOADER] Writing image: 131072 of 245760 bytes (53%)
 > [NATIVE UPLOADER] Writing image: 196608 of 245760 bytes (80%)
 > [NATIVE UPLOADER] Writing image: 245760 of 245760 bytes (100%)
-> [NATIVE UPLOADER] Wrote pc-reptest.uf2 to H:\
-> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
-pmfc: uploaded.
-pmfc: OK
-S=17 M=30 C=40 A=26 OK
-
-
-PC EXIT code=0 frames=6
-
-
-
-PC frames=6 clocks/s=544777 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=183 busy-us=131567 render-us=94401 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=112 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=113 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=111 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=112 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=114 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=113 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=115 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=110 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=118 busy-us=0 render-us=0 panel-wait-us=0
-
-
-serial check PASS
-serial check exit 0
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-pctest.picow  ->  RP2040
-pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65428 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-pctest.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
-NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
-NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
-NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
-NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122624|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-pctest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122624 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-pctest.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-pctest.uf2
-pmfc: OK
-image ends at 0x1001DF00
-
-Algorithm Hash                                                             Path                                        
---------- ----                                                             ----                                        
-SHA256    761A39D4A342043FB31A6A26D610416441C76875033BD9A0A26319B8BF4E5F2F C:\Users\ajtaj\Desktop\Github\8086Emulato...
-
-
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-pctest.picow  ->  RP2040
-pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65428 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-pctest.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
-NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
-NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
-NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
-NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122624|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-pctest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122624 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-pctest.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-pctest.uf2
-pmfc: uploading pc-pctest.uf2 (RP2040) through COM7
-> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
-> [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
-> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
-> [NATIVE UPLOADER] Found BOOTSEL drive at H:\
-> [NATIVE UPLOADER] Writing image: 65536 of 245248 bytes (26%)
-> [NATIVE UPLOADER] Writing image: 131072 of 245248 bytes (53%)
-> [NATIVE UPLOADER] Writing image: 196608 of 245248 bytes (80%)
-> [NATIVE UPLOADER] Writing image: 245248 of 245248 bytes (100%)
-> [NATIVE UPLOADER] Writing image: 245248 of 245248 bytes (100%)
-> [NATIVE UPLOADER] Wrote pc-pctest.uf2 to H:\
-> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
-pmfc: uploaded.
-pmfc: OK
-R=7 T=115
-
-
-PC EXIT code=7 frames=38
-
-
-
-PC frames=38 clocks/s=3087737 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=206 busy-us=585785 render-us=325178 panel-wait-us=689
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=124 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=122 busy-us=0 render-us=0 panel-wait-us=0
-
-
-
-PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=123 busy-us=0 render-us=0 panel-wait-us=0
-
-
-serial check PASS
-serial check exit 0
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.picow  ->  RP2040
-pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65410 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
-NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
-NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
-NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
-NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122476|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122476 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
-pmfc: OK
-image ends at 0x1001DF00
-
-Algorithm Hash                                                             Path                                        
---------- ----                                                             ----                                        
-SHA256    85899A5CF963028B0334AD99E672CE706B7DB06A39DF75A30F0992288E0FB1F0 C:\Users\ajtaj\Desktop\Github\8086Emulato...
-
-
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.picow  ->  RP2040
-pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65410 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
-NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
-NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
-NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
-NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122476|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122476 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-keytest.uf2
-pmfc: uploading pc-keytest.uf2 (RP2040) through COM7
-> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
-> [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
-> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
-> [NATIVE UPLOADER] Found BOOTSEL drive at H:\
-> [NATIVE UPLOADER] Writing image: 65536 of 245248 bytes (26%)
-> [NATIVE UPLOADER] Writing image: 131072 of 245248 bytes (53%)
-> [NATIVE UPLOADER] Writing image: 196608 of 245248 bytes (80%)
-> [NATIVE UPLOADER] Writing image: 245248 of 245248 bytes (100%)
-> [NATIVE UPLOADER] Wrote pc-keytest.uf2 to H:\
+> [NATIVE UPLOADER] Wrote pc-keytest.uf2 to I:\
 > [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
 pmfc: uploaded.
 pmfc: OK
 
 
-PC frames=61 clocks/s=4858528 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=61 late-us=15293 busy-us=919270 render-us=822571 panel-wait-us=0
+PC frames=61 clocks/s=4858528 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=61 late-us=10038 busy-us=599187 core1-draw-us=598434 panel-wait-us=487539
 
 
 
-PC frames=121 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=121 late-us=15265 busy-us=903901 render-us=809020 panel-wait-us=0
+PC frames=121 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=121 late-us=10021 busy-us=589211 core1-draw-us=589378 panel-wait-us=479620
 
 1E 9E 30 B0 2C AC 
 
-PC frames=181 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=181 late-us=15260 busy-us=904184 render-us=808999 panel-wait-us=0
+PC frames=181 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=181 late-us=10019 busy-us=589248 core1-draw-us=589473 panel-wait-us=479379
 
 
 
-PC frames=241 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=241 late-us=15257 busy-us=903924 render-us=809021 panel-wait-us=0
+PC frames=241 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=241 late-us=10013 busy-us=589182 core1-draw-us=589495 panel-wait-us=479602
 
 
 
-PC frames=301 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=301 late-us=15261 busy-us=903916 render-us=809003 panel-wait-us=0
+PC frames=301 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=301 late-us=10010 busy-us=589187 core1-draw-us=589545 panel-wait-us=479648
 
 
 
-PC frames=361 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=361 late-us=15260 busy-us=903907 render-us=808997 panel-wait-us=0
+PC frames=361 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=361 late-us=10014 busy-us=589213 core1-draw-us=589562 panel-wait-us=479604
 
 
 
-PC frames=421 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=421 late-us=15252 busy-us=903931 render-us=808989 panel-wait-us=0
+PC frames=421 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=421 late-us=10013 busy-us=589180 core1-draw-us=589514 panel-wait-us=479585
 
 
 
-PC frames=481 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=481 late-us=15253 busy-us=903931 render-us=808974 panel-wait-us=0
+PC frames=481 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=481 late-us=10011 busy-us=589192 core1-draw-us=589445 panel-wait-us=479592
 
 
 
-PC frames=541 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=541 late-us=15262 busy-us=903910 render-us=808968 panel-wait-us=0
+PC frames=541 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=541 late-us=10011 busy-us=589192 core1-draw-us=589557 panel-wait-us=479640
 
 
 
-PC frames=601 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=601 late-us=15263 busy-us=903906 render-us=808980 panel-wait-us=0
+PC frames=601 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=601 late-us=10013 busy-us=589194 core1-draw-us=589463 panel-wait-us=479642
 
 
 
-PC frames=661 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=661 late-us=15255 busy-us=903923 render-us=809012 panel-wait-us=0
-
-
-
-PC frames=721 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=721 late-us=15255 busy-us=903920 render-us=809078 panel-wait-us=0
+PC frames=661 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=661 late-us=10017 busy-us=589202 core1-draw-us=589495 panel-wait-us=479613
 
 
 serial check PASS
 serial check exit 0
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-modes.picow  ->  RP2040
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65426 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-modes.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
+pmfc: 66377 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2.asm
+> RP2040 ASSEMBLER: 96856 bytes of code run from SRAM at $20000000-$20017A57, copied from flash at boot; 3580 bytes of SRAM left free, stacks and reserved windows excluded.
 NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
 NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
 NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
 NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122616|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-modes.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122616 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-modes.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-modes.uf2
+ROM_TOTAL_RP2040|129012|2097152
+CYCLES_TOTAL_RP2040|74813|straight-line, not-taken branches
+REGMAP_RP2040|7330|247|119|388|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1474|frame-slot loads taken from a register
+pmfc: pc-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 129012 bytes into 504 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
 pmfc: OK
-image ends at 0x1001DF00
+image ends at 0x1001F800
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    11743894A7D77009BA2AC473F35E8A4034EAAD13C3EFEA76451A2C1C0212397E C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    5106D76CEEBC608D9A2B8B210F8EA9CD81780D8DFFA3B531AC6FBB0815ED1945 C:\Users\ajtaj\Desktop\Github\8086Emulato...
 
 
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-modes.picow  ->  RP2040
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65426 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-modes.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
+pmfc: 66377 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2.asm
+> RP2040 ASSEMBLER: 96856 bytes of code run from SRAM at $20000000-$20017A57, copied from flash at boot; 3580 bytes of SRAM left free, stacks and reserved windows excluded.
 NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
 NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
 NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
 NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122616|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc-modes.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122616 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-modes.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-modes.uf2
-pmfc: uploading pc-modes.uf2 (RP2040) through COM7
+ROM_TOTAL_RP2040|129012|2097152
+CYCLES_TOTAL_RP2040|74813|straight-line, not-taken branches
+REGMAP_RP2040|7330|247|119|388|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1474|frame-slot loads taken from a register
+pmfc: pc-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 129012 bytes into 504 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc-demo.uf2
+pmfc: uploading pc-demo.uf2 (RP2040) through COM7
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
 > [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
 > [NATIVE UPLOADER] Found BOOTSEL drive at I:\
-> [NATIVE UPLOADER] Writing image: 65536 of 245248 bytes (26%)
-> [NATIVE UPLOADER] Writing image: 131072 of 245248 bytes (53%)
-> [NATIVE UPLOADER] Writing image: 196608 of 245248 bytes (80%)
-> [NATIVE UPLOADER] Writing image: 245248 of 245248 bytes (100%)
-> [NATIVE UPLOADER] Wrote pc-modes.uf2 to I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 258048 bytes (25%)
+> [NATIVE UPLOADER] Writing image: 131072 of 258048 bytes (50%)
+> [NATIVE UPLOADER] Writing image: 196608 of 258048 bytes (76%)
+> [NATIVE UPLOADER] Writing image: 258048 of 258048 bytes (100%)
+> [NATIVE UPLOADER] Writing image: 258048 of 258048 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc-demo.uf2 to I:\
 > [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
 pmfc: uploaded.
 pmfc: OK
 
 
-PC frames=61 clocks/s=4858536 CS:IP=0050:016E mode=28 colour=1F PIT0=65536 IMR=FC panel frames=61 late-us=15282 busy-us=785404 render-us=522100 panel-wait-us=3
+PC frames=61 clocks/s=4858543 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=61 late-us=11721 busy-us=701919 core1-draw-us=634380 panel-wait-us=185282
 
 
 
-PC frames=122 clocks/s=4858613 CS:IP=0050:0162 mode=28 colour=3A PIT0=65536 IMR=FC panel frames=122 late-us=11332 busy-us=794882 render-us=521922 panel-wait-us=0
+PC frames=121 clocks/s=4778867 CS:IP=0050:09BB mode=09 colour=00 PIT0=19886 IMR=FE panel frames=121 late-us=11696 busy-us=693112 core1-draw-us=626231 panel-wait-us=169113
 
 
 
-PC frames=182 clocks/s=4778862 CS:IP=0050:0162 mode=08 colour=00 PIT0=65536 IMR=FC panel frames=182 late-us=11259 busy-us=815775 render-us=513097 panel-wait-us=928
+PC frames=181 clocks/s=4778885 CS:IP=0050:06E4 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=181 late-us=11685 busy-us=693074 core1-draw-us=626212 panel-wait-us=169573
 
 
 
-PC frames=242 clocks/s=4778807 CS:IP=0050:016F mode=08 colour=1F PIT0=65536 IMR=FC panel frames=242 late-us=14705 busy-us=761433 render-us=497768 panel-wait-us=14866
+PC frames=241 clocks/s=4778874 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=241 late-us=11702 busy-us=692884 core1-draw-us=626286 panel-wait-us=168936
 
 
 
-PC frames=303 clocks/s=4858535 CS:IP=0050:0166 mode=08 colour=3A PIT0=65536 IMR=FC panel frames=303 late-us=11255 busy-us=774897 render-us=505793 panel-wait-us=14830
+PC frames=301 clocks/s=4778892 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=301 late-us=11610 busy-us=692864 core1-draw-us=626187 panel-wait-us=169330
 
 
 
-PC frames=363 clocks/s=4778879 CS:IP=0050:015D mode=29 colour=00 PIT0=65536 IMR=FC panel frames=363 late-us=16224 busy-us=810561 render-us=507979 panel-wait-us=8808
+PC frames=361 clocks/s=4778867 CS:IP=0050:09BE mode=09 colour=00 PIT0=19886 IMR=FE panel frames=361 late-us=11683 busy-us=692836 core1-draw-us=626295 panel-wait-us=169849
 
 
 
-PC frames=419 clocks/s=4460280 CS:IP=0050:0171 mode=29 colour=1F PIT0=65536 IMR=FC panel frames=419 late-us=90931 busy-us=1000731 render-us=759144 panel-wait-us=0
+PC frames=421 clocks/s=4778895 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=421 late-us=11698 busy-us=692968 core1-draw-us=626224 panel-wait-us=169902
 
 
 
-PC frames=474 clocks/s=4380767 CS:IP=0050:0162 mode=29 colour=3A PIT0=65536 IMR=FC panel frames=474 late-us=83560 busy-us=1010501 render-us=745014 panel-wait-us=0
+PC frames=481 clocks/s=4778868 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=481 late-us=11697 busy-us=693214 core1-draw-us=626173 panel-wait-us=169040
 
 
 
-PC frames=530 clocks/s=4460175 CS:IP=0050:016E mode=29 colour=07 PIT0=65536 IMR=FC panel frames=530 late-us=60655 busy-us=1011793 render-us=758360 panel-wait-us=0
+PC frames=541 clocks/s=4778880 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=541 late-us=11704 busy-us=693009 core1-draw-us=626204 panel-wait-us=169992
 
 
 
-PC frames=589 clocks/s=4699256 CS:IP=0050:0162 mode=09 colour=1F PIT0=65536 IMR=FC panel frames=589 late-us=90422 busy-us=1013756 render-us=749945 panel-wait-us=0
+PC frames=601 clocks/s=4778885 CS:IP=0050:10C7 mode=08 colour=00 PIT0=19886 IMR=FE panel frames=601 late-us=11553 busy-us=692947 core1-draw-us=626202 panel-wait-us=169566
 
 
 
-PC frames=646 clocks/s=4539907 CS:IP=0050:016E mode=09 colour=25 PIT0=65536 IMR=FC panel frames=646 late-us=56153 busy-us=1001404 render-us=714096 panel-wait-us=0
+PC frames=661 clocks/s=4778898 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=661 late-us=10744 busy-us=658804 core1-draw-us=423714 panel-wait-us=235003
 
 
 
-PC frames=706 clocks/s=4778874 CS:IP=0050:016E mode=09 colour=07 PIT0=65536 IMR=FC panel frames=706 late-us=62515 busy-us=1007047 render-us=751645 panel-wait-us=0
+PC frames=721 clocks/s=4778864 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=721 late-us=11142 busy-us=660038 core1-draw-us=429774 panel-wait-us=234395
 
 
 
-PC frames=770 clocks/s=5097572 CS:IP=0050:0162 mode=0A colour=1F PIT0=65536 IMR=FC panel frames=770 late-us=11248 busy-us=874408 render-us=582307 panel-wait-us=47471
+PC frames=781 clocks/s=4778879 CS:IP=0050:0F5D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=781 late-us=11277 busy-us=659766 core1-draw-us=426908 panel-wait-us=233939
 
 
 
-PC frames=830 clocks/s=4778862 CS:IP=0050:0162 mode=0A colour=3A PIT0=65536 IMR=FC panel frames=830 late-us=11244 busy-us=762348 render-us=460155 panel-wait-us=29035
+PC frames=841 clocks/s=4778880 CS:IP=0050:0F78 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=841 late-us=11264 busy-us=659188 core1-draw-us=422034 panel-wait-us=234366
 
 
 
-PC frames=890 clocks/s=4778799 CS:IP=0050:016E mode=0A colour=07 PIT0=65536 IMR=FC panel frames=890 late-us=13824 busy-us=736877 render-us=473546 panel-wait-us=42137
+PC frames=901 clocks/s=4778955 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=901 late-us=10905 busy-us=658932 core1-draw-us=424555 panel-wait-us=234246
 
 
 
-PC frames=951 clocks/s=4858532 CS:IP=0050:015D mode=0E colour=1F PIT0=65536 IMR=FC panel frames=951 late-us=11244 busy-us=748515 render-us=479940 panel-wait-us=42968
+PC frames=961 clocks/s=4778807 CS:IP=0050:0F30 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=961 late-us=11284 busy-us=659574 core1-draw-us=429510 panel-wait-us=236008
 
 
 
-PC frames=1011 clocks/s=4778994 CS:IP=0050:0162 mode=0E colour=3A PIT0=65536 IMR=FC panel frames=1011 late-us=11259 busy-us=761311 render-us=459007 panel-wait-us=29608
+PC frames=1021 clocks/s=4778874 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1021 late-us=11277 busy-us=659607 core1-draw-us=429823 panel-wait-us=233699
 
 
 
-PC frames=1071 clocks/s=4778760 CS:IP=0050:0171 mode=0E colour=07 PIT0=65536 IMR=FC panel frames=1071 late-us=13812 busy-us=738638 render-us=471351 panel-wait-us=41612
+PC frames=1081 clocks/s=4778978 CS:IP=0050:0EB3 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1081 late-us=11300 busy-us=659229 core1-draw-us=424514 panel-wait-us=234049
 
 
 
-PC frames=1132 clocks/s=4858567 CS:IP=0050:0162 mode=1A colour=1F PIT0=65536 IMR=FC panel frames=1132 late-us=11241 busy-us=714633 render-us=449987 panel-wait-us=96555
+PC frames=1141 clocks/s=4778785 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1141 late-us=11284 busy-us=659428 core1-draw-us=422285 panel-wait-us=234308
 
 
 
-PC frames=1192 clocks/s=4778862 CS:IP=0050:0162 mode=1A colour=3A PIT0=65536 IMR=FC panel frames=1192 late-us=11239 busy-us=699746 render-us=397683 panel-wait-us=64387
+PC frames=1201 clocks/s=4778879 CS:IP=0050:0DDF mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1201 late-us=10752 busy-us=658818 core1-draw-us=426511 panel-wait-us=235159
 
 
 
-PC frames=1252 clocks/s=4778861 CS:IP=0050:016E mode=1A colour=07 PIT0=65536 IMR=FC panel frames=1252 late-us=12218 busy-us=692296 render-us=421140 panel-wait-us=87769
+PC frames=1261 clocks/s=4778873 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1261 late-us=11295 busy-us=659662 core1-draw-us=429625 panel-wait-us=234540
 
 
 
-PC frames=1313 clocks/s=4858527 CS:IP=0050:016E mode=00 colour=1F PIT0=65536 IMR=FC panel frames=1313 late-us=11995 busy-us=697292 render-us=435588 panel-wait-us=247587
+PC frames=1321 clocks/s=4778885 CS:IP=0050:0EFC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1321 late-us=11299 busy-us=659012 core1-draw-us=426400 panel-wait-us=234189
 
 
 
-PC frames=1373 clocks/s=4778965 CS:IP=0050:0162 mode=00 colour=3A PIT0=65536 IMR=FC panel frames=1373 late-us=11211 busy-us=694578 render-us=393087 panel-wait-us=230577
+PC frames=1381 clocks/s=4778877 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1381 late-us=11289 busy-us=659159 core1-draw-us=423949 panel-wait-us=233752
 
 
 
-PC frames=1433 clocks/s=4778794 CS:IP=0050:0171 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1433 late-us=12113 busy-us=689332 render-us=414149 panel-wait-us=251602
+PC frames=1441 clocks/s=4778925 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1441 late-us=10754 busy-us=658609 core1-draw-us=425150 panel-wait-us=234427
 
 
 
-PC EXIT code=0 frames=1439
+PC frames=1501 clocks/s=4778837 CS:IP=0050:0F85 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1501 late-us=11341 busy-us=659583 core1-draw-us=428744 panel-wait-us=235076
 
 
 
-PC frames=1439 clocks/s=551159 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=201 busy-us=82807 render-us=38112 panel-wait-us=19149
+PC frames=1561 clocks/s=4778890 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1561 late-us=11329 busy-us=659223 core1-draw-us=425450 panel-wait-us=234159
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=160 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=1621 clocks/s=4778870 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1621 late-us=11300 busy-us=659013 core1-draw-us=424018 panel-wait-us=233921
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=160 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=1681 clocks/s=4778878 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1681 late-us=11319 busy-us=659624 core1-draw-us=426079 panel-wait-us=233766
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=160 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=1741 clocks/s=4778974 CS:IP=0050:1468 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1741 late-us=10947 busy-us=659290 core1-draw-us=429616 panel-wait-us=235004
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=160 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=1801 clocks/s=4778786 CS:IP=0050:0F5A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1801 late-us=11336 busy-us=659656 core1-draw-us=427699 panel-wait-us=235864
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=161 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=1861 clocks/s=4778887 CS:IP=0050:0F33 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1861 late-us=11288 busy-us=659576 core1-draw-us=422106 panel-wait-us=234095
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=160 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=1921 clocks/s=4778871 CS:IP=0050:0F3E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1921 late-us=11332 busy-us=660374 core1-draw-us=424218 panel-wait-us=234168
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=160 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=1981 clocks/s=4778880 CS:IP=0050:0F7D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1981 late-us=11303 busy-us=659607 core1-draw-us=428799 panel-wait-us=234821
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=159 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=2041 clocks/s=4779011 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=2041 late-us=10755 busy-us=659237 core1-draw-us=429342 panel-wait-us=234955
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=161 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=2101 clocks/s=4778755 CS:IP=0050:05C6 mode=0A colour=01 PIT0=19886 IMR=FE panel frames=2101 late-us=10558 busy-us=657970 core1-draw-us=425817 panel-wait-us=236646
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=159 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=2161 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2161 late-us=11514 busy-us=675585 core1-draw-us=498741 panel-wait-us=191671
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=159 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=2221 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2221 late-us=11662 busy-us=686211 core1-draw-us=498158 panel-wait-us=154692
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=164 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=2281 clocks/s=4778884 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2281 late-us=11663 busy-us=686496 core1-draw-us=498242 panel-wait-us=153576
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=160 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=2341 clocks/s=4778874 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2341 late-us=11660 busy-us=686216 core1-draw-us=498134 panel-wait-us=154382
 
 
 
-PC frames=1439 clocks/s=0 CS:IP=0050:0181 mode=00 colour=07 PIT0=65536 IMR=FC panel frames=1440 late-us=159 busy-us=0 render-us=0 panel-wait-us=0
+PC frames=2401 clocks/s=4778886 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2401 late-us=11660 busy-us=686332 core1-draw-us=498246 panel-wait-us=154041
+
+
+
+PC frames=2461 clocks/s=4778877 CS:IP=0050:09BE mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2461 late-us=11665 busy-us=686520 core1-draw-us=498110 panel-wait-us=153723
+
+
+
+PC frames=2521 clocks/s=4778878 CS:IP=0050:09BE mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2521 late-us=11648 busy-us=685243 core1-draw-us=498318 panel-wait-us=152757
+
+
+
+PC frames=2581 clocks/s=4778879 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2581 late-us=11562 busy-us=684824 core1-draw-us=498100 panel-wait-us=152423
+
+
+
+PC frames=2641 clocks/s=4778882 CS:IP=0050:09B8 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2641 late-us=11627 busy-us=684918 core1-draw-us=498252 panel-wait-us=152865
+
+
+
+PC frames=2701 clocks/s=4778886 CS:IP=0050:086D mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2701 late-us=10997 busy-us=683649 core1-draw-us=501289 panel-wait-us=159157
+
+
+
+PC frames=2761 clocks/s=4778883 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2761 late-us=11847 busy-us=692635 core1-draw-us=626224 panel-wait-us=174054
+
+
+
+PC frames=2821 clocks/s=4778874 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2821 late-us=11839 busy-us=693038 core1-draw-us=626171 panel-wait-us=169551
+
+
+
+PC frames=2881 clocks/s=4778878 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2881 late-us=11814 busy-us=692998 core1-draw-us=626234 panel-wait-us=169584
+
+
+
+PC frames=2941 clocks/s=4778886 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2941 late-us=11846 busy-us=693202 core1-draw-us=626121 panel-wait-us=169125
+
+
+
+PC frames=3001 clocks/s=4778872 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3001 late-us=11831 busy-us=692921 core1-draw-us=626253 panel-wait-us=169909
+
+
+
+PC frames=3061 clocks/s=4778879 CS:IP=0050:09BB mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3061 late-us=11826 busy-us=693079 core1-draw-us=626217 panel-wait-us=169520
+
+
+
+PC frames=3121 clocks/s=4778895 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3121 late-us=11835 busy-us=693026 core1-draw-us=626216 panel-wait-us=169879
+
+
+
+PC frames=3181 clocks/s=4778872 CS:IP=0050:09B9 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3181 late-us=11838 busy-us=693206 core1-draw-us=626201 panel-wait-us=168984
+
+
+
+PC frames=3241 clocks/s=4778875 CS:IP=0050:0495 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3241 late-us=11809 busy-us=692901 core1-draw-us=626335 panel-wait-us=169989
+
+
+
+PC frames=3301 clocks/s=4778879 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=3301 late-us=11256 busy-us=690585 core1-draw-us=614186 panel-wait-us=172765
+
+
+
+PC frames=3361 clocks/s=4778888 CS:IP=0050:0F30 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=3361 late-us=11298 busy-us=659640 core1-draw-us=425745 panel-wait-us=233644
+
+
+
+PC frames=3421 clocks/s=4778875 CS:IP=0050:0E1A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=3421 late-us=10798 busy-us=659037 core1-draw-us=424504 panel-wait-us=235251
+
+
+
+PC frames=3481 clocks/s=4778883 CS:IP=0050:0F2B mode=08 colour=01 PIT0=19886 IMR=FE panel frames=3481 late-us=11300 busy-us=659854 core1-draw-us=425946 panel-wait-us=234514
 
 
 serial check PASS
 serial check exit 0
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\pc.picow  ->  RP2040
-pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65408 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
-NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
-NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
-NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
-NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122472|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122472 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc.uf2
-pmfc: OK
-image ends at 0x1001DF00
-
-Algorithm Hash                                                             Path                                        
---------- ----                                                             ----                                        
-SHA256    0C606A390B72B4E608884B0443143FDEF12FEE53FC43EC1C2B157BA2AF2B5D5C C:\Users\ajtaj\Desktop\Github\8086Emulato...
-
-
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\pc.picow  ->  RP2040
-pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 65408 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc.uf2.asm
-> RP2040 ASSEMBLER: 95352 bytes of code run from SRAM at $20000000-$20017477, copied from flash at boot; 1056 bytes of SRAM left free, stacks and reserved windows excluded.
-NOTE: 'global_pcram2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
-NOTE: 'global_pcram2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
-NOTE: 'global_pcram2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
-NOTE: 'global_pcram2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
-ROM_TOTAL_RP2040|122472|2097152
-CYCLES_TOTAL_RP2040|74544|straight-line, not-taken branches
-REGMAP_RP2040|7337|249|119|388|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1463|frame-slot loads taken from a register
-pmfc: pc.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122472 bytes into 479 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc.uf2
-pmfc: uploading pc.uf2 (RP2040) through COM7
-> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
-> [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.1 s): the board is going to its boot loader.
-> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
-> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
-> [NATIVE UPLOADER] Writing image: 65536 of 245248 bytes (26%)
-> [NATIVE UPLOADER] Writing image: 131072 of 245248 bytes (53%)
-> [NATIVE UPLOADER] Writing image: 196608 of 245248 bytes (80%)
-> [NATIVE UPLOADER] Writing image: 245248 of 245248 bytes (100%)
-> [NATIVE UPLOADER] Wrote pc.uf2 to I:\
-> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
-pmfc: uploaded.
-pmfc: OK
-
-
-PC frames=61 clocks/s=4858528 CS:IP=0050:0130 mode=0A colour=30 PIT0=65536 IMR=FC panel frames=61 late-us=14280 busy-us=855475 render-us=438987 panel-wait-us=380
-
-
-
-PC frames=121 clocks/s=4778880 CS:IP=0050:0133 mode=0A colour=3E PIT0=65536 IMR=FC panel frames=121 late-us=14257 busy-us=843599 render-us=431318 panel-wait-us=0
-
-
-
-PC frames=181 clocks/s=4778884 CS:IP=0050:0130 mode=0A colour=3C PIT0=65536 IMR=FC panel frames=181 late-us=14257 busy-us=843570 render-us=431331 panel-wait-us=0
-
-
-
-PC frames=241 clocks/s=4778876 CS:IP=0050:0131 mode=0A colour=3A PIT0=65536 IMR=FC panel frames=241 late-us=14253 busy-us=843576 render-us=431376 panel-wait-us=0
-
-
-
-PC frames=301 clocks/s=4778888 CS:IP=0050:0130 mode=0A colour=38 PIT0=65536 IMR=FC panel frames=301 late-us=14253 busy-us=843577 render-us=431345 panel-wait-us=0
-
-
-
-PC frames=361 clocks/s=4778876 CS:IP=0050:0131 mode=0A colour=36 PIT0=65536 IMR=FC panel frames=361 late-us=14253 busy-us=843608 render-us=431365 panel-wait-us=0
-
-
-
-PC frames=421 clocks/s=4778888 CS:IP=0050:0130 mode=0A colour=34 PIT0=65536 IMR=FC panel frames=421 late-us=14252 busy-us=843560 render-us=431333 panel-wait-us=0
-
-
-
-PC frames=481 clocks/s=4778868 CS:IP=0050:0130 mode=0A colour=32 PIT0=65536 IMR=FC panel frames=481 late-us=14252 busy-us=843590 render-us=431373 panel-wait-us=0
-
-
-
-PC frames=541 clocks/s=4778880 CS:IP=0050:0133 mode=0A colour=30 PIT0=65536 IMR=FC panel frames=541 late-us=14257 busy-us=843571 render-us=431306 panel-wait-us=0
-
-
-
-PC frames=601 clocks/s=4778884 CS:IP=0050:0130 mode=0A colour=3E PIT0=65536 IMR=FC panel frames=601 late-us=14253 busy-us=843596 render-us=431356 panel-wait-us=0
-
-
-serial check PASS
-serial check exit 0
-lease released 23:21:17
+lease released 07:42:17

@@ -243,7 +243,7 @@ Pico's timer.
 
 ```powershell
 py -3 tools/make_pcprogram.py desktop/examples/bars.com          # writes src/pcprogram.pmi
-.	oolsuild.ps1 -Source src/pc.picow -Output firmware/8086-pc-picow.uf2 -Port COM7
+.\tools\build.ps1 -Source src/pc.picow -Output firmware/8086-pc-picow.uf2 -Port COM7
 ```
 
 - RAM: 126 KB from linear 0 (96 KB + 30 KB, around the USB buffers); CGA 16 KB at
@@ -254,11 +254,17 @@ py -3 tools/make_pcprogram.py desktop/examples/bars.com          # writes src/pc
   there returns into the REP with all its prefixes. The reference tests count a whole
   REP as one step, so for them it stays off.
 - Picture: the LAFVIN ST7796 (480 x 320) shows the 200 lines at half width,
-  320 x 200, centred; core 1 converts and sends lines by DMA while core 0 runs the
-  PC. Lines are drawn by `Pc86RenderHalf`, which writes the panel's pixels
-  straight into the line ring, four to a store; `cpu86_pc.exe --halfcheck`
-  compares it with the desktop's full-width renderer on every line (pixel x =
-  full pixel 2x). No border on the panel.
+  320 x 200, centred. The two cores split the work: core 0 runs the PC and, at each
+  scanline, only latches the CGA registers that line depends on (`Pc86LatchRegs`:
+  mode, colour select, start address, cursor, frame count) into a ring of 32
+  records; core 1 draws the lines from those records and the CGA memory straight
+  into RGB565 (`Pc86RenderHalf`, from SRAM, two pixels to a store; in text the
+  attribute's four pixel pairs are built once and reused along the row) and sends
+  them by DMA. Register effects ($3D9 raster bars, palette switches) are exact to
+  the line; the CGA memory is read up to a few lines after the line's moment.
+  `cpu86_pc.exe --halfcheck` compares the same renderer, given the same latched
+  records and an identity palette, with the desktop's full-width one on every line
+  (pixel x = full pixel 2x). No border on the panel.
 - USB serial: `OUT E9h` prints there; typed characters become set-1 scan codes
   (make, then break: letters, digits, space, Enter, Esc, Backspace); `OUT F4h`
   ends the run. The run starts once a host opens the port, or after 10 s. Once
@@ -266,21 +272,22 @@ py -3 tools/make_pcprogram.py desktop/examples/bars.com          # writes src/pc
   where core 0's time went.
 - No speaker: the bench Pico W has none; port 61h and PIT channel 2 still work.
 
-On the board (COM7, `docs/pc-*-picow.log`, `docs/board-pc-run.log`):
+On the board (COM7, `docs/pc-*-picow.log`, `docs/board-pc-run*.log`):
 
-| Program | Result | clocks/s | core 0 busy (drawing) |
+| Program | Result | clocks/s | core 0 busy / core 1 drawing |
 |---|---|---:|---:|
-| `pctest.com` | `R=7 T=115`, `PC EXIT code=7` at frame 37: the same as the desktop | | |
-| `keytest.com`, typed `abz` | `1E 9E 30 B0 2C AC` | 4.78 M (60 frames/s) | 90% (81%), 80-column text |
-| `modes.com`, every CGA mode | all 40 mode/colour pairs, `PC EXIT code=0` at frame 1439 | 4.78 M | about 80% (50%) |
-| `bars.com`, $3D9 every line | runs | 4.78 M (60 frames/s) | 84% (43%), 320 x 200 |
+| `pctest.com` | `R=7 T=115`, `PC EXIT code=7` at frame 38: the same as the desktop | | |
+| `keytest.com`, typed `abz`, 80-column text | `1E 9E 30 B0 2C AC` | 4.78 M (60 frames/s) | 59% / 59% |
+| `modes.com`, every CGA mode | all 40 mode/colour pairs, `PC EXIT code=0` at frame 1439 | 4.78 M; 4.46 M in its 80-column screens | up to 100% / 99% there |
+| `bars.com`, $3D9 every line, 320 x 200 | runs | 4.78 M (60 frames/s) | 65% / 50% |
 | `reptest_small.com`, REP strings under a 1 kHz IRQ0 | `S=17 M=30 C=40 A=26 OK` (as on the desktop) | | |
-| `demo/demo.com` (the 8086 back end's demo) | title, plasma + scroller, copper | 3.82 M in the title (0.80x), 4.78 M in the plasma and the copper | 100% (60%) in the title's 80-column text |
+| `demo/demo.com` (the 8086 back end's demo) | title (80 x 25), plasma + scroller (40 x 25), copper (320 x 200), on every frame | 4.78 M in all three parts | 69% / 63% in the title |
 
-So every mode runs at the real 4.77 MHz while the CPU leaves room. 80-column text
-is the limit: drawing it takes 60% of core 0, so a program that keeps the CPU busy
-there (the demo's title, polling $3DA for its raster bars) runs at 0.8x, frames
-whole and music slower. The image is built with 1,056 bytes of SRAM to spare.
+So every mode runs at the real 4.77 MHz. The one exception measured is 80-column
+text whose attribute changes in nearly every cell (modes.com fills the screen with
+random bytes): 0.93x, since the pixel pairs are then rebuilt for each character.
+Before core 1 drew the lines, core 0 did, and the demo's title ran at 0.80x. The
+image is built with 3,580 bytes of SRAM to spare.
 The clock-counted reference suites still pass on the board with the REP change:
 32,300 of 32,300 (100 per file) and the API checks 77 of 77 (`docs/verify-timed.log`,
 `docs/board-timed-run.log`).

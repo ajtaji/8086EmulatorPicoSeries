@@ -3,10 +3,13 @@
 ; Adapted from the C64 emulator's panel driver (C64EmulatorPicoSeries,
 ; src/pico_video.pmi), which runs on the same bench boards.
 ;
-; Core 0's PC writes each line as 320 colour indices into a ring of 32 lines
-; (PlatformLine / PlatformLineDone). Core 1 turns them into RGB565, four lines
-; to a buffer, two buffers, and sends them with SPI0's DMA while it converts
-; the next. A frame opens the panel's window at its first line, so a dropped
+; Core 0's PC puts each line's CGA registers in a ring of 32 records
+; (PlatformLine / PlatformLineDone, Pc86LatchRegs). Core 1 draws the lines from
+; them and the CGA memory (Pc86RenderHalf) straight into RGB565, four lines to a
+; buffer, two buffers, and sends them with SPI0's DMA while it draws the next.
+; So core 0 spends nothing on the picture. Core 1 reads the CGA memory a few
+; lines after the line's moment: a write in those lines can show a line early;
+; the registers ($3D8, $3D9, start, cursor) are exact to the line. A frame opens the panel's window at its first line, so a dropped
 ; or late line can never shift the picture: the window is re-opened at the
 ; line that comes next whenever the sequence breaks.
 ;
@@ -16,15 +19,18 @@
 #VID_Y0 = 60
 #VID_W = 320
 #VID_H = 200
-#VID_RING = 16                    ; 32 in the C64 build: 16 frees 5 KB for guest RAM
+#VID_RING = 32
+#VID_REC = 32                     ; a line's latched registers (#PC86_REGS)
 #VID_BATCH = 4
-Global Dim LineRing.a(#VID_RING * #VID_W)
+Global Dim LineRing.a(#VID_RING * #VID_REC)
 Global Dim LineTag.i(#VID_RING)
 Global Dim Pal565.u(32)
 Global Dim DmaBuf.u(2 * #VID_BATCH * #VID_W)
 Global LinesMade.i, LinesSent.i, VidWaitUs.i, VidDropped.i
 Global VidOpen.i, VidNextRow.i, VidBusy.i, VidCur.i, VidPending.i, VidPendingLines.i
-Global VidFrames.i, VidLinesOut.i, VidSkip.i
+Global VidFrames.i, VidLinesOut.i, VidSkip.i, VidDrawUs.i
+
+Declare Pc86RenderHalf(line.i, dest.i, r.i, pal.i)
 
 ProcedureRAM VidFence()
   ASM
@@ -44,7 +50,7 @@ Procedure VideoBegin()
   Tft796Begin(0, 5, 6, 7) : Tft796Rotate(1) : Tft796Fill(0)
 EndProcedure
 
-; Core 0: the buffer for view line viewY, once core 1 has room for it.
+; Core 0: the record for view line viewY, once core 1 has room for it.
 ProcedureRAM.i PlatformLine(viewY.i)
   Protected start.i, slot.i
   If LinesMade - PeekL(@LinesSent) >= #VID_RING
@@ -56,7 +62,7 @@ ProcedureRAM.i PlatformLine(viewY.i)
   EndIf
   slot = LinesMade & (#VID_RING - 1)
   LineTag(slot) = viewY
-  ProcedureReturn @LineRing(slot * #VID_W)
+  ProcedureReturn @LineRing(slot * #VID_REC)
 EndProcedure
 ProcedureRAM PlatformLineDone(viewY.i)
   VidFence()
@@ -91,9 +97,9 @@ Procedure VidOpenAt(row.i)
   VidOpen = 1 : VidNextRow = row
 EndProcedure
 
-; Convert up to #VID_BATCH consecutive lines into buffer VidCur.
+; Draw up to #VID_BATCH consecutive lines into buffer VidCur.
 ProcedureRAM.i VidConvert()
-  Protected n.i, slot.i, src.i, dst.i, i.i, tag.i
+  Protected n.i, slot.i, dst.i, tag.i, t.i
   dst = @DmaBuf(VidCur * #VID_BATCH * #VID_W)
   n = 0
   While n < #VID_BATCH And LinesSent <> PeekL(@LinesMade)
@@ -101,11 +107,10 @@ ProcedureRAM.i VidConvert()
     tag = LineTag(slot)
     If tag <> VidNextRow + n : Break : EndIf
     VidFence()
-    src = @LineRing(slot * #VID_W)
-    For i = 0 To #VID_W - 1
-      PokeU(dst, Pal565(PeekA(src + i)))
-      dst = dst + 2
-    Next
+    t = Micros()
+    Pc86RenderHalf(tag, dst, @LineRing(slot * #VID_REC), @Pal565(0))
+    VidDrawUs = VidDrawUs + Micros() - t
+    dst = dst + #VID_W * 2
     VidFence()
     LinesSent = LinesSent + 1
     n = n + 1
