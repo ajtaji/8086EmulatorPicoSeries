@@ -1,0 +1,606 @@
+﻿lease taken 10:57:06
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-pctest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 63848 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-pctest.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|119972|4194304
+CYCLES_TOTAL_RP2350|72073|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-pctest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 119972 bytes into 469 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-pctest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-pctest.uf2
+pmfc: OK
+image ends at 0x1001D500
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    69E167545DBCB07B9E6658309515B53CDF3132A08BF034D1BC9B64C88E667DE1 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-pctest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 63848 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-pctest.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|119972|4194304
+CYCLES_TOTAL_RP2350|72073|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-pctest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 119972 bytes into 469 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-pctest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-pctest.uf2
+pmfc: uploading pc2-pctest.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 240128 bytes (27%)
+> [NATIVE UPLOADER] Writing image: 131072 of 240128 bytes (54%)
+> [NATIVE UPLOADER] Writing image: 196608 of 240128 bytes (81%)
+> [NATIVE UPLOADER] Writing image: 240128 of 240128 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc2-pctest.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+R=7 T=115
+
+
+PC EXIT code=7 frames=38
+
+
+
+PC frames=38 clocks/s=3087737 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=112 busy-us=544544 core1-draw-us=333809 panel-wait-us=253121
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=68 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=63 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=62 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=62 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=61 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=69 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=61 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=60 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=74 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=61 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=38 clocks/s=0 CS:IP=0050:01BE mode=0A colour=37 PIT0=1193 IMR=FC panel frames=39 late-us=61 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+serial check PASS
+serial check exit 0
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-reptest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 63872 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-reptest.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|120172|4194304
+CYCLES_TOTAL_RP2350|72074|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-reptest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 120172 bytes into 470 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-reptest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-reptest.uf2
+pmfc: OK
+image ends at 0x1001D600
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    078EBAAF125A86CFAFE526B747554934751407E2679A90D11598D9A121B32B43 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-reptest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 63872 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-reptest.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|120172|4194304
+CYCLES_TOTAL_RP2350|72074|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-reptest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 120172 bytes into 470 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-reptest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-reptest.uf2
+pmfc: uploading pc2-reptest.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 240640 bytes (27%)
+> [NATIVE UPLOADER] Writing image: 131072 of 240640 bytes (54%)
+> [NATIVE UPLOADER] Writing image: 196608 of 240640 bytes (81%)
+> [NATIVE UPLOADER] Writing image: 240640 of 240640 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc2-reptest.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+S=17 M=30 C=40 A=26 OK
+
+
+PC EXIT code=0 frames=6
+
+
+
+PC frames=6 clocks/s=544777 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=110 busy-us=95812 core1-draw-us=68923 panel-wait-us=55843
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=62 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=61 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=63 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=77 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=62 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=62 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=74 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=62 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+
+PC frames=6 clocks/s=0 CS:IP=0050:0249 mode=29 colour=00 PIT0=1193 IMR=FC panel frames=7 late-us=67 busy-us=0 core1-draw-us=0 panel-wait-us=0
+
+
+serial check PASS
+serial check exit 0
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 63830 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|119824|4194304
+CYCLES_TOTAL_RP2350|72073|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 119824 bytes into 469 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: OK
+image ends at 0x1001D500
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    967D9A5ABD1B7E2E70758E052CFF068F929A5D4FFEE03006B8BB62A1FCBA37CD C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 63830 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|119824|4194304
+CYCLES_TOTAL_RP2350|72073|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 119824 bytes into 469 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: uploading pc2-keytest.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.7 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 240128 bytes (27%)
+> [NATIVE UPLOADER] Writing image: 131072 of 240128 bytes (54%)
+> [NATIVE UPLOADER] Writing image: 196608 of 240128 bytes (81%)
+> [NATIVE UPLOADER] Writing image: 240128 of 240128 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc2-keytest.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+
+
+PC frames=61 clocks/s=4858528 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=61 late-us=12968 busy-us=783685 core1-draw-us=598413 panel-wait-us=664193
+
+
+
+PC frames=121 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=121 late-us=12926 busy-us=770634 core1-draw-us=589723 panel-wait-us=653417
+
+1E 9E 30 B0 2C AC 
+
+PC frames=181 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=181 late-us=12936 busy-us=770729 core1-draw-us=589700 panel-wait-us=653232
+
+
+
+PC frames=241 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=241 late-us=12931 busy-us=770631 core1-draw-us=589745 panel-wait-us=653440
+
+
+
+PC frames=301 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=301 late-us=12923 busy-us=770642 core1-draw-us=589621 panel-wait-us=653399
+
+
+
+PC frames=361 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=361 late-us=12921 busy-us=770626 core1-draw-us=589597 panel-wait-us=653403
+
+
+
+PC frames=421 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=421 late-us=12932 busy-us=770647 core1-draw-us=589643 panel-wait-us=653416
+
+
+
+PC frames=481 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=481 late-us=12921 busy-us=770624 core1-draw-us=589588 panel-wait-us=653428
+
+
+
+PC frames=541 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=541 late-us=12919 busy-us=770639 core1-draw-us=589651 panel-wait-us=653405
+
+
+
+PC frames=601 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=601 late-us=12921 busy-us=770622 core1-draw-us=589618 panel-wait-us=653463
+
+
+
+PC frames=661 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=661 late-us=12921 busy-us=770634 core1-draw-us=589664 panel-wait-us=653401
+
+
+
+PC frames=721 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=721 late-us=12924 busy-us=770630 core1-draw-us=589652 panel-wait-us=653411
+
+
+serial check PASS
+serial check exit 0
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 64605 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|126032|4194304
+CYCLES_TOTAL_RP2350|72076|straight-line, not-taken branches
+REGMAP_RP2350|7150|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 126032 bytes into 493 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: OK
+image ends at 0x1001ED00
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    3932AB95F2E7F079A23251E70FD083DEEAED1EBC014FD3B00EFEAF33C46ECD8E C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 64605 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2.asm
+> RP2350 ASSEMBLER: 95112 bytes of code run from SRAM at $20000000-$20017387, copied from flash at boot; 35924 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|126032|4194304
+CYCLES_TOTAL_RP2350|72076|straight-line, not-taken branches
+REGMAP_RP2350|7150|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 126032 bytes into 493 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: uploading pc2-demo.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] A BOOTSEL drive is already present at H:\. It is not the board on COM6 (that board is running a program, so it has no boot drive yet) and is left alone; the program goes only to the drive that appears after COM6 is reset.
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.1 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 252416 bytes (25%)
+> [NATIVE UPLOADER] Writing image: 131072 of 252416 bytes (51%)
+> [NATIVE UPLOADER] Writing image: 196608 of 252416 bytes (77%)
+> [NATIVE UPLOADER] Writing image: 252416 of 252416 bytes (100%)
+> [NATIVE UPLOADER] Writing image: 252416 of 252416 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc2-demo.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+
+
+PC frames=61 clocks/s=4858543 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=61 late-us=14457 busy-us=875625 core1-draw-us=638042 panel-wait-us=346836
+
+
+
+PC frames=121 clocks/s=4778867 CS:IP=0050:09BB mode=09 colour=00 PIT0=19886 IMR=FE panel frames=121 late-us=14412 busy-us=863137 core1-draw-us=630223 panel-wait-us=327234
+
+
+
+PC frames=181 clocks/s=4778885 CS:IP=0050:06E4 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=181 late-us=14405 busy-us=863274 core1-draw-us=630241 panel-wait-us=327317
+
+
+
+PC frames=241 clocks/s=4778874 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=241 late-us=14414 busy-us=862827 core1-draw-us=630175 panel-wait-us=326863
+
+
+
+PC frames=301 clocks/s=4778892 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=301 late-us=14393 busy-us=862914 core1-draw-us=630115 panel-wait-us=326964
+
+
+
+PC frames=361 clocks/s=4778867 CS:IP=0050:09BE mode=09 colour=00 PIT0=19886 IMR=FE panel frames=361 late-us=14398 busy-us=862842 core1-draw-us=630140 panel-wait-us=327017
+
+
+
+PC frames=421 clocks/s=4778895 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=421 late-us=14419 busy-us=863213 core1-draw-us=630088 panel-wait-us=327305
+
+
+
+PC frames=481 clocks/s=4778868 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=481 late-us=14424 busy-us=863199 core1-draw-us=630120 panel-wait-us=327149
+
+
+
+PC frames=541 clocks/s=4778880 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=541 late-us=14415 busy-us=863233 core1-draw-us=630231 panel-wait-us=327342
+
+
+
+PC frames=601 clocks/s=4778885 CS:IP=0050:10C7 mode=08 colour=00 PIT0=19886 IMR=FE panel frames=601 late-us=14247 busy-us=863085 core1-draw-us=629988 panel-wait-us=327334
+
+
+
+PC frames=661 clocks/s=4778898 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=661 late-us=13617 busy-us=839671 core1-draw-us=441720 panel-wait-us=410027
+
+
+
+PC frames=721 clocks/s=4778864 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=721 late-us=14144 busy-us=840943 core1-draw-us=448150 panel-wait-us=409507
+
+
+
+PC frames=781 clocks/s=4778879 CS:IP=0050:0F5D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=781 late-us=14175 busy-us=840402 core1-draw-us=445098 panel-wait-us=408908
+
+
+
+PC frames=841 clocks/s=4778880 CS:IP=0050:0F78 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=841 late-us=14180 busy-us=840278 core1-draw-us=439735 panel-wait-us=408997
+
+
+
+PC frames=901 clocks/s=4778955 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=901 late-us=13736 busy-us=839962 core1-draw-us=442556 panel-wait-us=409229
+
+
+
+PC frames=961 clocks/s=4778807 CS:IP=0050:0F30 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=961 late-us=14175 busy-us=840885 core1-draw-us=447868 panel-wait-us=410773
+
+
+
+PC frames=1021 clocks/s=4778874 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1021 late-us=14167 busy-us=840511 core1-draw-us=448275 panel-wait-us=409041
+
+
+
+PC frames=1081 clocks/s=4778978 CS:IP=0050:0EB3 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1081 late-us=14206 busy-us=840491 core1-draw-us=442423 panel-wait-us=409015
+
+
+
+PC frames=1141 clocks/s=4778785 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1141 late-us=14177 busy-us=840600 core1-draw-us=440160 panel-wait-us=409188
+
+
+
+PC frames=1201 clocks/s=4778879 CS:IP=0050:0DDF mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1201 late-us=13627 busy-us=839961 core1-draw-us=444601 panel-wait-us=410346
+
+
+
+PC frames=1261 clocks/s=4778873 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1261 late-us=14194 busy-us=840839 core1-draw-us=448145 panel-wait-us=409455
+
+
+
+PC frames=1321 clocks/s=4778885 CS:IP=0050:0EFC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1321 late-us=14188 busy-us=840118 core1-draw-us=444540 panel-wait-us=408677
+
+
+
+PC frames=1381 clocks/s=4778877 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1381 late-us=14179 busy-us=840154 core1-draw-us=441805 panel-wait-us=408708
+
+
+
+PC frames=1441 clocks/s=4778925 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1441 late-us=13690 busy-us=839822 core1-draw-us=443193 panel-wait-us=409222
+
+
+
+PC frames=1501 clocks/s=4778837 CS:IP=0050:0F85 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1501 late-us=14249 busy-us=840765 core1-draw-us=447235 panel-wait-us=410384
+
+
+
+PC frames=1561 clocks/s=4778890 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1561 late-us=14238 busy-us=840491 core1-draw-us=443569 panel-wait-us=409254
+
+
+
+PC frames=1621 clocks/s=4778870 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1621 late-us=14186 busy-us=840139 core1-draw-us=441792 panel-wait-us=408906
+
+
+
+PC frames=1681 clocks/s=4778878 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1681 late-us=14206 busy-us=840499 core1-draw-us=444146 panel-wait-us=409090
+
+
+
+PC frames=1741 clocks/s=4778974 CS:IP=0050:1468 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1741 late-us=13785 busy-us=840199 core1-draw-us=447865 panel-wait-us=409587
+
+
+
+PC frames=1801 clocks/s=4778786 CS:IP=0050:0F5A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1801 late-us=14241 busy-us=840485 core1-draw-us=446115 panel-wait-us=410491
+
+
+
+PC frames=1861 clocks/s=4778887 CS:IP=0050:0F33 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1861 late-us=14174 busy-us=840292 core1-draw-us=439550 panel-wait-us=408804
+
+
+
+PC frames=1921 clocks/s=4778871 CS:IP=0050:0F3E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1921 late-us=14230 busy-us=841065 core1-draw-us=441868 panel-wait-us=409393
+
+
+
+PC frames=1981 clocks/s=4778880 CS:IP=0050:0F7D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1981 late-us=14188 busy-us=840724 core1-draw-us=447079 panel-wait-us=409568
+
+
+
+PC frames=2041 clocks/s=4779011 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=2041 late-us=13625 busy-us=840282 core1-draw-us=447746 panel-wait-us=410446
+
+
+
+PC frames=2101 clocks/s=4778755 CS:IP=0050:05C6 mode=0A colour=01 PIT0=19886 IMR=FE panel frames=2101 late-us=13291 busy-us=838754 core1-draw-us=443395 panel-wait-us=411870
+
+
+
+PC frames=2161 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2161 late-us=14532 busy-us=857607 core1-draw-us=497020 panel-wait-us=362301
+
+
+
+PC frames=2221 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2221 late-us=14583 busy-us=869007 core1-draw-us=496498 panel-wait-us=321007
+
+
+
+PC frames=2281 clocks/s=4778884 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2281 late-us=14573 busy-us=869092 core1-draw-us=496448 panel-wait-us=321047
+
+
+
+PC frames=2341 clocks/s=4778874 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2341 late-us=14577 busy-us=869006 core1-draw-us=496439 panel-wait-us=320979
+
+
+
+PC frames=2401 clocks/s=4778886 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2401 late-us=14581 busy-us=869054 core1-draw-us=496298 panel-wait-us=321095
+
+
+
+PC frames=2461 clocks/s=4778877 CS:IP=0050:09BE mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2461 late-us=14572 busy-us=869087 core1-draw-us=496374 panel-wait-us=321076
+
+
+
+PC frames=2521 clocks/s=4778878 CS:IP=0050:09BE mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2521 late-us=14554 busy-us=867803 core1-draw-us=496393 panel-wait-us=319601
+
+
+
+PC frames=2581 clocks/s=4778879 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2581 late-us=14521 busy-us=867367 core1-draw-us=496428 panel-wait-us=319247
+
+
+
+PC frames=2641 clocks/s=4778882 CS:IP=0050:09B8 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2641 late-us=14535 busy-us=867541 core1-draw-us=496392 panel-wait-us=319350
+
+
+
+PC frames=2701 clocks/s=4778886 CS:IP=0050:086D mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2701 late-us=13746 busy-us=865863 core1-draw-us=499199 panel-wait-us=326498
+
+
+
+PC frames=2761 clocks/s=4778883 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2761 late-us=14548 busy-us=862775 core1-draw-us=630641 panel-wait-us=332024
+
+
+
+PC frames=2821 clocks/s=4778874 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2821 late-us=14539 busy-us=863206 core1-draw-us=630106 panel-wait-us=327262
+
+
+
+PC frames=2881 clocks/s=4778878 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2881 late-us=14530 busy-us=863148 core1-draw-us=630078 panel-wait-us=327288
+
+
+
+PC frames=2941 clocks/s=4778886 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=2941 late-us=14545 busy-us=863239 core1-draw-us=630283 panel-wait-us=327191
+
+
+
+PC frames=3001 clocks/s=4778872 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3001 late-us=14533 busy-us=863230 core1-draw-us=630161 panel-wait-us=327399
+
+
+
+PC frames=3061 clocks/s=4778879 CS:IP=0050:09BB mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3061 late-us=14535 busy-us=863256 core1-draw-us=630224 panel-wait-us=327353
+
+
+
+PC frames=3121 clocks/s=4778895 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3121 late-us=14534 busy-us=863314 core1-draw-us=630107 panel-wait-us=327454
+
+
+
+PC frames=3181 clocks/s=4778872 CS:IP=0050:09B9 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3181 late-us=14539 busy-us=863295 core1-draw-us=630074 panel-wait-us=327109
+
+
+
+PC frames=3241 clocks/s=4778875 CS:IP=0050:0495 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=3241 late-us=14509 busy-us=863201 core1-draw-us=630136 panel-wait-us=327536
+
+
+
+PC frames=3301 clocks/s=4778879 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=3301 late-us=14159 busy-us=861142 core1-draw-us=618765 panel-wait-us=331331
+
+
+
+PC frames=3361 clocks/s=4778888 CS:IP=0050:0F30 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=3361 late-us=14217 busy-us=840323 core1-draw-us=443965 panel-wait-us=408717
+
+
+
+PC frames=3421 clocks/s=4778875 CS:IP=0050:0E1A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=3421 late-us=13646 busy-us=839897 core1-draw-us=442254 panel-wait-us=409782
+
+
+serial check PASS
+serial check exit 0
+lease released 10:59:55

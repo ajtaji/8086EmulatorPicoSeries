@@ -1,0 +1,21 @@
+; The PC machine on the Pico 2 W (RP2350) running demo/demo.com (the 8086 back end's PureMetal demo) (board check).
+; panel: the 8086 core with clock counting, the program from src/pcprogram.pmi
+; (tools/make_pcprogram.py file.com), in real time. See src/pc_body.pmi.
+#CLOCK_KHZ = 150000
+#CPU_TIMING = 1
+#CPU_ASM_TAIL = 1
+#PC_RAM_KB = 256
+#PC_RAM2_KB = 96
+XIncludeFile "RP2350/Lib/clocks.pico2"
+XIncludeFile "RP2350/Lib/timer.pico2"
+XIncludeFile "RP2350/Lib/uart.pico2"
+XIncludeFile "RP2350/Lib/usb_serial.pico2"
+XIncludeFile "RP2350/Lib/safety.pico2"
+XIncludeFile "RP2350/Lib/bits.pico2"
+XIncludeFile "RP2350/Lib/wiring.pico2"
+XIncludeFile "RP2350/Lib/spi.pico2"
+XIncludeFile "RP2350/Lib/st7796.pico2"
+XIncludeFile "RP2350/Lib/multicore_smp.pico2"
+XIncludeFile "../src/cpu86.pico2"
+XIncludeFile "pc_demo.pmi"
+XIncludeFile "../src/pc_body.pmi"

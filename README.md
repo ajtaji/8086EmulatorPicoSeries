@@ -288,6 +288,16 @@ text whose attribute changes in nearly every cell (modes.com fills the screen wi
 random bytes): 0.93x, since the pixel pairs are then rebuilt for each character.
 Before core 1 drew the lines, core 0 did, and the demo's title ran at 0.80x. The
 image is built with 3,580 bytes of SRAM to spare.
+**On the Pico 2 W** (RP2350 at 150 MHz; `src/pc.pico2w`, `Diagnostics/pc-*.pico2w`):
+the same machine, 352 KB of guest RAM (256 KB + 96 KB), core 1 started through
+`RP2350/Lib/multicore_smp.pico2`; `src/pico_video.pmi` tells the chips apart by
+their SPI library and uses the RP2350's SPI0 address and DMA request field. Run on
+the bench's Pico 2 W (COM6, checked by serial output; `docs/pc2-*.log`):
+pctest `R=7 T=115` exit 7 at frame 38, reptest_small `S=17 M=30 C=40 A=26 OK`,
+keytest `1E 9E 30 B0 2C AC`, and the demo at 4.78 M clocks/s in all three parts
+(core 1 drawing 44-63% of its time). `firmware/8086-pc-pico2w.uf2` is `src/pc.pico2w`
+(bars.com), built from the same sources.
+
 The clock-counted reference suites still pass on the board with the REP change:
 32,300 of 32,300 (100 per file) and the API checks 77 of 77 (`docs/verify-timed.log`,
 `docs/board-timed-run.log`).

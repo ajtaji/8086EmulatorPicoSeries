@@ -22,6 +22,15 @@
 #VID_RING = 32
 #VID_REC = 32                     ; a line's latched registers (#PC86_REGS)
 #VID_BATCH = 4
+; The chip, told by its SPI library: SPI0's registers and the DMA request field
+; moved on the RP2350 (spi.pico2: TREQ_SEL at bits 22:17, SPI0 at $40080000).
+CompilerIf #SPI_IO_BANK0 = $40028000
+  #VID_SPI0 = $40080000
+  #VID_TREQ_SHIFT = 17
+CompilerElse
+  #VID_SPI0 = $4003C000
+  #VID_TREQ_SHIFT = 15
+CompilerEndIf
 Global Dim LineRing.a(#VID_RING * #VID_REC)
 Global Dim LineTag.i(#VID_RING)
 Global Dim Pal565.u(32)
@@ -72,13 +81,13 @@ EndProcedure
 ; Core 1 side ------------------------------------------------------------
 ProcedureRAM VidDmaStart(pointer.i, halfwords.i)
   PokeL(#SPI_DMA_CH0_READ, pointer)
-  PokeL(#SPI_DMA_CH0_WRITE, $4003C008)
+  PokeL(#SPI_DMA_CH0_WRITE, #VID_SPI0 + 8)
   PokeL(#SPI_DMA_CH0_COUNT, halfwords)
-  PokeL(#SPI_DMA_CH0_CTRL, #SPI_DMA_EN | #SPI_DMA_SIZE_HALF | #SPI_DMA_INCR_READ | (#SPI_DMA_TREQ_SPI0_TX << 15))
+  PokeL(#SPI_DMA_CH0_CTRL, #SPI_DMA_EN | #SPI_DMA_SIZE_HALF | #SPI_DMA_INCR_READ | (#SPI_DMA_TREQ_SPI0_TX << #VID_TREQ_SHIFT))
 EndProcedure
 ProcedureRAM.i VidDmaIdle()
   If PeekL(#SPI_DMA_CH0_CTRL) & #SPI_DMA_BUSY : ProcedureReturn 0 : EndIf
-  If PeekL($4003C00C) & #SPI_SR_BSY : ProcedureReturn 0 : EndIf
+  If PeekL(#VID_SPI0 + $C) & #SPI_SR_BSY : ProcedureReturn 0 : EndIf
   ProcedureReturn 1
 EndProcedure
 Procedure VidClose()
@@ -93,7 +102,7 @@ Procedure VidOpenAt(row.i)
   Tft796Window(#VID_X0, #VID_Y0 + row, #VID_X0 + #VID_W - 1, #VID_Y0 + #VID_H - 1)
   SpiDmaInit() : SpiSetBits(0, 16)
   Tft796PinSet(tft796_dc, 1) : Tft796PinSet(tft796_cs, 0)
-  PokeL($4003C024, PeekL($4003C024) | #SPI_SSPDMACR_TXDMAE)
+  PokeL(#VID_SPI0 + $24, PeekL(#VID_SPI0 + $24) | #SPI_SSPDMACR_TXDMAE)
   VidOpen = 1 : VidNextRow = row
 EndProcedure
 

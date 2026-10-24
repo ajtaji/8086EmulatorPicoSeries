@@ -120,6 +120,18 @@ Procedure PcKeys()
   EndIf
 EndProcedure
 
+; Core 1 runs Core1Main(): the RP2040's intrinsic, or the RP2350's symmetric
+; multicore library (the wrapper includes RP2350/Lib/multicore_smp.pico2). 1 = started.
+Procedure.i PcLaunchCore1()
+  CompilerIf #SPI_IO_BANK0 = $40028000
+    McCore1ReleaseHold()
+    If McLaunchCore1() = 6 : ProcedureReturn 1 : EndIf
+    ProcedureReturn 0
+  CompilerElse
+    ProcedureReturn multicore_launch()
+  CompilerEndIf
+EndProcedure
+
 Procedure PcStartup()
   SafetyBoot()
   ClockInitKhz(#CLOCK_KHZ)
@@ -131,7 +143,7 @@ Procedure PcStartup()
   Wend
   VideoBegin()
   Say("8086 PC machine clk_sys kHz=") : Num(ClockSysKhz()) : Say(" RAM KB=") : Num(#PC_RAM_KB + #PC_RAM2_KB)
-  Say(" core1=") : Num(multicore_launch()) : Eol()
+  Say(" core1=") : Num(PcLaunchCore1()) : Eol()
   MainT = Micros()
   While PeekL(@Core1Ready) = 0 And Micros() - MainT < 1000000 : SafetyPet() : Wend
 EndProcedure
