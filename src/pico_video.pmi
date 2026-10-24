@@ -1,0 +1,153 @@
+; The PC machine's picture on the LAFVIN ST7796 (480 x 320, landscape): the
+; CGA's 640 x 200 at half width (every other pixel), 1:1 vertically, centred.
+; Adapted from the C64 emulator's panel driver (C64EmulatorPicoSeries,
+; src/pico_video.pmi), which runs on the same bench boards.
+;
+; Core 0's PC writes each line as 320 colour indices into a ring of 32 lines
+; (PlatformLine / PlatformLineDone). Core 1 turns them into RGB565, four lines
+; to a buffer, two buffers, and sends them with SPI0's DMA while it converts
+; the next. A frame opens the panel's window at its first line, so a dropped
+; or late line can never shift the picture: the window is re-opened at the
+; line that comes next whenever the sequence breaks.
+;
+; LAFVIN wiring: SCK GP2, MOSI GP3 (SPI0, 100 MHz from clk_sys 200 MHz),
+; CS GP5, DC GP6, RST GP7.
+#VID_X0 = 80
+#VID_Y0 = 60
+#VID_W = 320
+#VID_H = 200
+#VID_RING = 16                    ; 32 in the C64 build: 16 frees 5 KB for guest RAM
+#VID_BATCH = 4
+Global Dim LineRing.a(#VID_RING * #VID_W)
+Global Dim LineTag.i(#VID_RING)
+Global Dim Pal565.u(32)
+Global Dim DmaBuf.u(2 * #VID_BATCH * #VID_W)
+Global LinesMade.i, LinesSent.i, VidWaitUs.i, VidDropped.i
+Global VidOpen.i, VidNextRow.i, VidBusy.i, VidCur.i, VidPending.i, VidPendingLines.i
+Global VidFrames.i, VidLinesOut.i, VidSkip.i
+
+ProcedureRAM VidFence()
+  ASM
+    dmb
+  EndASM
+EndProcedure
+
+Procedure VideoBegin()
+  Protected i.i, r.i, g.i, b.i
+  For i = 0 To 15
+    r = PeekA(?CgaPalette + i * 3) : g = PeekA(?CgaPalette + i * 3 + 1) : b = PeekA(?CgaPalette + i * 3 + 2)
+    Pal565(i) = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
+    Pal565(i + 16) = Pal565(i)
+  Next
+  SpiPeriFromSys(#CLOCK_KHZ)
+  SpiBegin(0, 2, 3, -1, 100000)
+  Tft796Begin(0, 5, 6, 7) : Tft796Rotate(1) : Tft796Fill(0)
+EndProcedure
+
+; Core 0: the buffer for view line viewY, once core 1 has room for it.
+ProcedureRAM.i PlatformLine(viewY.i)
+  Protected start.i, slot.i
+  If LinesMade - PeekL(@LinesSent) >= #VID_RING
+    start = Micros()
+    While LinesMade - PeekL(@LinesSent) >= #VID_RING
+      If Micros() - start > 200000 : Break : EndIf
+    Wend
+    VidWaitUs = VidWaitUs + Micros() - start
+  EndIf
+  slot = LinesMade & (#VID_RING - 1)
+  LineTag(slot) = viewY
+  ProcedureReturn @LineRing(slot * #VID_W)
+EndProcedure
+ProcedureRAM PlatformLineDone(viewY.i)
+  VidFence()
+  LinesMade = LinesMade + 1
+EndProcedure
+
+; Core 1 side ------------------------------------------------------------
+ProcedureRAM VidDmaStart(pointer.i, halfwords.i)
+  PokeL(#SPI_DMA_CH0_READ, pointer)
+  PokeL(#SPI_DMA_CH0_WRITE, $4003C008)
+  PokeL(#SPI_DMA_CH0_COUNT, halfwords)
+  PokeL(#SPI_DMA_CH0_CTRL, #SPI_DMA_EN | #SPI_DMA_SIZE_HALF | #SPI_DMA_INCR_READ | (#SPI_DMA_TREQ_SPI0_TX << 15))
+EndProcedure
+ProcedureRAM.i VidDmaIdle()
+  If PeekL(#SPI_DMA_CH0_CTRL) & #SPI_DMA_BUSY : ProcedureReturn 0 : EndIf
+  If PeekL($4003C00C) & #SPI_SR_BSY : ProcedureReturn 0 : EndIf
+  ProcedureReturn 1
+EndProcedure
+Procedure VidClose()
+  If VidOpen
+    SpiDmaRestore(0) : Tft796PinSet(tft796_cs, 1)
+    VidOpen = 0
+  EndIf
+EndProcedure
+; Open the panel's window at view row `row` down to the bottom.
+Procedure VidOpenAt(row.i)
+  VidClose()
+  Tft796Window(#VID_X0, #VID_Y0 + row, #VID_X0 + #VID_W - 1, #VID_Y0 + #VID_H - 1)
+  SpiDmaInit() : SpiSetBits(0, 16)
+  Tft796PinSet(tft796_dc, 1) : Tft796PinSet(tft796_cs, 0)
+  PokeL($4003C024, PeekL($4003C024) | #SPI_SSPDMACR_TXDMAE)
+  VidOpen = 1 : VidNextRow = row
+EndProcedure
+
+; Convert up to #VID_BATCH consecutive lines into buffer VidCur.
+ProcedureRAM.i VidConvert()
+  Protected n.i, slot.i, src.i, dst.i, i.i, tag.i
+  dst = @DmaBuf(VidCur * #VID_BATCH * #VID_W)
+  n = 0
+  While n < #VID_BATCH And LinesSent <> PeekL(@LinesMade)
+    slot = LinesSent & (#VID_RING - 1)
+    tag = LineTag(slot)
+    If tag <> VidNextRow + n : Break : EndIf
+    VidFence()
+    src = @LineRing(slot * #VID_W)
+    For i = 0 To #VID_W - 1
+      PokeU(dst, Pal565(PeekA(src + i)))
+      dst = dst + 2
+    Next
+    VidFence()
+    LinesSent = LinesSent + 1
+    n = n + 1
+  Wend
+  ProcedureReturn n
+EndProcedure
+
+ProcedureRAM VideoPoll()
+  Protected slot.i, tag.i
+  If VidBusy
+    If VidDmaIdle() = 0
+      ; while the panel takes one buffer, fill the other
+      If VidPending = 0 And LinesSent <> PeekL(@LinesMade)
+        VidPendingLines = VidConvert()
+        If VidPendingLines : VidPending = 1 : EndIf
+      EndIf
+      ProcedureReturn
+    EndIf
+    VidBusy = 0
+  EndIf
+  If VidPending
+    VidDmaStart(@DmaBuf(VidCur * #VID_BATCH * #VID_W), VidPendingLines * #VID_W)
+    VidNextRow = VidNextRow + VidPendingLines
+    VidLinesOut = VidLinesOut + VidPendingLines
+    VidCur = 1 - VidCur : VidBusy = 1 : VidPending = 0
+    ProcedureReturn
+  EndIf
+  If LinesSent = PeekL(@LinesMade) : ProcedureReturn : EndIf
+  slot = LinesSent & (#VID_RING - 1)
+  tag = LineTag(slot)
+  If VidOpen = 0 Or tag <> VidNextRow
+    ; a new frame (row 0), or the sequence broke: re-open the window there
+    If tag = 0 : VidFrames = VidFrames + 1 : EndIf
+    VidOpenAt(tag)
+  EndIf
+  VidPendingLines = VidConvert()
+  If VidPendingLines : VidPending = 1 : EndIf
+EndProcedure
+
+DataSection
+CgaPalette:
+  ; the CGA's 16 colours (RGBI)
+  Data.a $00,$00,$00, $00,$00,$AA, $00,$AA,$00, $00,$AA,$AA, $AA,$00,$00, $AA,$00,$AA, $AA,$55,$00, $AA,$AA,$AA
+  Data.a $55,$55,$55, $55,$55,$FF, $55,$FF,$55, $55,$FF,$FF, $FF,$55,$55, $FF,$55,$FF, $FF,$FF,$55, $FF,$FF,$FF
+EndDataSection

@@ -1,4 +1,4 @@
-# Intel 8086 on the Raspberry Pi Pico series â€” PureMetal
+# Intel 8086 on the Raspberry Pi Pico series — PureMetal
 
 A fast Intel 8086 interpreter core for the Raspberry Pi Pico W (RP2040) and
 Pico 2 W (RP2350), written in PureMetal. The interpreter runs from SRAM and
@@ -12,6 +12,12 @@ below. Everything reported there ran on the physical boards.
 Windows program with a Neon Arcade Display Engine front end in [`desktop/`](desktop/README.md):
 it passes the same 646,000 reference tests with the board's own test code, and
 runs 230-490 M instructions a second.
+
+**A PC around it:** `src/pc86.pmi` is a minimal BIOS-less IBM PC (CGA, 8253,
+8259, keyboard on IRQ1), shared by the desktop program and the Pico W
+(`src/pc.picow`, picture on the bench's ST7796 panel, in real time). See
+**The PC machine** below and [`desktop/README.md`](desktop/README.md) for the
+memory map and the ports.
 
 ## What it implements
 
@@ -226,6 +232,47 @@ second. What made the difference, measured one change at a time:
 Reserving a seventh register for AF is refused by the compiler (the RP2040
 allocator needs one of r5/r6 for its spill pool), and r12 cannot hold state
 because the flash/SRAM call veneers write it.
+
+## The PC machine on the Pico W
+
+`src/pc.picow` runs a .COM program on the PC machine (`src/pc86.pmi`, the same
+device code as the desktop's; memory map and ports in
+[`desktop/README.md`](desktop/README.md#the-pc-machine)), with the core counting
+8086 clocks: 262 scanlines of 304 clocks, 59.92 frames a second, paced by the
+Pico's timer.
+
+```powershell
+py -3 tools/make_pcprogram.py desktop/examples/bars.com          # writes src/pcprogram.pmi
+.	oolsuild.ps1 -Source src/pc.picow -Output firmware/8086-pc-picow.uf2 -Port COM7
+```
+
+- RAM: 128 KB from linear 0 (96 KB + 32 KB, around the USB buffers); CGA 16 KB at
+  B8000, mirrored at BC000. A .COM needs 64 KB above 0050:0000.
+- Picture: the LAFVIN ST7796 (480 x 320) shows the 200 lines at half width,
+  320 x 200, centred; core 1 converts and sends lines by DMA while core 0 runs the
+  PC. Lines are drawn by `Pc86RenderHalf`, which writes the panel's pixels
+  straight into the line ring, four to a store; `cpu86_pc.exe --halfcheck`
+  compares it with the desktop's full-width renderer on every line (pixel x =
+  full pixel 2x). No border on the panel.
+- USB serial: `OUT E9h` prints there; typed characters become set-1 scan codes
+  (make, then break: letters, digits, space, Enter, Esc, Backspace); `OUT F4h`
+  ends the run. The run starts once a host opens the port, or after 10 s. Once
+  a second it prints frames, clocks a second, CS:IP, the CGA registers and
+  where core 0's time went.
+- No speaker: the bench Pico W has none; port 61h and PIT channel 2 still work.
+
+On the board (COM7, `docs/pc-*-picow.log`, `docs/board-pc-run.log`):
+
+| Program | Result | clocks/s | core 0 busy (drawing) |
+|---|---|---:|---:|
+| `pctest.com` | `R=7 T=115`, `PC EXIT code=7` at frame 37: the same as the desktop | | |
+| `keytest.com`, typed `abz` | `1E 9E 30 B0 2C AC` | 4.78 M (60 frames/s) | 90% (81%), 80-column text |
+| `modes.com`, every CGA mode | all 40 mode/colour pairs, `PC EXIT code=0` at frame 1439 | 4.78 M | about 80% (50%) |
+| `bars.com`, $3D9 every line | runs | 4.78 M (60 frames/s) | 84% (43%), 320 x 200 |
+
+So every mode runs at the real 4.77 MHz, with the least room in 80-column text:
+a program that keeps the CPU busy there will run a little slow. The image is
+built with 32 bytes of SRAM to spare.
 
 ## Credits
 

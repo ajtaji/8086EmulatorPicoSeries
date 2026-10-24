@@ -268,3 +268,50 @@ def bars():
 data = bars()
 (OUT / 'bars.com').write_bytes(data)
 print('bars.com', len(data), 'bytes')
+
+def modes():
+    """Every CGA mode with several colour selects: for each (mode $3D8, colour $3D9)
+    pair the 16 KB is filled from an LCG, the start address moves (so reads wrap)
+    and the cursor sits near it; 20 frames each (blink and cursor phases change).
+    Ends with OUT F4h, 0. For cpu86_pc.exe --halfcheck (both renderers, every line)."""
+    pairs = [(m, c) for m in (0x28, 0x08, 0x29, 0x09, 0x0A, 0x0E, 0x1A, 0x00)
+                    for c in (0x00, 0x1F, 0x25, 0x3A, 0x07)]
+    a = Asm()
+    def call(name):
+        a.emit(0xE8); a.fix.append(('rel16', len(a.b), name)); a.b += b'\0\0'
+    a.emit(0xB8); a.w(0xB800); a.emit(0x8E, 0xC0)       # es = B800
+    a.emit(0xBE); a.wl('table')                         # mov si, table
+    a.emit(0xFC)
+    a.label('cfg')
+    a.emit(0xAD, 0x3C, 0xFF)                            # lodsw / cmp al, FFh
+    a.emit(0x75, 0x03, 0xE9); a.fix.append(('rel16', len(a.b), 'end')); a.b += b'\0\0'
+    a.emit(0xBA); a.w(0x3D8); a.emit(0xEE)              # out 3D8h, mode
+    a.emit(0x88, 0xE0, 0xBA); a.w(0x3D9); a.emit(0xEE)  # out 3D9h, colour
+    a.emit(0x89, 0xF0, 0xBB); a.w(0x0731); a.emit(0xF7, 0xE3)   # ax = si * 0731h
+    a.emit(0x80, 0xE4, 0x3F, 0x89, 0xC5)                # and ah, 3Fh / mov bp, ax: the start
+    a.emit(0x89, 0xE8, 0xB0, 12); call('crtc')          # R12 = start high
+    a.emit(0x89, 0xE8, 0x88, 0xC4, 0xB0, 13); call('crtc')      # R13 = start low
+    a.emit(0x89, 0xE8, 0x05); a.w(85); a.emit(0x50, 0xB0, 14); call('crtc')   # R14 = cursor high
+    a.emit(0x58, 0x88, 0xC4, 0xB0, 15); call('crtc')    # R15 = cursor low
+    a.emit(0xB8); a.w(0x060A); call('crtc')             # R10 = 6
+    a.emit(0xB8); a.w(0x070B); call('crtc')             # R11 = 7
+    a.emit(0x89, 0xE8, 0x31, 0xFF, 0xB9); a.w(0x2000)   # ax = seed / di = 0 / cx = 2000h
+    a.label('fill')
+    a.emit(0xBB); a.w(25173); a.emit(0xF7, 0xE3, 0x05); a.w(13849); a.emit(0xAB)   # ax = ax*25173+13849 / stosw
+    a.jr(0xE2, 'fill')
+    a.emit(0xB9); a.w(20); a.emit(0xBA); a.w(0x3DA)
+    a.label('w1'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x74, 'w1')
+    a.label('w2'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x75, 'w2')
+    a.jr(0xE2, 'w1')
+    a.emit(0xE9); a.fix.append(('rel16', len(a.b), 'cfg')); a.b += b'\0\0'
+    a.label('end'); a.emit(0x31, 0xC0, 0xE7, 0xF4, 0xF4)
+    a.label('crtc'); a.emit(0xBA); a.w(0x3D4); a.emit(0xEE, 0x42, 0x88, 0xE0, 0xEE, 0xC3)
+    a.label('table')
+    for m, c in pairs:
+        a.emit(m, c)
+    a.emit(0xFF, 0xFF)
+    return a.done()
+
+data = modes()
+(OUT / 'modes.com').write_bytes(data)
+print('modes.com', len(data), 'bytes')

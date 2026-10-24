@@ -7,6 +7,8 @@
 #
 #   flash   <source> <output.uf2> [seconds]              build, upload, capture output
 #   vectors <source> <output.uf2> <vectors.py args...>   build, upload, stream the reference tests
+#   serial  <source> <output.uf2> <pc_serial_check.py args...>   build, upload, type keys / check the output
+#           (job words split on spaces: write a space in an --expect value as _)
 # COM7 leases are limited to 15 minutes: split the full corpus with --part 1/2 and 2/2.
 param(
     [Parameter(Mandatory)][string[]]$Jobs,
@@ -32,6 +34,12 @@ try {
                     $a = @((Join-Path $PSScriptRoot 'vectors.py'), '--port', $Port) + $w[3..($w.Count - 1)]
                     & py -3 @a
                     "vectors exit $LASTEXITCODE"
+                }
+                'serial' {
+                    & (Join-Path $PSScriptRoot 'build.ps1') -Source $w[1] -Output $w[2] -Port $Port -Seconds 0
+                    $a = @((Join-Path $PSScriptRoot 'pc_serial_check.py'), '--port', $Port) + $w[3..($w.Count - 1)]
+                    & py -3 @a
+                    "serial check exit $LASTEXITCODE"
                 }
                 default { "unknown job: $job" }
             }

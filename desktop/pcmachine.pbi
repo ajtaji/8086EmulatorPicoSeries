@@ -4,29 +4,86 @@
 ; A program loads at 0050:0100 (#PC86_SEG) as a .COM would; no BIOS, no ROM.
 
 #PC86_SEG = $0050
-#PC_W = 640
+#PC_W = 640                         ; the picture
 #PC_H = 200
+#PC_BX = 32                         ; the border (overscan) each side, in the picture's pixels
+#PC_BY = 16                         ; and above and below, in scanlines
+#PC_FW = #PC_W + 2 * #PC_BX         ; the whole screen: 704 x 232 scanlines
+#PC_FH = #PC_H + 2 * #PC_BY
 #PC_RATE = 48000
 #PC_FRAME_SAMPLES = 800             ; 48000 / 60
 #PC_SND_BUFFERS = 6
 
+#PC86_HALF = 0                      ; full-width lines through Pc86PutLine (the Pico draws them at half width)
 XIncludeFile "../src/pc86_state.pmi"
 
-Global Dim PcRGBA.l(#PC_W * #PC_H)
-Global Dim PcTexRows.l(#PC_W * #PC_H * 2)   ; each line twice: 640 x 400
+Global Dim PcRGBA.l(#PC_FW * #PC_FH)
+Global Dim PcTexRows.l(#PC_FW * #PC_FH * 2) ; each line twice: 704 x 464
 Global Dim CgaRGBA.l(15)
 Global *PcVramMem
 Global PcTex.l, PcSprite.GLSprite, PcTexReady.i
 
+Declare Pc86RenderHalf(line.i, dest.i)
+Global Dim PcFull.a(#PC_W)
+Global Dim PcHalf.a(#PC_W / 2)
+Global PcHalfCheck.i, PcHalfLines.i, PcHalfBad.i, PcHalfFirst.s
+
 Procedure Pc86PutLine(line.i)
-  Protected x.i, row.i = line * #PC_W
+  Protected x.i, row.i = (line + #PC_BY) * #PC_FW + #PC_BX
   For x = 0 To #PC_W - 1
     PcRGBA(row + x) = CgaRGBA(PcLine(x))
+  Next
+  If PcHalfCheck                    ; --halfcheck: the Pico's renderer against this one, same registers
+    CopyMemory(@PcLine(0), @PcFull(0), #PC_W)
+    Pc86RenderHalf(line, @PcHalf(0))
+    PcHalfLines + 1
+    For x = 0 To #PC_W / 2 - 1
+      If PcHalf(x) <> PcFull(x * 2)
+        If PcHalfBad = 0
+          PcHalfFirst = "frame " + Str(PcFrames) + " line " + Str(line) + " x " + Str(x) + ": " + Str(PcHalf(x)) + " vs " + Str(PcFull(x * 2)) + " mode " + Hex(PcMode)
+        EndIf
+        PcHalfBad + 1 : Break
+      EndIf
+    Next
+    CopyMemory(@PcFull(0), @PcLine(0), #PC_W)
+  EndIf
+EndProcedure
+
+; The border: the overscan colour as this scanline begins (latched with $3D8/$3D9,
+; before the CPU runs the line). $3D9 bits 0-3, except in 640 x 200 where those
+; bits are the foreground and the border is black. Shown: 16 scanlines above the
+; picture (the frame's last lines, 246-261), the picture's lines with 32 pixels
+; each side, 16 scanlines below it (200-215). Desktop only: the Pico's panel
+; draws the picture alone.
+Procedure PcBorderLine(line.i)
+  Protected c.l, row.i, x.i
+  If (PcMode & $12) = $12 : c = CgaRGBA(0) : Else : c = CgaRGBA(PcColor & 15) : EndIf
+  If line < #PC86_VISIBLE
+    row = (line + #PC_BY) * #PC_FW
+    For x = 0 To #PC_BX - 1
+      PcRGBA(row + x) = c : PcRGBA(row + #PC_BX + #PC_W + x) = c
+    Next
+    ProcedureReturn
+  ElseIf line < #PC86_VISIBLE + #PC_BY
+    row = (line + #PC_BY) * #PC_FW
+  ElseIf line >= #PC86_LINES - #PC_BY
+    row = (line - (#PC86_LINES - #PC_BY)) * #PC_FW
+  Else
+    ProcedureReturn
+  EndIf
+  For x = 0 To #PC_FW - 1
+    PcRGBA(row + x) = c
   Next
 EndProcedure
 
 XIncludeFile "../src/pc86.pmi"
 XIncludeFile "../src/cgafont.pmi"
+
+; One scanline of the PC with its border.
+Procedure.i PcRunLine()
+  PcBorderLine(PcLineNo)
+  ProcedureReturn Pc86RunLine()
+EndProcedure
 
 Procedure PcPaletteInit()
   Protected i.i, r.i, g.i, b.i
@@ -72,30 +129,30 @@ Procedure PcTextureInit()
   glTexParameteri_(#GL_TEXTURE_2D, #GL_TEXTURE_MAG_FILTER, #GL_NEAREST)
   glTexParameteri_(#GL_TEXTURE_2D, #GL_TEXTURE_WRAP_S, #GL_CLAMP_TO_EDGE)
   glTexParameteri_(#GL_TEXTURE_2D, #GL_TEXTURE_WRAP_T, #GL_CLAMP_TO_EDGE)
-  glTexImage2D_(#GL_TEXTURE_2D, 0, #GL_RGBA, #PC_W, #PC_H * 2, 0, #GL_RGBA, #GL_UNSIGNED_BYTE, @PcTexRows(0))
-  PcSprite\TextureID = PcTex : PcSprite\Width = #PC_W : PcSprite\Height = #PC_H * 2
+  glTexImage2D_(#GL_TEXTURE_2D, 0, #GL_RGBA, #PC_FW, #PC_FH * 2, 0, #GL_RGBA, #GL_UNSIGNED_BYTE, @PcTexRows(0))
+  PcSprite\TextureID = PcTex : PcSprite\Width = #PC_FW : PcSprite\Height = #PC_FH * 2
   PcTexReady = 1
 EndProcedure
 
 Procedure PcTextureUpload()
   Protected y.i
-  For y = 0 To #PC_H - 1
-    CopyMemory(@PcRGBA(y * #PC_W), @PcTexRows((#PC_H * 2 - 1 - y * 2) * #PC_W), #PC_W * 4)
-    CopyMemory(@PcRGBA(y * #PC_W), @PcTexRows((#PC_H * 2 - 2 - y * 2) * #PC_W), #PC_W * 4)
+  For y = 0 To #PC_FH - 1
+    CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((#PC_FH * 2 - 1 - y * 2) * #PC_FW), #PC_FW * 4)
+    CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((#PC_FH * 2 - 2 - y * 2) * #PC_FW), #PC_FW * 4)
   Next
   glBindTexture_(#GL_TEXTURE_2D, PcTex)
-  glTexSubImage2D_(#GL_TEXTURE_2D, 0, 0, 0, #PC_W, #PC_H * 2, #GL_RGBA, #GL_UNSIGNED_BYTE, @PcTexRows(0))
+  glTexSubImage2D_(#GL_TEXTURE_2D, 0, 0, 0, #PC_FW, #PC_FH * 2, #GL_RGBA, #GL_UNSIGNED_BYTE, @PcTexRows(0))
 EndProcedure
 
-; The current picture as a PNG (headless runs and the window's screenshot).
+; The current screen, border included, as a PNG (headless runs and the window's screenshot).
 Procedure.i PcSavePng(path.s)
   Protected img.i, x.i, y.i, c.l, ok.i
-  img = CreateImage(#PB_Any, #PC_W, #PC_H * 2, 24)
+  img = CreateImage(#PB_Any, #PC_FW, #PC_FH * 2, 24)
   If img = 0 : ProcedureReturn 0 : EndIf
   If StartDrawing(ImageOutput(img))
-    For y = 0 To #PC_H - 1
-      For x = 0 To #PC_W - 1
-        c = PcRGBA(y * #PC_W + x)
+    For y = 0 To #PC_FH - 1
+      For x = 0 To #PC_FW - 1
+        c = PcRGBA(y * #PC_FW + x)
         Plot(x, y * 2, RGB(c & 255, (c >> 8) & 255, (c >> 16) & 255))
         Plot(x, y * 2 + 1, RGB(c & 255, (c >> 8) & 255, (c >> 16) & 255))
       Next

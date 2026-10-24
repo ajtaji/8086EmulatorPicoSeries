@@ -1,0 +1,174 @@
+; The PC machine on the Pico W: the 8086 core (clock-counted), src/pc86.pmi's
+; devices, the CGA picture on the LAFVIN ST7796 (core 1 drives the panel), the
+; program from src/pcprogram.pmi at 0050:0100, in real time (59.92 frames a
+; second). The wrapper includes the program (#PC_PROGRAM_BYTES, PcProgram:)
+; before this file. No BIOS, no ROM. USB serial: OUT E9h prints there; keys typed there
+; reach the PC as set-1 scan codes (make, then break); OUT F4h ends the run.
+; The run starts once a host opens the port, or after 10 s without one.
+; No speaker on this board: the speaker state is kept but not played.
+EnableExplicit
+XIncludeFile "io.pmi"
+XIncludeFile "pico_video.pmi"
+
+#PC86_SEG = $0050
+Global Dim PcRam.l(#PC_RAM_KB * 256)             ; guest RAM from linear 0
+CompilerIf #PC_RAM2_KB > 0
+  Global Dim PcRam2.l(#PC_RAM2_KB * 256)         ; the rest, after it (SRAM is split by USB's buffers)
+CompilerEndIf
+Global Dim PcVramArr.l(4096)                     ; the CGA's 16 KB
+Global PcExit.i, PcExitCode.i, Core1Ready.i, StatusT.i, StatusClocks.i
+Global BusyUs.i, StatusWait.i
+
+#PC86_HALF = 1                                   ; lines drawn 320 wide straight into the panel's ring
+XIncludeFile "pc86_state.pmi"
+XIncludeFile "pc86.pmi"
+XIncludeFile "cgafont.pmi"
+
+Procedure.i Cpu86HookRead(lin.i)
+  ProcedureReturn $FF
+EndProcedure
+
+Procedure Cpu86HookWrite(lin.i, v.i)
+EndProcedure
+
+Procedure.i Cpu86PortIn(port.i, wide.i)
+  ProcedureReturn Pc86PortIn(port, wide)
+EndProcedure
+
+Procedure Cpu86PortOut(port.i, v.i, wide.i)
+  If (port & $FFFF) = $E9
+    UsbSerialWrite(v & 255)
+    If (v & 255) = 10 : UsbSerialFlush() : EndIf
+  ElseIf (port & $FFFF) = $F4
+    PcExit = 1 : PcExitCode = v & $FFFF
+    Left = 1                                     ; the core stops after this instruction
+  Else
+    Pc86PortOut(port, v, wide)
+  EndIf
+EndProcedure
+
+ProcedureRAM Core1Main()
+  Core1Ready = 1
+  Repeat
+    VideoPoll()
+  ForEver
+EndProcedure
+
+; A character typed on the USB serial port: its set-1 scan code, or 0.
+Procedure.i KeyFromSerial(c.i)
+  If c >= 97 And c <= 122 : ProcedureReturn PeekA(?ScanAZ + c - 97) : EndIf
+  If c >= 65 And c <= 90 : ProcedureReturn PeekA(?ScanAZ + c - 65) : EndIf
+  If c >= 49 And c <= 57 : ProcedureReturn c - 49 + 2 : EndIf
+  If c = 48 : ProcedureReturn $0B : EndIf
+  If c = 32 : ProcedureReturn $39 : EndIf
+  If c = 13 Or c = 10 : ProcedureReturn $1C : EndIf
+  If c = 27 : ProcedureReturn $01 : EndIf
+  If c = 8 Or c = 127 : ProcedureReturn $0E : EndIf
+  ProcedureReturn 0
+EndProcedure
+
+; Small procedures with their state in Globals: a procedure that keeps its own
+; values in r4-r7 must not call into the core, which holds PIP in r4 (PM1126).
+Global MainT.i, MainK.i, MainC.i, NextFrame.i
+
+Procedure PcSetup()
+  Cpu86MapNone(0, $100000)
+  Cpu86MapRam(0, #PC_RAM_KB * 1024, @PcRam(0))
+  CompilerIf #PC_RAM2_KB > 0
+    Cpu86MapRam(#PC_RAM_KB * 1024, #PC_RAM2_KB * 1024, @PcRam2(0))
+  CompilerEndIf
+  Cpu86MapRam($B8000, $4000, @PcVramArr(0))
+  Cpu86MapRam($BC000, $4000, @PcVramArr(0))
+  PcVram = @PcVramArr(0)
+  For MainK = 0 To #PC_PROGRAM_BYTES - 1
+    PokeA(@PcRam(0) + #PC86_SEG * 16 + $100 + MainK, PeekA(?PcProgram + MainK))
+  Next
+  Cpu86Reset()
+  For MainK = 0 To 3
+    Cpu86SetSeg(MainK, #PC86_SEG)
+  Next
+  R(4) = $FFFE
+  Cpu86SetIP($100)
+  Pc86Reset()
+EndProcedure
+
+Procedure PcFrame()
+  MainT = Micros()
+  For MainK = 1 To #PC86_LINES
+    Pc86RunLine()
+    If PcExit : Break : EndIf
+  Next
+  BusyUs = BusyUs + Micros() - MainT
+EndProcedure
+
+Procedure PcStatus()
+  Eol()
+  Say("PC frames=") : Num(PcFrames) : Say(" clocks/s=") : Num(PcClocks - StatusClocks)
+  Say(" CS:IP=") : Hex(Cpu86GetSeg(1), 4) : Say(":") : Hex(Cpu86GetIP(), 4)
+  Say(" mode=") : Hex(PcMode, 2) : Say(" colour=") : Hex(PcColor, 2)
+  Say(" PIT0=") : Num(PitReload(0)) : Say(" IMR=") : Hex(PicImr, 2) : Say(" panel frames=") : Num(VidFrames)
+  Say(" late-us=") : Num(Micros() - NextFrame)
+  Say(" busy-us=") : Num(BusyUs) : Say(" render-us=") : Num(PcRenderUs) : Say(" panel-wait-us=") : Num(VidWaitUs - StatusWait) : Eol()
+  StatusT = Micros() : StatusClocks = PcClocks : BusyUs = 0 : PcRenderUs = 0 : StatusWait = VidWaitUs
+EndProcedure
+
+Procedure PcKeys()
+  MainC = UsbSerialRead()
+  If MainC >= 0
+    MainK = KeyFromSerial(MainC)
+    If MainK : Pc86Key(MainK) : Pc86Key(MainK | $80) : EndIf
+  EndIf
+EndProcedure
+
+Procedure PcStartup()
+  SafetyBoot()
+  ClockInitKhz(#CLOCK_KHZ)
+  TimerInit()
+  UsbSerialInit()
+  MainT = Micros()
+  While UsbSerialReady() = 0 And Micros() - MainT < 10000000   ; a host gets the first line
+    UsbSerialTask() : SafetyPet()
+  Wend
+  VideoBegin()
+  Say("8086 PC machine clk_sys kHz=") : Num(ClockSysKhz()) : Say(" RAM KB=") : Num(#PC_RAM_KB + #PC_RAM2_KB)
+  Say(" core1=") : Num(multicore_launch()) : Eol()
+  MainT = Micros()
+  While PeekL(@Core1Ready) = 0 And Micros() - MainT < 1000000 : SafetyPet() : Wend
+EndProcedure
+
+Procedure PcWait()
+  ; real time: one frame every 16,688 us
+  NextFrame = NextFrame + 16688
+  If Micros() - NextFrame > 100000 : NextFrame = Micros() : EndIf
+  While Micros() - NextFrame < 0
+    UsbSerialTask() : SafetyPet()
+  Wend
+  UsbSerialTask() : SafetyPet()
+EndProcedure
+
+Procedure PcExitReport()
+  Eol() : Say("PC EXIT code=") : Num(PcExitCode) : Say(" frames=") : Num(PcFrames) : Eol()
+EndProcedure
+
+Procedure Main()
+  PcStartup()
+  PcSetup()
+  Say("program bytes=") : Num(#PC_PROGRAM_BYTES) : Say(" at 0050:0100") : Eol()
+  NextFrame = Micros()
+  StatusT = Micros() : StatusClocks = 0
+  Repeat
+    If PcExit = 0
+      PcFrame()
+      If PcExit : PcExitReport() : EndIf
+    EndIf
+    PcKeys()
+    If Micros() - StatusT >= 1000000 : PcStatus() : EndIf
+    PcWait()
+  ForEver
+EndProcedure
+
+DataSection
+  ScanAZ:
+  Data.a $1E, $30, $2E, $20, $12, $21, $22, $23, $17, $24, $25, $26, $32, $31, $18, $19
+  Data.a $10, $13, $1F, $14, $16, $2F, $11, $2D, $15, $2C
+EndDataSection

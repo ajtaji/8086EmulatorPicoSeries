@@ -201,53 +201,53 @@ EndProcedure
 ; ---- ports ----
 Procedure.i Pc86In8(port.i)
   Protected c.i
-  Select port
-    Case $20
-      Pc86PicAck()
-      If PicReadIsr : ProcedureReturn PicIsr : EndIf
-      ProcedureReturn PicIrr
-    Case $21
-      ProcedureReturn PicImr
-    Case $40, $41, $42
-      ProcedureReturn Pc86PitRead(port - $40)
-    Case $60
-      KeyFull = 0
-      ProcedureReturn KeyData
-    Case $61
-      ProcedureReturn (Port61 & $CF) | (PitOut(2) << 5)
-    Case $3D1, $3D3, $3D5, $3D7
-      If PcCrtcIndex >= 12 And PcCrtcIndex <= 17 : ProcedureReturn PcCrtc(PcCrtcIndex) : EndIf
-      ProcedureReturn 0
-    Case $3DA
-      c = $F0
-      If PcLineNo >= #PC86_VISIBLE Or Pc86LineClock() >= #PC86_HDISP_CLOCKS : c = c | 1 : EndIf
-      If PcLineNo >= #PC86_VSYNC_FIRST And PcLineNo <= #PC86_VSYNC_LAST : c = c | 8 : EndIf
-      ProcedureReturn c
-  EndSelect
+  If port = $20
+    Pc86PicAck()
+    If PicReadIsr : ProcedureReturn PicIsr : EndIf
+    ProcedureReturn PicIrr
+  ElseIf port = $21
+    ProcedureReturn PicImr
+  ElseIf port >= $40 And port <= $42
+    ProcedureReturn Pc86PitRead(port - $40)
+  ElseIf port = $60
+    KeyFull = 0
+    ProcedureReturn KeyData
+  ElseIf port = $61
+    ProcedureReturn (Port61 & $CF) | (PitOut(2) << 5)
+  ElseIf port = $3DA
+    c = $F0
+    If PcLineNo >= #PC86_VISIBLE Or Pc86LineClock() >= #PC86_HDISP_CLOCKS : c = c | 1 : EndIf
+    If PcLineNo >= #PC86_VSYNC_FIRST And PcLineNo <= #PC86_VSYNC_LAST : c = c | 8 : EndIf
+    ProcedureReturn c
+  ElseIf port >= $3D0 And port <= $3D7 And (port & 1)
+    If PcCrtcIndex >= 12 And PcCrtcIndex <= 17 : ProcedureReturn PcCrtc(PcCrtcIndex) : EndIf
+    ProcedureReturn 0
+  EndIf
   ProcedureReturn $FF
 EndProcedure
 
 Procedure Pc86Out8(port.i, v.i)
   v = v & 255
-  Select port
-    Case $20, $21
-      Pc86PicWrite(port, v)
-    Case $40, $41, $42
-      Pc86PitWrite(port - $40, v)
-    Case $43
-      Pc86PitControl(v)
-    Case $61
-      If (v & $80) And (Port61 & $80) = 0 : KeyFull = 0 : EndIf   ; acknowledge
-      Port61 = v
-    Case $3D0, $3D2, $3D4, $3D6
-      PcCrtcIndex = v & 31
-    Case $3D1, $3D3, $3D5, $3D7
+  If port = $20 Or port = $21
+    Pc86PicWrite(port, v)
+  ElseIf port >= $40 And port <= $42
+    Pc86PitWrite(port - $40, v)
+  ElseIf port = $43
+    Pc86PitControl(v)
+  ElseIf port = $61
+    If (v & $80) And (Port61 & $80) = 0 : KeyFull = 0 : EndIf   ; acknowledge
+    Port61 = v
+  ElseIf port >= $3D0 And port <= $3D7
+    If port & 1
       If PcCrtcIndex < 18 : PcCrtc(PcCrtcIndex) = v : EndIf
-    Case $3D8
-      PcMode = v
-    Case $3D9
-      PcColor = v
-  EndSelect
+    Else
+      PcCrtcIndex = v & 31
+    EndIf
+  ElseIf port = $3D8
+    PcMode = v
+  ElseIf port = $3D9
+    PcColor = v
+  EndIf
 EndProcedure
 
 Procedure.i Pc86PortIn(port.i, wide.i)
@@ -337,14 +337,101 @@ Procedure Pc86RenderLine(line.i)
   Next
 EndProcedure
 
+; The same scanline at half width, 320 colour indices straight to dest, four
+; pixels to a 32-bit store: pixel x is Pc86RenderLine's pixel 2x (cpu86_pc.exe
+; --halfcheck proves it on every line). For a panel 320 wide (the Pico); the
+; platform sets #PC86_HALF = 1 and supplies PlatformLine / PlatformLineDone.
+; PcLine() is its scratch: the line's four 320x200 colours, then 16 pixel pairs.
+Procedure Pc86RenderHalf(line.i, dest.i)
+  Protected x.i, b.i, p.i, c.i, k.i, start.i, src.i, addr.i, row.i, scan.i, cols.i
+  Protected ch.i, at.i, fg.i, bg.i, bits.i, curx.i, bon.i, f4.i, b4.i, pt.i, font.i
+  start = ((PcCrtc(12) << 8) | PcCrtc(13)) & $3FFF
+  If (PcMode & 8) = 0
+    For x = 0 To 79 : PokeL(dest + x * 4, 0) : Next
+    ProcedureReturn
+  EndIf
+  If PcMode & 2
+    src = PcVram + ((line & 1) << 13)
+    addr = (start << 1) + (line >> 1) * 80
+    If PcMode & $10                               ; 640 x 200 x 2: bits 7, 5, 3, 1
+      f4 = (PcColor & 15) * $01010101
+      For b = 0 To 79
+        p = PeekA(src + ((addr + b) & $1FFF))
+        PokeL(dest + b * 4, f4 & PeekL(?Pc86Nib + PeekA(?Pc86Even + p) * 4))
+      Next
+    Else                                          ; 320 x 200 x 4
+      pt = @PcLine(0)
+      PokeA(pt, PcColor & 15)
+      For c = 1 To 3
+        If PcMode & 4
+          k = PeekA(?Pc86Pal5 + c)
+        ElseIf PcColor & $20
+          k = c * 2 + 1
+        Else
+          k = c * 2
+        EndIf
+        If PcColor & $10 : k = k | 8 : EndIf
+        PokeA(pt + c, k)
+      Next
+      For k = 0 To 15                             ; nibble -> two pixels
+        PokeU(pt + 4 + k * 2, PeekA(pt + (k >> 2)) | (PeekA(pt + (k & 3)) << 8))
+      Next
+      For b = 0 To 79
+        p = PeekA(src + ((addr + b) & $1FFF))
+        PokeL(dest + b * 4, PeekU(pt + 4 + (p >> 4) * 2) | (PeekU(pt + 4 + (p & 15) * 2) << 16))
+      Next
+    EndIf
+    ProcedureReturn
+  EndIf
+  ; text: what is the same for the whole line is worked out once
+  If PcMode & 1 : cols = 80 : Else : cols = 40 : EndIf
+  row = line >> 3 : scan = line & 7
+  addr = start + row * cols                       ; the line's first cell
+  curx = -1                                       ; the cursor's column on this line, if it shows
+  If scan >= (PcCrtc(10) & 31) And scan <= (PcCrtc(11) & 31) And (PcCrtc(10) & $60) <> $20 And (PcFrames & 8)
+    curx = ((((PcCrtc(14) << 8) | PcCrtc(15)) & $3FFF) - addr) & $3FFF
+  EndIf
+  bon = 0                                         ; blink mode, in the phase that hides
+  If (PcMode & $20) And (PcFrames & 16) : bon = $80 : EndIf
+  font = ?CgaFont + scan
+  src = PcVram
+  For x = 0 To cols - 1
+    k = ((addr + x) << 1) & $3FFF
+    ch = PeekA(src + k) : at = PeekA(src + k + 1)
+    fg = at & 15
+    If PcMode & $20
+      bg = (at >> 4) & 7
+      If at & bon : fg = bg : EndIf
+    Else
+      bg = at >> 4
+    EndIf
+    bits = PeekA(font + ch * 8)
+    If x = curx : bits = 255 : EndIf
+    f4 = fg * $01010101 : b4 = bg * $01010101 : fg = f4 ! b4
+    If cols = 80
+      PokeL(dest + x * 4, b4 ! (fg & PeekL(?Pc86Nib + PeekA(?Pc86Even + bits) * 4)))
+    Else
+      PokeL(dest + x * 8, b4 ! (fg & PeekL(?Pc86Nib + (bits >> 4) * 4)))
+      PokeL(dest + x * 8 + 4, b4 ! (fg & PeekL(?Pc86Nib + (bits & 15) * 4)))
+    EndIf
+  Next
+EndProcedure
+
 ; ---- time ----
 ; One scanline: draw it (if visible) with the registers as they are now, run
 ; the CPU for its 304 clocks, advance the 8253, hand interrupts over.
 Procedure.i Pc86RunLine()
   Protected budget.i, ran.i, ch.i
   If PcLineNo < #PC86_VISIBLE
-    Pc86RenderLine(PcLineNo)
-    Pc86PutLine(PcLineNo)
+    CompilerIf #PC86_HALF
+      ch = Micros()
+      Pc86RenderHalf(PcLineNo, PlatformLine(PcLineNo))
+      PlatformLineDone(PcLineNo)
+      PcRenderUs = PcRenderUs + Micros() - ch
+    CompilerElse
+      Pc86RenderLine(PcLineNo)
+      Pc86PutLine(PcLineNo)
+    CompilerEndIf
   EndIf
   ; the speaker during this line
   If (Port61 & 3) = 3 And PitArmed(2) And PitMode(2) = 3 And PitReload(2) > 1
@@ -386,4 +473,24 @@ EndProcedure
 DataSection
   Pc86Pal5:
   Data.a 0, 3, 4, 7
+  Pc86Nib:                                        ; nibble -> four byte masks, its bit 3 first (lowest address)
+  Data.l $00000000, $FF000000, $00FF0000, $FFFF0000, $0000FF00, $FF00FF00, $00FFFF00, $FFFFFF00
+  Data.l $000000FF, $FF0000FF, $00FF00FF, $FFFF00FF, $0000FFFF, $FF00FFFF, $00FFFFFF, $FFFFFFFF
+  Pc86Even:                                       ; a byte's bits 7, 5, 3, 1 as a nibble: the even pixels of 8
+  Data.a 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3
+  Data.a 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3
+  Data.a 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7, 6, 6, 7, 7
+  Data.a 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7, 6, 6, 7, 7
+  Data.a 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3
+  Data.a 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3
+  Data.a 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7, 6, 6, 7, 7
+  Data.a 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7, 6, 6, 7, 7
+  Data.a 8, 8, 9, 9, 8, 8, 9, 9, 10, 10, 11, 11, 10, 10, 11, 11
+  Data.a 8, 8, 9, 9, 8, 8, 9, 9, 10, 10, 11, 11, 10, 10, 11, 11
+  Data.a 12, 12, 13, 13, 12, 12, 13, 13, 14, 14, 15, 15, 14, 14, 15, 15
+  Data.a 12, 12, 13, 13, 12, 12, 13, 13, 14, 14, 15, 15, 14, 14, 15, 15
+  Data.a 8, 8, 9, 9, 8, 8, 9, 9, 10, 10, 11, 11, 10, 10, 11, 11
+  Data.a 8, 8, 9, 9, 8, 8, 9, 9, 10, 10, 11, 11, 10, 10, 11, 11
+  Data.a 12, 12, 13, 13, 12, 12, 13, 13, 14, 14, 15, 15, 14, 14, 15, 15
+  Data.a 12, 12, 13, 13, 12, 12, 13, 13, 14, 14, 15, 15, 14, 14, 15, 15
 EndDataSection

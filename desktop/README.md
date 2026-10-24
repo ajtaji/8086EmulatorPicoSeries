@@ -11,6 +11,7 @@ The same Intel 8086 core as the Pico build, as a Windows program in PureBasic
 |---|---|
 | `cpu86_desktop.exe` | the window |
 | `cpu86_console.exe` | the same program with a console: `--test`, `--bench`, `--run` |
+| `cpu86_pc.exe` | the console program with the core counting 8086 clocks: the PC machine headless (`--pc`) |
 | `cpu86_console_proctable.exe` | the console build on the procedure-table core (for the dispatch measurement) |
 
 ```text
@@ -36,8 +37,9 @@ CS=.... DS=.... ES=.... SS=.... IP=.... SP=.... AX=.... BX=.... CX=.... DX=.... 
 
 and `--dump` writes the 1 MB raw. A self-jump is noticed between 10,000-instruction
 slices, so its `instr=` includes the spinning. Exit code 0 when the run stopped, 2
-with a sentence when the file could not be read or written; `--pc` (the PC machine)
-is refused for now. Test images: `Diagnostics/gate/*.com`.
+with a sentence when the file could not be read or written. Test images:
+`Diagnostics/gate/*.com`. Add `--pc` to run the file on the PC machine instead
+(below; `cpu86_pc.exe` and `cpu86_desktop.exe` only, the clock-counted builds).
 
 The window has a toolbar (Open, the two examples, Reset, Run/Stop, Step,
 Step 100, a breakpoint at an IP, Run tests, and the speed), the registers and
@@ -59,6 +61,61 @@ A program (`.com`, or any raw binary) is loaded at 1000:0100 with its PSP at
 1000:0000, CS=DS=ES=SS=1000h and SP=FFFEh, as DOS loads a .COM.
 `examples/hello.com` and `examples/sieve.com` (primes below 10000: 1229) are
 written by `tools/make_examples.py`.
+
+## The PC machine
+
+A minimal IBM PC with **no BIOS ROM**: the program brings its own vectors and drivers.
+The same device code (`src/pc86.pmi`) runs here and on the Pico W (`src/pc.picow`).
+
+```text
+cpu86_pc.exe --com program.com --pc [--frames n] [--keys 1E,9E,..] [--screenshot file.png] [--halfcheck]
+cpu86_desktop.exe program.com --pc --run       (the window: PC machine, PC screen tab, keys, speaker)
+```
+
+The program is loaded at **0050:0100** with CS=DS=ES=SS=0050, IP=0100 and SP=FFFE. Memory:
+
+| Linear | What |
+|---|---|
+| 00000-9FFFF | RAM (640 KB); the vector table is empty |
+| B8000-BBFFF | the CGA's 16 KB, mirrored at BC000-BFFFF |
+| the rest | unmapped: reads FFh, writes ignored |
+
+| Port | Device |
+|---|---|
+| 20h-21h | 8259 PIC: ICW1-ICW4, OCW1 mask, OCW2 EOI (non-specific 20h, specific 60h+n), OCW3 IRR/ISR read. Starts as a BIOS leaves it: vector base 8, IMR = FCh (IRQ0 and IRQ1 open) |
+| 40h-43h | 8253 PIT: channels 0-2, modes 0-5 (1, 4 and 5 counted like 2), LSB/MSB/both, counter latch; no 8254 read-back. Channel 0 is IRQ0 and starts at 18.2 Hz (count 65536, mode 3); channel 2 is the speaker |
+| 60h | keyboard: set-1 scan codes (make, then break), IRQ1; a read takes the code |
+| 61h | bit 0 channel 2 gate, bit 1 speaker data, bit 7 keyboard acknowledge; reads bit 5 = channel 2's output |
+| 3D0h-3D7h | 6845: index on the even ports, data on the odd ones (3D4h/3D5h); R12/R13 start address, R10/R11/R14/R15 cursor |
+| 3D8h | CGA mode: text 40x25 / 80x25, 320x200x4, 640x200x2, blink, video enable |
+| 3D9h | colour select: border/background, palette, intensity |
+| 3DAh | status: bit 0 = outside the picture, bit 3 = vertical retrace, from the CPU's clock |
+| E9h | out: a byte to stdout (the Pico: to its USB serial port) |
+| F4h | out: ends the run, the value is the exit code |
+
+The screen (window and `--screenshot`, 704 x 464) has a border: 32 pixels each side
+and 16 scanlines above and below the picture, in the overscan colour of each scanline
+as it begins ($3D9 bits 0-3; black in 640 x 200, where those bits are the foreground),
+so raster effects on $3D9 show in it. `--keys` queues set-1 scan codes in hex.
+`--halfcheck` also draws every line with the Pico's half-width renderer and counts the
+lines where its pixel x differs from pixel 2x here (exit 4 if any).
+
+No port 64h (that is the AT's controller), no DMA, no disks. Timing: 4.77 MHz,
+304 clocks a scanline, 262 scanlines (200 in the picture, display enable for the
+first 213 clocks of a line, vertical retrace on lines 224-239), 59.92 frames a
+second; the PIT counts 76 per scanline. $3D8, $3D9 and the start address are read at
+the start of each scanline, so a change made in a line's horizontal retrace shows
+from the next line.
+
+Checks (`desktop/examples`, made by `tools/make_examples.py`):
+
+| Program | Result here |
+|---|---|
+| `pctest.com` | IRQ0 at 1 kHz counted over 7 vertical retraces: `R=7 T=115` (59.92 Hz frames); raster bars through all 16 colours, one per line |
+| `keytest.com` | IRQ1 echoes every scan code: 6 of 6 |
+| `beep.com` | PIT channel 2 through port 61h: 1000 Hz |
+| `bars.com` | raster bars in the window, about 0.9x real time |
+| `modes.com` | every mode with five colour selects, cursor, blink, start-address wrap; `--halfcheck`: 288,000 lines, 0 differing |
 
 ## The core and its dispatch
 

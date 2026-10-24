@@ -144,6 +144,7 @@ Procedure.i GateMain()
       Case "--frames" : i + 1 : frames = Val(ProgramParameter(i))
       Case "--screenshot" : i + 1 : shot = ProgramParameter(i)
       Case "--keys" : i + 1 : keys = ProgramParameter(i)
+      Case "--halfcheck" : PcHalfCheck = 1
     EndSelect
   Next
   If pc And #CPU_TIMING = 0
@@ -170,7 +171,7 @@ Procedure.i GateMain()
     why = "frames"
     For fr = 1 To frames
       For ln = 1 To #PC86_LINES
-        count + Pc86RunLine()
+        count + PcRunLine()
         If SpkFreq((PcLineNo + #PC86_LINES - 1) % #PC86_LINES) > tone : tone = SpkFreq((PcLineNo + #PC86_LINES - 1) % #PC86_LINES) : EndIf
         If GateExit : Break : EndIf
         If Halted And (Cpu86Flags() & $200) = 0 : Break : EndIf
@@ -185,6 +186,10 @@ Procedure.i GateMain()
            " DX=" + H4(R(2)) + " SI=" + H4(R(6)) + " DI=" + H4(R(7)) + " BP=" + H4(R(5)) + " FLAGS=" + H4(Cpu86Flags()))
     PrintN("PIC IMR=" + H2(PicImr) + " ISR=" + H2(PicIsr) + " base=" + H2(PicBase) + "  PIT0 reload=" + Str(PitReload(0)) +
            " mode=" + Str(PitMode(0)) + "  CGA mode=" + H2(PcMode) + " colour=" + H2(PcColor) + "  highest tone=" + Str(tone) + " Hz")
+    If PcHalfCheck
+      PrintN("HALFCHECK lines=" + Str(PcHalfLines) + " differing=" + Str(PcHalfBad) + " " + PcHalfFirst)
+      If PcHalfBad : ProcedureReturn 4 : EndIf
+    EndIf
     If shot <> ""
       If PcSavePng(shot) = 0 : PrintN("Cannot write the picture '" + shot + "'.") : ProcedureReturn 2 : EndIf
     EndIf
@@ -343,7 +348,7 @@ Procedure RunFor(budgetMs.i)
   If MachineKind = 1
     While Running And n < 3
       For ln = 1 To #PC86_LINES
-        ran + Pc86RunLine()
+        ran + PcRunLine()
         If BreakAt >= 0 And Cpu86GetIP() = BreakAt
           Running = 0 : Status$ = "Stopped at the breakpoint " + H4(Cpu86GetSeg(1)) + ":" + H4(BreakAt) + " (checked once a scanline)."
           Break
@@ -493,9 +498,9 @@ Procedure DrawPcScreen(x.f, y.f, w.f, h.f)
   Protected sc.f, sw.f, sh.f
   If PcTexReady = 0 : ProcedureReturn : EndIf
   PcTextureUpload()
-  sc = w / #PC_W
-  If (h - Neon_S(22)) / (#PC_H * 2) < sc : sc = (h - Neon_S(22)) / (#PC_H * 2) : EndIf
-  sw = #PC_W * sc : sh = #PC_H * 2 * sc
+  sc = w / #PC_FW
+  If (h - Neon_S(22)) / (#PC_FH * 2) < sc : sc = (h - Neon_S(22)) / (#PC_FH * 2) : EndIf
+  sw = #PC_FW * sc : sh = #PC_FH * 2 * sc
   Neon_Box(x + (w - sw) / 2 - 2, y - 2, sw + 4, sh + 4, 0.15, 0.20, 0.30)
   DrawGLSprite(@PcSprite, x + (w - sw) / 2, y, 0.0, sc, 1.0, 1.0, 1.0, 1.0, #True, -1, -1, -1, -1, #True)
   If MachineKind = 1 And Running
@@ -835,7 +840,7 @@ Define rc.i = ConsoleMain()
 If rc >= 0
   End rc
 EndIf
-Define argi.i, arg$, showTests.i, startRun.i
+Define argi.i, arg$, showTests.i, startRun.i, loaded.i
 For argi = 0 To CountProgramParameters() - 1
   arg$ = ProgramParameter(argi)
   If LCase(arg$) = "--show-tests"
@@ -848,9 +853,12 @@ For argi = 0 To CountProgramParameters() - 1
   ElseIf LCase(arg$) = "--pc"
     If #CPU_TIMING : MachineKind = 1 : MemTab = 5 : ResetProgram() : EndIf
   ElseIf LoadProgram(arg$)
-    Status$ = "Loaded " + MachineName$ + " (" + Str(MachineLoadBytes) + " bytes)" + LoadText() : DisTop = $100
+    loaded = 1 : DisTop = $100
   EndIf
 Next
+If loaded                           ; after the loop: --pc may follow the file name
+  Status$ = "Loaded " + MachineName$ + " (" + Str(MachineLoadBytes) + " bytes)" + LoadText()
+EndIf
 If showTests : RunTestsInWindow() : EndIf
 If startRun
   Running = 1

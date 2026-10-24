@@ -1,0 +1,20 @@
+; The BIOS-less PC machine (src/pc86.pmi) on the Pico W with the LAFVIN ST7796
+; panel: the 8086 core with clock counting, the program from src/pcprogram.pmi
+; (tools/make_pcprogram.py file.com), in real time. See src/pc_body.pmi.
+#CLOCK_KHZ = 200000
+#CPU_TIMING = 1
+#CPU_ASM_TAIL = 1
+#PC_RAM_KB = 96
+#PC_RAM2_KB = 32
+XIncludeFile "RP2040/Lib/clocks.pico"
+XIncludeFile "RP2040/Lib/timer.pico"
+XIncludeFile "RP2040/Lib/uart.pico"
+XIncludeFile "RP2040/Lib/usb_serial.pico"
+XIncludeFile "RP2040/Lib/safety.pico"
+XIncludeFile "RP2040/Lib/bits.pico"
+XIncludeFile "RP2040/Lib/wiring.pico"
+XIncludeFile "RP2040/Lib/spi.pico"
+XIncludeFile "RP2040/Lib/st7796.pico"
+XIncludeFile "cpu86.pico"
+XIncludeFile "pcprogram.pmi"
+XIncludeFile "pc_body.pmi"
