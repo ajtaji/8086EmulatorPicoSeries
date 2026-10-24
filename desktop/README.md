@@ -71,6 +71,7 @@ The same device code (`src/pc86.pmi`) runs here and on the Pico W (`src/pc.picow
 ```text
 cpu86_pc.exe --com program.com --pc [--frames n] [--keys 1E,9E,..] [--screenshot file.png] [--halfcheck] [--portlog FRAME:N]
 cpu86_desktop.exe program.com --pc --run       (the window: PC machine, PC screen tab, keys, speaker)
+cpu86_desktop.exe program.com --pc --run --mute  (the same, silent)
 ```
 
 The program is loaded at **0050:0100** with CS=DS=ES=SS=0050, IP=0100 and SP=FFFE. Memory:

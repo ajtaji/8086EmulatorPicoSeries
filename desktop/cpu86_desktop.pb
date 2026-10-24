@@ -23,7 +23,8 @@
 ;   --show-tests        run the test suites as soon as the window is up
 ;   --run               start the loaded program running
 ;   --screenshot <png>  save the window's own picture after two seconds and close
-;   --pc                the PC machine (before the program's name)
+;   --pc                the PC machine
+;   --mute              the PC machine without sound
 ;
 ; Build with desktop/build.ps1 (x64, C back end, /DPIAWARE, /OPTIMIZER).
 
@@ -372,10 +373,20 @@ EndProcedure
 
 ; Runs for about budgetMs of wall time, stopping at the breakpoint, at HLT and
 ; when the program exits.
+Global PcOwedMs.d, PcLastMs.q           ; silent PC: wall-clock time owed to the machine
+
 Procedure RunFor(budgetMs.i)
-  Protected t0.q = ElapsedMilliseconds(), ran.i, k.i, ln.i, n.i
+  Protected t0.q = ElapsedMilliseconds(), ran.i, k.i, ln.i, n.i, silent.i
   If MachineKind = 1
     Cpu86RepYield = 1                 ; the test runners turn it off
+    ; With sound the queue paces the frames; without it (--mute, or no sound
+    ; device) the clock does - a frame each 16.688 ms, whatever the screen's refresh.
+    silent = Bool(PcSndOpen = 0 Or PcSndMuted)
+    If silent
+      If PcLastMs = 0 Or t0 - PcLastMs > 100 : PcLastMs = t0 - 17 : EndIf   ; starting, or after a pause
+      PcOwedMs + (t0 - PcLastMs) : PcLastMs = t0
+      If PcOwedMs < 16.688 : ProcedureReturn : EndIf
+    EndIf
     While Running And n < 3
       For ln = 1 To #PC86_LINES
         ran + PcRunLine()
@@ -392,8 +403,14 @@ Procedure RunFor(budgetMs.i)
       Next
       PcSoundFrame()
       n + 1
-      If PcSndOpen = 0 Or PcSoundPending() >= 3 : Break : EndIf
+      If silent
+        PcOwedMs - 16.688
+        If PcOwedMs < 16.688 : Break : EndIf
+      ElseIf PcSoundPending() >= 3
+        Break
+      EndIf
     Wend
+    If silent And PcOwedMs > 50 : PcOwedMs = 0 : EndIf     ; too far behind: let it go
     RateWindowCount + ran
     Executed + ran
     ProcedureReturn
@@ -880,6 +897,8 @@ For argi = 0 To CountProgramParameters() - 1
   ElseIf LCase(arg$) = "--screenshot"
     argi + 1
     ShotPath$ = ProgramParameter(argi)
+  ElseIf LCase(arg$) = "--mute"
+    PcSndMuted = 1
   ElseIf LCase(arg$) = "--pc"
     If #CPU_TIMING : MachineKind = 1 : MemTab = 5 : ResetProgram() : EndIf
   ElseIf LoadProgram(arg$)
