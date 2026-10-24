@@ -1,0 +1,12 @@
+8086 desktop core, labels-as-values dispatch, 100 x 1,000,000 instructions per mix
+register/branch         444.4 M instructions/s  (100000000 in 225 ms)
+alu                     490.2 M instructions/s  (100000000 in 204 ms)
+memory                  232.0 M instructions/s  (100000000 in 431 ms)
+call/stack              348.4 M instructions/s  (100000000 in 287 ms)
+rep movsw               771.0 MB/s
+8086 desktop core, procedure-table dispatch, 100 x 1,000,000 instructions per mix
+register/branch         386.1 M instructions/s  (100000000 in 259 ms)
+alu                     300.3 M instructions/s  (100000000 in 333 ms)
+memory                  160.3 M instructions/s  (100000000 in 624 ms)
+call/stack              226.2 M instructions/s  (100000000 in 442 ms)
+rep movsw               589.1 MB/s

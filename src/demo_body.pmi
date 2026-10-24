@@ -5,6 +5,8 @@
 ; 4 KB page table joins them into one guest range. A smoke test, then four measured mixes, forever.
 EnableExplicit
 XIncludeFile "io.pmi"
+XIncludeFile "dosrom.pmi"
+XIncludeFile "examples.pmi"
 
 Global Dim Guest.l(#GUEST_KB * 256)       ; .l keeps it word aligned
 CompilerIf #GUEST2_KB > 0
@@ -26,7 +28,73 @@ Procedure.i Cpu86PortIn(port.i, wide.i)
   ProcedureReturn $FF
 EndProcedure
 
+; The ROM's console (OUT E9h) and exit (OUT EAh) ports.
+Global Dim ConOut.a(256)
+Global ConLen.i, ConExit.i
 Procedure Cpu86PortOut(port.i, v.i, wide.i)
+  If (port & $FFFF) = $E9
+    If ConLen < 255
+      ConOut(ConLen) = v & 255
+      ConLen = ConLen + 1
+    EndIf
+  ElseIf (port & $FFFF) = $EA
+    ConExit = 1
+  EndIf
+EndProcedure
+
+; A whole program: the sieve .COM (tools/make_examples.py) through the ROM's
+; DOS services, at 1000:0100 as DOS would load it.
+Procedure RunSieve()
+  Protected k.i, n.i, bad.i, t0.i, steps.i
+  Cpu86MapRom($F0000, $1000, ?DosRom)
+  For k = 0 To 255
+    PokeA(@Guest(0) + k * 4, #DOSROM_IRET & 255) : PokeA(@Guest(0) + k * 4 + 1, #DOSROM_IRET >> 8)
+    PokeA(@Guest(0) + k * 4 + 2, 0) : PokeA(@Guest(0) + k * 4 + 3, $F0)
+  Next
+  PokeA(@Guest(0) + $20 * 4, #DOSROM_INT20 & 255) : PokeA(@Guest(0) + $20 * 4 + 1, #DOSROM_INT20 >> 8)
+  PokeA(@Guest(0) + $21 * 4, #DOSROM_INT21 & 255) : PokeA(@Guest(0) + $21 * 4 + 1, #DOSROM_INT21 >> 8)
+  PokeA(@Guest(0) + $10 * 4, #DOSROM_INT10 & 255) : PokeA(@Guest(0) + $10 * 4 + 1, #DOSROM_INT10 >> 8)
+  n = ?SieveComEnd - ?SieveCom
+  For k = 0 To n - 1
+    PokeA(@Guest(0) + $10100 + k, PeekA(?SieveCom + k))
+  Next
+  PokeA(@Guest(0) + $10000, $CD) : PokeA(@Guest(0) + $10001, $20)
+  Cpu86Reset()
+  For k = 0 To 3
+    Cpu86SetSeg(k, $1000)
+  Next
+  R(4) = $FFFE
+  Cpu86SetIP($100)
+  ConLen = 0 : ConExit = 0
+  t0 = Micros()
+  While ConExit = 0 And Halted = 0 And Micros() - t0 < 5000000
+    steps = steps + Cpu86Run(100000)
+  Wend
+  t0 = Micros() - t0
+  Say("sieve.com printed: ")
+  For k = 0 To ConLen - 1
+    If ConOut(k) >= 32
+      UsbSerialWrite(ConOut(k))
+    EndIf
+  Next
+  n = 25                    ; the expected line's length: ?End - ?Start of a DataSection label is padded
+  If ConLen <> n
+    bad = 1
+  Else
+    For k = 0 To n - 1
+      If ConOut(k) <> PeekA(?SieveExpect + k)
+        bad = 1
+      EndIf
+    Next
+  EndIf
+  Say(" instructions=") : Num(steps) : Say(" us=") : Num(t0)
+  If bad Or ConExit = 0
+    Say(" FAIL (bytes=") : Num(ConLen) : Say(" exit=") : Num(ConExit) : Say(")")
+  Else
+    Say(" PASS")
+  EndIf
+  Eol()
+  Cpu86MapNone($F0000, $1000)
 EndProcedure
 
 ; Copy n bytes of a DataSection program to guest 0000:0100.
@@ -81,6 +149,7 @@ Procedure Main()
     Say(" FAIL")
   EndIf
   Eol()
+  RunSieve()
   Repeat
     Load(?MixLoop, ?MixLoopEnd - ?MixLoop)
     Start()
@@ -123,6 +192,9 @@ Procedure Main()
 EndProcedure
 
 DataSection
+SieveExpect:
+  Data.a 112, 114, 105, 109, 101, 115, 32, 98, 101, 108, 111, 119, 32, 49, 48, 48, 48, 48, 58, 32, 49, 50, 50, 57, 10
+SieveExpectEnd:
 Smoke:          ; MOV CX,100 / XOR AX,AX / L: ADD AX,CX / LOOP L / HLT
   Data.a $B9, $64, $00, $31, $C0, $01, $C8, $E2, $FC, $F4
 SmokeEnd:

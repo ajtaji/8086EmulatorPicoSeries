@@ -1,0 +1,16 @@
+; API checks: state. Shared by the board (api_body.pmi) and the desktop program.
+; Checks of what the per-instruction vectors cannot reach: the run
+; budget, HLT, the interrupt line with the STI delay, NMI, the trap flag,
+; the divide-error interrupt, ROM / unmapped / hook pages, words and
+; instructions that cross a page or wrap a segment, self-modifying code,
+; prefixes inside one budget step, and PUSH SP.
+;
+; Guest memory: 0-$FFFF in GuestA, $10000-$10FFF in GuestB (a separate host
+; array, so a word across $FFFF/$10000 crosses host memory too), ROM at
+; $20000 (SRAM, read-only to the guest), hooks at $30000, the rest unmapped.
+
+Global Dim GuestA.l(16384)
+Global Dim GuestB.l(1024)
+Global Dim RomPage.l(1024)
+Global Failures.i, Checks.i, HookReads.i, HookWrites.i, LastWriteLin.i, LastWriteVal.i, Got.i, K.i
+

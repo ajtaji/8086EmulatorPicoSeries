@@ -77,7 +77,8 @@ def build(name, meta, per_file):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--port', required=True)
+    ap.add_argument('--port', default='')
+    ap.add_argument('--out', default='', help='write the stream to this file instead (for the desktop program)')
     ap.add_argument('--per-file', type=int, default=2000)
     ap.add_argument('--only', default='')
     ap.add_argument('--skip', default='')
@@ -98,6 +99,18 @@ def main():
         k, n = (int(v) for v in args.part.split('/'))
         size = (len(names) + n - 1) // n
         names = names[(k - 1) * size:k * size]
+    if args.out:
+        with open(args.out, 'wb') as f:
+            total = 0
+            for n in names:
+                blob, tnames = build(n, meta, args.per_file)
+                f.write(blob)
+                total += len(tnames)
+            f.write(b'ZZ')
+        print(f'{args.out}: {len(names)} files, {total} tests')
+        return
+    if not args.port:
+        raise SystemExit('give --port (stream to a board) or --out (write a file)')
     log = open(args.log, 'w', encoding='utf-8') if args.log else None
     def out(line):
         print(line, flush=True)

@@ -1,0 +1,23 @@
+; The demo machine's ROM: a few DOS/BIOS services for .COM programs, shared by
+; the Pico demo (src/demo_body.pmi) and the desktop program (desktop/machine.pbi).
+; One contiguous block, mapped as the ROM page at F000:0000 (straight from flash
+; on the Pico). Vectors: INT 20h -> F000:0000, INT 21h -> F000:0010,
+; INT 10h -> F000:0049, every other one -> F000:0048 (an IRET).
+;   console: OUT E9h,AL        exit: OUT EAh,AL, then HLT
+;   INT 20h, INT 21h AH=00h/4Ch exit (4Ch: AL is the code); AH=02h DL out;
+;   AH=09h DS:DX '$'-terminated string out; INT 10h AH=0Eh AL out.
+#DOSROM_INT20 = $0000
+#DOSROM_INT21 = $0010
+#DOSROM_IRET = $0048
+#DOSROM_INT10 = $0049
+DataSection
+  DosRom:
+  Data.a $B0,$00,$E6,$EA,$F4,$EB,$FD,$90, $90,$90,$90,$90,$90,$90,$90,$90       ; 0000 INT 20h
+  Data.a $80,$FC,$02,$75,$07,$50,$88,$D0,$E6,$E9,$58,$CF                         ; 0010 INT 21h AH=02
+  Data.a $80,$FC,$09,$75,$11,$50,$56,$89,$D6,$FC,$AC,$3C,$24,$74,$04,$E6,$E9,$EB,$F7,$5E,$58,$CF ; 001C AH=09
+  Data.a $80,$FC,$4C,$75,$06,$E6,$EA,$F4,$EB,$FD,$90                             ; 0032 AH=4Ch
+  Data.a $0A,$E4,$75,$07,$B0,$00,$E6,$EA,$F4,$EB,$FD                             ; 003D AH=00
+  Data.a $CF                                                                     ; 0048 IRET
+  Data.a $80,$FC,$0E,$75,$02,$E6,$E9,$CF                                         ; 0049 INT 10h AH=0Eh
+  DosRomEnd:
+EndDataSection

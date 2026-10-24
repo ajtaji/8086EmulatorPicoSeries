@@ -24,6 +24,16 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 import os
 VARIANT = os.environ.get('CPU86_VARIANT', '')
+IW = 32          # host integer width: 32 on the Picos, 64 on the PC (set by generate)
+DESKTOP = False  # PureBasic on the PC: labels-as-values through the C back end
+def T(bit):
+    """Shift that moves `bit` to the host integer's top (sign) bit."""
+    return IW - 1 - bit
+def TOP():
+    return '$80000000' if IW == 32 else '$8000000000000000'
+def ZT():
+    """FZS << this is 0 exactly when ZF is set (bits 0..16 of FZS clear)."""
+    return IW - 17
 REP_BLOCK = True    # REP MOVS/STOS block path (emit_rep_block)
 
 # ---------------------------------------------------------------- emitter
@@ -48,7 +58,47 @@ def charge(c):
         e(f'  Charge({c})')
 
 def tail(cyc):
-    e(f'  NextOp({cyc})')
+    if not DESKTOP:
+        e(f'  NextOp({cyc})')
+        return
+    e('  CompilerIf #CPU_TIMING = 1')
+    e(f'    Left = Left - ({cyc})')
+    e('    If Left <= 0')
+    e('      Goto Done')
+    e('    EndIf')
+    e('  CompilerElse')
+    e('    Left = Left - 1')
+    e('    If Left = 0')
+    e('      Goto Done')
+    e('    EndIf')
+    e('  CompilerEndIf')
+    e('  If PIP >= PEnd')
+    e('    Goto Resync')
+    e('  EndIf')
+    dispatch()
+
+def dispatch():
+    """Jump to the handler of the opcode byte at PIP."""
+    if DESKTOP:
+        e('  ! goto *cpu86_dsp[*(unsigned char*)g_pip];')
+    else:
+        e('  Goto Dispatch(PeekA(PIP))')
+
+def lab(name):
+    """The C name the PureBasic C back end gives a label of Cpu86Run."""
+    return 'll_cpu86run_' + name.lower()
+
+def ea_call(ret_expr_pm, ret_expr_c):
+    """Decode the ModR/M memory operand of m, then continue at the return label."""
+    if DESKTOP:
+        e(f'    ! cpu86_earet = {ret_expr_c};')
+        e('    ! goto *cpu86_eat[v_m];')
+    else:
+        e(f'    EaRet = {ret_expr_pm}')
+        e('    Goto EaTab(m)')
+
+def PROC():
+    return 'Procedure' if DESKTOP else 'ProcedureRAM'
 
 # ---------------------------------------------------------------- memory helpers
 # All take/produce locals of CpuRun: ea (linear address), eo (offset), sb (segment base).
@@ -70,7 +120,7 @@ def wr8(v, ea='ea'):
 
 def rd16(dst, sb='sb', eo='eo', ea='ea'):
     e(f'  t = PageR({ea} >> 12)')
-    e(f'  If (~{ea} << 28) = 0              ; xxxF: maybe a page or segment end')
+    e(f'  If (~{ea} << {IW - 4}) = 0              ; xxxF: maybe a page or segment end')
     e(f'    t = 0')
     e(f'  EndIf')
     e(f'  If t <> 0')
@@ -81,7 +131,7 @@ def rd16(dst, sb='sb', eo='eo', ea='ea'):
 
 def wr16(v, sb='sb', eo='eo', ea='ea'):
     e(f'  t = PageW({ea} >> 12)')
-    e(f'  If (~{ea} << 28) = 0              ; xxxF: maybe a page or segment end')
+    e(f'  If (~{ea} << {IW - 4}) = 0              ; xxxF: maybe a page or segment end')
     e(f'    t = 0')
     e(f'  EndIf')
     e(f'  If t <> 0')
@@ -133,7 +183,7 @@ def far_jump(cs_expr, ip_expr):
 # ---------------------------------------------------------------- flags
 def sz(w):
     """(shift for CF, shift for OF, shift for sign extension)"""
-    return (15, 16, 16) if w else (23, 24, 24)
+    return (T(16), T(15), IW - 16) if w else (T(8), T(7), IW - 8)
 
 def set_zs(w, v):
     s = sz(w)[2]
@@ -145,11 +195,11 @@ def alu(op, w, a='va', b='vb', r='vr'):
     if op == 'ADD':
         e(f'  {r} = {a} + {b}')
     elif op == 'ADC':
-        e(f'  {r} = {a} + {b} + ((FC >> 31) & 1)')
+        e(f'  {r} = {a} + {b} + ((FC >> {T(0)}) & 1)')
     elif op in ('SUB', 'CMP'):
         e(f'  {r} = {a} - {b}')
     elif op == 'SBB':
-        e(f'  {r} = {a} - {b} - ((FC >> 31) & 1)')
+        e(f'  {r} = {a} - {b} - ((FC >> {T(0)}) & 1)')
     elif op in ('AND', 'TEST'):
         e(f'  {r} = {a} & {b}')
     elif op == 'OR':
@@ -235,8 +285,7 @@ def modrm_handler(label, body, rcyc, mcyc):
     e(f'{label}:')
     e(f'  m = PeekA(PIP + 1)')
     e(f'  If m < $C0')
-    e(f'    EaRet = ?{label}M')
-    e(f'    Goto EaTab(m)')
+    ea_call(f'?{label}M', '&&' + lab(label + 'M'))
     e(f'  EndIf')
     e(f'  PIP = PIP + 2')
     body('r')
@@ -250,11 +299,13 @@ def group_handler(label, table, bodies, rcyc, mcyc):
     e(f'{label}:')
     e(f'  m = PeekA(PIP + 1)')
     e(f'  If m < $C0')
-    e(f'    EaRet = {table}M((m >> 3) & 7)')
-    e(f'    Goto EaTab(m)')
+    ea_call(f'{table}M((m >> 3) & 7)', f'cpu86_{table.lower()}m[(v_m >> 3) & 7]')
     e(f'  EndIf')
     e(f'  PIP = PIP + 2')
-    e(f'  Goto {table}R((m >> 3) & 7)')
+    if DESKTOP:
+        e(f'  ! goto *cpu86_{table.lower()}r[(v_m >> 3) & 7];')
+    else:
+        e(f'  Goto {table}R((m >> 3) & 7)')
     SUBLABELS.append(table)
     for k in range(8):
         for kind in 'rm':
@@ -266,11 +317,19 @@ def group_handler(label, table, bodies, rcyc, mcyc):
 
 # ---------------------------------------------------------------- the generator
 def generate(target):
+    global IW, DESKTOP
     OUT.clear()
     SUBLABELS.clear()
     rp2350 = target == 'rp2350'
+    DESKTOP = target == 'desktop'
+    IW = 64 if DESKTOP else 32
     e('; Generated by tools/gen_cpu.py. Edit the generator, then regenerate.')
-    e('; Intel 8086 interpreter core for the Raspberry Pi Pico series, PureMetal.')
+    if DESKTOP:
+        e('; Intel 8086 interpreter core, PureBasic (C back end, x64), for the desktop program.')
+        e('; The same handlers as the Pico core, written with 64-bit flag shifts; the')
+        e('; computed jumps are C labels-as-values (gcc && and goto *).')
+    else:
+        e('; Intel 8086 interpreter core for the Raspberry Pi Pico series, PureMetal.')
     e(f'; Target: {target}. See README.md for the API, memory map and limits.')
     e(';')
     e('; Configuration, declared by the including program before XIncludeFile:')
@@ -284,6 +343,13 @@ def generate(target):
     e(';   Cpu86PortOut(port.i, v.i, wide.i) OUT')
     e('EnableExplicit')
     e('')
+    if DESKTOP:
+        e('Declare.i Cpu86HookRead(lin.i)')
+        e('Declare Cpu86HookWrite(lin.i, v.i)')
+        e('Declare.i Cpu86PortIn(port.i, wide.i)')
+        e('Declare Cpu86PortOut(port.i, v.i, wide.i)')
+        e('#CPU_ASM_TAIL = 0')
+        e('')
     e('#CPU86_PAGES = 256              ; 1 MB in 4 KB pages')
     e('#CPU86_RAM = 0                  ; page kinds')
     e('#CPU86_ROM = 1')
@@ -297,13 +363,15 @@ def generate(target):
     e('Global Dim PageW.i(#CPU86_PAGES + 16)')
     e('Global Dim PageK.a(#CPU86_PAGES)')
     e('Global Dim PageH.i(#CPU86_PAGES) ; host base of a ROM/RAM page (for slow paths)')
-    e('Global Dim Dispatch.Label(256)')
-    e('Global Dim EaTab.Label(256)')
-    e('Global Dim EaSmall.Label(32)     ; mod * 8 + rm')
+    if not DESKTOP:
+        e('Global Dim Dispatch.Label(256)')
+        e('Global Dim EaTab.Label(256)')
+        e('Global Dim EaSmall.Label(32)     ; mod * 8 + rm')
     e('Global Dim Par.a(256)           ; 4 when the byte has even parity')
     e('Global Dim R8O.a(8)             ; byte register -> byte offset in R')
     e('Global Dim Buf.a(8)             ; instructions that cross a page or IP wrap')
-    e('Global EaRet.Label')
+    if not DESKTOP:
+        e('Global EaRet.Label')
     e('Global PIP.i, PEnd.i, FZS.i, FC.i, FO.i, Left.i, FA.i')
     e('Global PBase.i, PStart.i, PEndReal.i')
     e('Global SegD.i, SegS.i, Rep.i')
@@ -312,7 +380,8 @@ def generate(target):
     e('Global Budget.i, Ready.i, CpuCycles.i, InitIndex.i, Cpu86Fetching.i')
     # Left in r6 lets the tail decrement it in place; r5 must stay free (the
     # RP2040 allocator needs one of r5/r6 for its spill pool).
-    e('ReserveRegister PIP = r4, Left = r6, FZS = r8, FC = r9, FO = r10, PEnd = r11')
+    if not DESKTOP:
+        e('ReserveRegister PIP = r4, Left = r6, FZS = r8, FC = r9, FO = r10, PEnd = r11')
     e('')
     e('; EvPend bits: 1 trap armed, 2 NMI, 4 IRQ, 8 inhibit interrupts for one boundary.')
     e('')
@@ -330,7 +399,7 @@ def generate(target):
 def emit_slow_procs():
     e('; ------------------------------------------------------------ slow memory paths')
     e('; Any linear address, any page kind. Hook pages call the program\'s hooks.')
-    e('ProcedureRAM.i Cpu86Rd8(lin.i)')
+    e(PROC() + '.i Cpu86Rd8(lin.i)')
     e('  Protected k.i')
     e('  lin = lin & $FFFFF')
     e('  k = PageK(lin >> 12)')
@@ -343,7 +412,7 @@ def emit_slow_procs():
     e('  ProcedureReturn PeekA(PageH(lin >> 12) + (lin & $FFF))')
     e('EndProcedure')
     e('')
-    e('ProcedureRAM Cpu86Wr8(lin.i, v.i)')
+    e(PROC() + ' Cpu86Wr8(lin.i, v.i)')
     e('  Protected k.i')
     e('  lin = lin & $FFFFF')
     e('  k = PageK(lin >> 12)')
@@ -355,13 +424,13 @@ def emit_slow_procs():
     e('EndProcedure')
     e('')
     e('; Word at seg:off; the second byte is at seg:(off + 1) & $FFFF, as on the 8086.')
-    e('ProcedureRAM.i Cpu86Rd16(sb.i, off.i)')
+    e(PROC() + '.i Cpu86Rd16(sb.i, off.i)')
     e('  Protected lo.i')
     e('  lo = Cpu86Rd8(sb + off)')
     e('  ProcedureReturn lo | (Cpu86Rd8(sb + ((off + 1) & $FFFF)) << 8)')
     e('EndProcedure')
     e('')
-    e('ProcedureRAM Cpu86Wr16(sb.i, off.i, v.i)')
+    e(PROC() + ' Cpu86Wr16(sb.i, off.i, v.i)')
     e('  Cpu86Wr8(sb + off, v)')
     e('  Cpu86Wr8(sb + ((off + 1) & $FFFF), v >> 8)')
     e('EndProcedure')
@@ -369,7 +438,7 @@ def emit_slow_procs():
 
 def emit_api():
     e('; ------------------------------------------------------------ flags')
-    e('ProcedureRAM.i Cpu86Flags()')
+    e(PROC() + '.i Cpu86Flags()')
     e('  Protected f.i')
     e('  f = FlagsHi')
     e('  If FC < 0')
@@ -377,7 +446,7 @@ def emit_api():
     e('  EndIf')
     e('  f = f | Par((FZS ! (FZS >> 17)) & 255)')
     e('  f = f | ((FA ! FZS) & $10)')
-    e('  If (FZS << 15) = 0')
+    e(f'  If (FZS << {ZT()}) = 0')
     e('    f = f | $40')
     e('  EndIf')
     e('  If FZS < 0')
@@ -390,10 +459,10 @@ def emit_api():
     e('EndProcedure')
     e('')
     e('; Load all flags. Bits 12-15 read as 1 and bits 3 and 5 as 0 on the 8086.')
-    e('ProcedureRAM Cpu86SetFlags(f.i)')
+    e(PROC() + ' Cpu86SetFlags(f.i)')
     e('  Protected z.i')
-    e('  FC = (f & 1) << 31')
-    e('  FO = (f & $800) << 20')
+    e(f'  FC = (f & 1) << {T(0)}')
+    e(f'  FO = (f & $800) << {T(11)}')
     e('  If f & $40')
     e('    z = 0')
     e('    If (f & 4) = 0')
@@ -406,7 +475,7 @@ def emit_api():
     e('    EndIf')
     e('  EndIf')
     e('  If f & $80')
-    e('    z = z | $80000000')
+    e(f'    z = z | {TOP()}')
     e('  EndIf')
     e('  FZS = z')
     e('  FA = (f & $10) ! z')
@@ -503,7 +572,7 @@ def emit_api():
     e('; ------------------------------------------------------------ fetch window')
     e('; Recompute PIP/PBase/PStart/PEnd for the current CS:IP. Prefix state is')
     e('; untouched, so a prefix may call this in the middle of an instruction.')
-    e('ProcedureRAM Cpu86Remap()')
+    e(PROC() + ' Cpu86Remap()')
     e('  Protected ip.i, lin.i, p.i, en.i, k.i')
     e(f'  ip = {ip_now()}')
     e(f'  lin = (SegB({CS}) + ip) & $FFFFF')
@@ -532,7 +601,7 @@ def emit_api():
     e('    Cpu86Fetching = 0')
     e('    PBase = @Buf(0) - ip')
     e('    PIP = @Buf(0)')
-    e('    PStart = $7FFFFFFF')
+    e('    PStart = ' + ('$7FFFFFFF' if IW == 32 else '$7FFFFFFFFFFFFFFF'))
     e('    PEndReal = PIP + 1')
     e('  EndIf')
     e('  PEnd = PEndReal')
@@ -549,7 +618,7 @@ def emit_api():
     e('')
     e('; ------------------------------------------------------------ interrupts')
     e('; Push FLAGS, CS, IP (the IP of PIP); clear IF and TF; jump through the IVT.')
-    e('ProcedureRAM Cpu86Interrupt(n.i)')
+    e(PROC() + ' Cpu86Interrupt(n.i)')
     e('  Protected f.i, ip.i, sp.i, ncs.i, nip.i')
     e('  f = Cpu86Flags()')
     e(f'  ip = {ip_now()}')
@@ -573,7 +642,7 @@ def emit_api():
     e('')
     e('; At an instruction boundary with EvPend or Halted set. Returns 0 when the CPU')
     e('; is halted with nothing to wake it.')
-    e('ProcedureRAM.i Cpu86Events()')
+    e(PROC() + '.i Cpu86Events()')
     e('  If EvPend & 8')
     e('    EvPend = EvPend & ~8')
     e('  ElseIf EvPend & 1')
@@ -667,15 +736,25 @@ def emit_ea():
             e(f'  sb = {seg}')
             e('  ea = sb + eo')
             charge(EACYC[mod][rm])
-            e('  Goto EaRet')
+            if DESKTOP:
+                e('  ! goto *cpu86_earet;')
+            else:
+                e('  Goto EaRet')
 
 def emit_run(rp2350):
     e('; ------------------------------------------------------------ the interpreter')
     e('; Cpu86Run(n): execute until the budget n is spent (instructions, or clocks')
     e('; with #CPU_TIMING = 1). A REP string instruction is one instruction. Returns')
     e('; the budget used; stops early when the CPU halts (Halted = 1).')
-    e('ProcedureRAM.i Cpu86Run(n.i)')
+    e(PROC() + '.i Cpu86Run(n.i)')
     e('  Protected m.i, t.i, ea.i, eo.i, sb.i, va.i, vb.i, vr.i, cnt.i, x.i, y.i')
+    if DESKTOP:
+        e('  ; @@C_TABLES@@')
+    if not DESKTOP:
+        emit_pm_tail_macro(rp2350)
+    emit_run_body()
+
+def emit_pm_tail_macro(rp2350):
     e('Macro NextOp(c)')
     e('  CompilerIf #CPU_TIMING = 1')
     e('    Left = Left - (c)')
@@ -742,6 +821,8 @@ def emit_run(rp2350):
     e('    CompilerEndIf')
     e('  CompilerEndIf')
     e('EndMacro')
+
+def emit_run_body():
     e('  If n <= 0')
     e('    ProcedureReturn 0')
     e('  EndIf')
@@ -758,15 +839,16 @@ def emit_run(rp2350):
     e('    Next')
     for i, o in enumerate(R8OFF):
         e(f'    R8O({i}) = {o}')
-    for op in range(256):
-        e(f'    Dispatch(${op:02X}) = ?Op{op:02X}')
-    for mod in range(3):
-        for rm in range(8):
-            e(f'    EaSmall({mod * 8 + rm}) = ?Ea{mod}{rm}')
-    e('    For InitIndex = 0 To 255')
-    e('      EaTab(InitIndex) = EaSmall(((InitIndex >> 3) & $18) | (InitIndex & 7))')
-    e('    Next')
-    e('    InitTables()')
+    if not DESKTOP:
+        for op in range(256):
+            e(f'    Dispatch(${op:02X}) = ?Op{op:02X}')
+        for mod in range(3):
+            for rm in range(8):
+                e(f'    EaSmall({mod * 8 + rm}) = ?Ea{mod}{rm}')
+        e('    For InitIndex = 0 To 255')
+        e('      EaTab(InitIndex) = EaSmall(((InitIndex >> 3) & $18) | (InitIndex & 7))')
+        e('    Next')
+        e('    InitTables()')
     e('    Ready = 1')
     e('  EndIf')
     e('  Budget = n')
@@ -784,7 +866,7 @@ def emit_run(rp2350):
     e('    EndIf')
     e('  EndIf')
     e('  Cpu86Remap()')
-    e('  Goto Dispatch(PeekA(PIP))')
+    dispatch()
     e('')
     e('PrefixNext:')
     e('  PIP = PIP + 1')
@@ -792,7 +874,7 @@ def emit_run(rp2350):
     e('    Cpu86Remap()')
     e('  EndIf')
     e('  PEnd = 0')
-    e('  Goto Dispatch(PeekA(PIP))')
+    dispatch()
     e('')
     emit_ea()
     emit_handlers()
@@ -804,6 +886,9 @@ def emit_run(rp2350):
     tables = []
     for tname in SUBLABELS:
         tables.append(tname)
+    if DESKTOP:
+        emit_c_tables(tables)
+        return
     # Insert the table declarations and InitTables macro before CpuRun.
     decl = []
     for tname in tables:
@@ -817,6 +902,23 @@ def emit_run(rp2350):
     decl.append('EndMacro')
     idx = OUT.index('; ------------------------------------------------------------ the interpreter')
     OUT[idx:idx] = decl + ['']
+
+def emit_c_tables(tables):
+    """The PC's jump tables: static C arrays of label addresses inside Cpu86Run."""
+    c = []
+    def table(name, labels):
+        c.append(f'  ! static void *{name}[{len(labels)}] = {{')
+        for i in range(0, len(labels), 8):
+            c.append('  !   ' + ', '.join('&&' + lab(l) for l in labels[i:i + 8]) + ',')
+        c.append('  ! };')
+    table('cpu86_dsp', [f'Op{n:02X}' for n in range(256)])
+    table('cpu86_eat', [f'Ea{(m >> 6) if m < 0xC0 else 0}{m & 7}' for m in range(256)])
+    for t in tables:
+        table(f'cpu86_{t.lower()}r', [f'{t}R{k}' for k in range(8)])
+        table(f'cpu86_{t.lower()}m', [f'{t}M{k}' for k in range(8)])
+    c.append('  ! static void *cpu86_earet;')
+    idx = OUT.index('  ; @@C_TABLES@@')
+    OUT[idx:idx + 1] = c
 
 # ---------------------------------------------------------------- handlers
 def emit_handlers():
@@ -890,7 +992,7 @@ def emit_handlers():
         op(0x40 + r)
         e(f'  va = R({r})')
         e('  vr = va + 1')
-        e('  FO = (vr & ~va) << 16')
+        e(f'  FO = (vr & ~va) << {T(15)}')
         e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e(f'  R({r}) = vr')
@@ -899,7 +1001,7 @@ def emit_handlers():
         op(0x48 + r)
         e(f'  va = R({r})')
         e('  vr = va - 1')
-        e('  FO = (va & ~vr) << 16')
+        e(f'  FO = (va & ~vr) << {T(15)}')
         e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e(f'  R({r}) = vr')
@@ -925,12 +1027,12 @@ def emit_handlers():
     # ---- Jcc (70-7F) and their 8086 aliases (60-6F)
     conds = [
         'FO < 0', 'FO >= 0', 'FC < 0', 'FC >= 0',
-        '(FZS << 15) = 0', '(FZS << 15) <> 0',
-        '(FC < 0) Or ((FZS << 15) = 0)', '(FC >= 0) And ((FZS << 15) <> 0)',
+        f'(FZS << {ZT()}) = 0', f'(FZS << {ZT()}) <> 0',
+        f'(FC < 0) Or ((FZS << {ZT()}) = 0)', f'(FC >= 0) And ((FZS << {ZT()}) <> 0)',
         'FZS < 0', 'FZS >= 0',
         'Par((FZS ! (FZS >> 17)) & 255) <> 0', 'Par((FZS ! (FZS >> 17)) & 255) = 0',
         '(FZS ! FO) < 0', '(FZS ! FO) >= 0',
-        '((FZS ! FO) < 0) Or ((FZS << 15) = 0)', '((FZS ! FO) >= 0) And ((FZS << 15) <> 0)',
+        f'((FZS ! FO) < 0) Or ((FZS << {ZT()}) = 0)', f'((FZS ! FO) >= 0) And ((FZS << {ZT()}) <> 0)',
     ]
     for k in range(16):
         for base in (0x70, 0x60):
@@ -1270,9 +1372,9 @@ def emit_handlers():
             if n == 0xE2:
                 e('  If R(1) <> 0')
             elif n == 0xE1:
-                e('  If (R(1) <> 0) And ((FZS << 15) = 0)')
+                e(f'  If (R(1) <> 0) And ((FZS << {ZT()}) = 0)')
             else:
-                e('  If (R(1) <> 0) And ((FZS << 15) <> 0)')
+                e(f'  If (R(1) <> 0) And ((FZS << {ZT()}) <> 0)')
         jump_rel('PeekB(PIP + 1)', 2)
         charge(12)
         e('  Else')
@@ -1357,11 +1459,11 @@ def emit_handlers():
     e('  PEnd = 0')
     tail(2)
     op(0xF5)  # CMC
-    e('  FC = FC ! $80000000')
+    e(f'  FC = FC ! {TOP()}')
     e('  PIP = PIP + 1')
     tail(2)
     emit_grp3()
-    for n, code in ((0xF8, ['FC = 0']), (0xF9, ['FC = $80000000']),
+    for n, code in ((0xF8, ['FC = 0']), (0xF9, ['FC = ' + TOP()]),
                     (0xFA, ['FlagsHi = FlagsHi & ~$200']),
                     (0xFB, ['If (FlagsHi & $200) = 0', '  FlagsHi = FlagsHi | $200',
                             '  EvPend = EvPend | 8', '  PEnd = 0', 'EndIf']),
@@ -1402,8 +1504,7 @@ def emit_8f():
     e('Op8F:')
     e('  m = PeekA(PIP + 1)')
     e('  If m < $C0')
-    e('    EaRet = ?Op8FM')
-    e('    Goto EaTab(m)')
+    ea_call('?Op8FM', '&&' + lab('Op8FM'))
     e('  EndIf')
     e('  PIP = PIP + 2')
     e(f'  eo = R({SP})')
@@ -1430,16 +1531,16 @@ def emit_bcd(op):
     # 27 DAA
     op(0x27)
     e(f'  va = {rd_reg8_const(0)}')
-    e('  x = (FC >> 31) & 1')
+    e(f'  x = (FC >> {T(0)}) & 1')
     e('  y = ((FA ! FZS) >> 4) & 1')
     e('  vr = va')
     e('  FO = 0')
     e('  If x')
     e('    If (va >= $1A) And (va <= $7F)')
-    e('      FO = $80000000')
+    e(f'      FO = {TOP()}')
     e('    EndIf')
     e('  ElseIf (va >= $7A) And (va <= $7F)')
-    e('    FO = $80000000')
+    e(f'    FO = {TOP()}')
     e('  EndIf')
     e('  If ((va & 15) > 9) Or y')
     e('    vr = (vr + 6) & 255')
@@ -1453,7 +1554,7 @@ def emit_bcd(op):
     e('  EndIf')
     e('  If (va > cnt) Or x')
     e('    vr = (vr + $60) & 255')
-    e('    FC = $80000000')
+    e(f'    FC = {TOP()}')
     e('  Else')
     e('    FC = 0')
     e('  EndIf')
@@ -1465,25 +1566,25 @@ def emit_bcd(op):
     # 2F DAS
     op(0x2F)
     e(f'  va = {rd_reg8_const(0)}')
-    e('  x = (FC >> 31) & 1')
+    e(f'  x = (FC >> {T(0)}) & 1')
     e('  y = ((FA ! FZS) >> 4) & 1')
     e('  vr = va')
     e('  FO = 0')
     e('  If (x = 0) And (y = 0)')
     e('    If (va >= $9A) And (va <= $DF)')
-    e('      FO = $80000000')
+    e(f'      FO = {TOP()}')
     e('    EndIf')
     e('  ElseIf x = 0')
     e('    If ((va >= $80) And (va <= $85)) Or ((va >= $A0) And (va <= $E5))')
-    e('      FO = $80000000')
+    e(f'      FO = {TOP()}')
     e('    EndIf')
     e('  ElseIf y = 0')
     e('    If (va >= $80) And (va <= $DF)')
-    e('      FO = $80000000')
+    e(f'      FO = {TOP()}')
     e('    EndIf')
     e('  Else')
     e('    If (va >= $80) And (va <= $E5)')
-    e('      FO = $80000000')
+    e(f'      FO = {TOP()}')
     e('    EndIf')
     e('  EndIf')
     e('  If ((va & 15) > 9) Or y')
@@ -1498,7 +1599,7 @@ def emit_bcd(op):
     e('  EndIf')
     e('  If (va > cnt) Or x')
     e('    vr = (vr - $60) & 255')
-    e('    FC = $80000000')
+    e(f'    FC = {TOP()}')
     e('  Else')
     e('    FC = 0')
     e('  EndIf')
@@ -1514,7 +1615,7 @@ def emit_bcd(op):
     e('    PokeA(@R(0) + 1, PeekA(@R(0) + 1) + 1)')
     e('    vr = (va + 6) & 255')
     e('    FA = $10')
-    e('    FC = $80000000')
+    e(f'    FC = {TOP()}')
     e('  Else')
     e('    vr = va')
     e('    FA = 0')
@@ -1523,16 +1624,16 @@ def emit_bcd(op):
     e('  PokeA(@R(0), vr & 15)')
     e('  FO = 0')
     e('  If (va >= $7A) And (va <= $7F)')
-    e('    FO = $80000000')
+    e(f'    FO = {TOP()}')
     e('  EndIf')
     # ZF/PF from vr, SF from the range rule
     e('  If (va >= $7A) And (va <= $F9)')
-    e('    FZS = $80000000 | vr')
+    e(f'    FZS = {TOP()} | vr')
     e('  Else')
     e('    FZS = vr')
     e('  EndIf')
     e('  If vr = 0')
-    e('    FZS = FZS & $80000000')
+    e(f'    FZS = FZS & {TOP()}')
     e('  EndIf')
     e('  FA = FA ! vr')
     e('  PIP = PIP + 1')
@@ -1545,7 +1646,7 @@ def emit_bcd(op):
     e('    vr = (va - 6) & 255')
     e('    PokeA(@R(0) + 1, PeekA(@R(0) + 1) - 1)')
     e('    FA = $10')
-    e('    FC = $80000000')
+    e(f'    FC = {TOP()}')
     e('  Else')
     e('    vr = va')
     e('    FA = 0')
@@ -1555,7 +1656,7 @@ def emit_bcd(op):
     e('  FO = 0')
     e('  x = 0')
     e('  If y And (va >= $80) And (va <= $85)')
-    e('    FO = $80000000')
+    e(f'    FO = {TOP()}')
     e('  EndIf')
     e('  If (y = 0) And (va >= $80)')
     e('    x = 1')
@@ -1565,10 +1666,10 @@ def emit_bcd(op):
     e('  EndIf')
     e('  FZS = vr')
     e('  If x')
-    e('    FZS = FZS | $80000000')
+    e(f'    FZS = FZS | {TOP()}')
     e('  EndIf')
     e('  If vr = 0')
-    e('    FZS = FZS & $80000000')
+    e(f'    FZS = FZS & {TOP()}')
     e('  EndIf')
     e('  FA = FA ! vr')
     e('  PIP = PIP + 1')
@@ -1740,11 +1841,11 @@ def emit_strings(op):
         charge(iter_cyc)
         if kind in ('CMPS', 'SCAS'):
             e('  If Rep = 2')
-            e('    If (FZS << 15) <> 0')
+            e(f'    If (FZS << {ZT()}) <> 0')
             e('      Break')
             e('    EndIf')
             e('  Else')
-            e('    If (FZS << 15) = 0')
+            e(f'    If (FZS << {ZT()}) = 0')
             e('      Break')
             e('    EndIf')
             e('  EndIf')
@@ -1787,31 +1888,31 @@ def emit_shifts():
                       20 if opc >= 0xD2 else 15)
 
 def shift_body(k, w, W, mask, msb):
-    sc = 31 - W   # shift to move bit W into bit 31
+    sc = T(W)     # shift to move bit W into the top bit
     if k == 0:    # ROL
         e(f'    x = cnt % {W}')
         e(f'    vr = ((va << x) | (va >> ({W} - x))) & {mask}')
-        e('    FC = (vr & 1) << 31')
-        e(f'    FO = ((vr >> {msb}) ! vr) << 31')
+        e(f'    FC = (vr & 1) << {T(0)}')
+        e(f'    FO = ((vr >> {msb}) ! vr) << {T(0)}')
     elif k == 1:  # ROR
         e(f'    x = cnt % {W}')
         e(f'    vr = ((va >> x) | (va << ({W} - x))) & {mask}')
-        e(f'    FC = (vr >> {msb}) << 31')
-        e(f'    FO = ((vr >> {msb}) ! (vr >> {msb - 1})) << 31')
+        e(f'    FC = (vr >> {msb}) << {T(0)}')
+        e(f'    FO = ((vr >> {msb}) ! (vr >> {msb - 1})) << {T(0)}')
     elif k == 2:  # RCL through a W+1 bit value
         e(f'    x = cnt % {W + 1}')
-        e(f'    y = va | (((FC >> 31) & 1) << {W})')
+        e(f'    y = va | (((FC >> {T(0)}) & 1) << {W})')
         e(f'    y = (y << x) | (y >> ({W + 1} - x))')
         e(f'    vr = y & {mask}')
-        e(f'    FC = ((y >> {W}) & 1) << 31')
-        e(f'    FO = ((vr >> {msb}) ! (y >> {W})) << 31')
+        e(f'    FC = ((y >> {W}) & 1) << {T(0)}')
+        e(f'    FO = ((vr >> {msb}) ! (y >> {W})) << {T(0)}')
     elif k == 3:  # RCR
         e(f'    x = cnt % {W + 1}')
-        e(f'    y = va | (((FC >> 31) & 1) << {W})')
+        e(f'    y = va | (((FC >> {T(0)}) & 1) << {W})')
         e(f'    y = (y >> x) | (y << ({W + 1} - x))')
         e(f'    vr = y & {mask}')
-        e(f'    FC = ((y >> {W}) & 1) << 31')
-        e(f'    FO = ((vr >> {msb}) ! (vr >> {msb - 1})) << 31')
+        e(f'    FC = ((y >> {W}) & 1) << {T(0)}')
+        e(f'    FO = ((vr >> {msb}) ! (vr >> {msb - 1})) << {T(0)}')
     elif k == 4:  # SHL
         e('    If cnt > 31')
         e('      y = 0')
@@ -1820,7 +1921,7 @@ def shift_body(k, w, W, mask, msb):
         e('    EndIf')
         e(f'    vr = y & {mask}')
         e(f'    FC = y << {sc}')
-        e(f'    FO = ((vr >> {msb}) ! (y >> {W})) << 31')
+        e(f'    FO = ((vr >> {msb}) ! (y >> {W})) << {T(0)}')
         e('    FA = vr')
         set_zs_i(w, 'vr')
     elif k == 5:  # SHR
@@ -1830,8 +1931,8 @@ def shift_body(k, w, W, mask, msb):
         e('      y = va >> (cnt - 1)')
         e('    EndIf')
         e('    vr = y >> 1')
-        e('    FC = y << 31')
-        e(f'    FO = (y >> {msb}) << 31')
+        e(f'    FC = y << {T(0)}')
+        e(f'    FO = (y >> {msb}) << {T(0)}')
         e('    FA = vr')
         set_zs_i(w, 'vr')
     elif k == 6:  # SETMO / SETMOC: all ones, flags as OR with ones
@@ -1841,21 +1942,21 @@ def shift_body(k, w, W, mask, msb):
         e('    FA = vr')
         set_zs_i(w, 'vr')
     else:         # SAR
-        s = 32 - W
+        s = IW - W
         e(f'    y = (va << {s}) >> {s}')
         e('    If cnt > 31')
         e('      cnt = 31')
         e('    EndIf')
         e('    y = y >> (cnt - 1)')
         e(f'    vr = (y >> 1) & {mask}')
-        e('    FC = y << 31')
+        e(f'    FC = y << {T(0)}')
         e('    FO = 0')
         e('    FA = vr')
         set_zs_i(w, 'vr')
     if k < 4:
         # Rotates leave SF, ZF, PF, AF alone. Normalise CF/OF to bit 31 only.
-        e('    FC = FC & $80000000')
-        e('    FO = FO & $80000000')
+        e(f'    FC = FC & {TOP()}')
+        e(f'    FO = FO & {TOP()}')
 
 def set_zs_i(w, v):
     s = sz(w)[2]
@@ -1890,7 +1991,7 @@ def emit_grp3():
                 e('  R(0) = vr')
                 e('  x = (vr >> 16) & $FFFF')
                 e('  R(2) = x')
-                e('  FZS = (x << 16) >> 16')
+                e(f'  FZS = (x << {IW - 16}) >> {IW - 16}')
             else:
                 e('  vr = PeekA(@R(0)) * vb')
                 e('  If Rep')
@@ -1898,10 +1999,10 @@ def emit_grp3():
                 e('  EndIf')
                 e('  R(0) = vr')
                 e('  x = (vr >> 8) & $FF')
-                e('  FZS = (x << 24) >> 24')
+                e(f'  FZS = (x << {IW - 8}) >> {IW - 8}')
             e('  If x <> 0')
-            e('    FC = $80000000')
-            e('    FO = $80000000')
+            e(f'    FC = {TOP()}')
+            e(f'    FO = {TOP()}')
             e('  Else')
             e('    FC = 0')
             e('    FO = 0')
@@ -1910,25 +2011,25 @@ def emit_grp3():
         def imul_b(kind, w=w):
             e_read(kind, w, 'vb')
             if w:
-                e('  vr = PeekW(@R(0)) * ((vb << 16) >> 16)      ; PeekW: AX read signed')
+                e(f'  vr = PeekW(@R(0)) * ((vb << {IW - 16}) >> {IW - 16})      ; PeekW: AX read signed')
                 e('  If Rep')
                 e('    vr = 0 - vr')
                 e('  EndIf')
                 e('  R(0) = vr')
                 e('  R(2) = vr >> 16')
-                e('  x = (vr << 16) >> 16')
-                e('  FZS = (vr >> 16) << 16 >> 16')
+                e(f'  x = (vr << {IW - 16}) >> {IW - 16}')
+                e(f'  FZS = (vr >> 16) << {IW - 16} >> {IW - 16}')
             else:
-                e('  vr = PeekB(@R(0)) * ((vb << 24) >> 24)')
+                e(f'  vr = PeekB(@R(0)) * ((vb << {IW - 8}) >> {IW - 8})')
                 e('  If Rep')
                 e('    vr = 0 - vr')
                 e('  EndIf')
                 e('  R(0) = vr')
-                e('  x = (vr << 24) >> 24')
-                e('  FZS = (vr << 16) >> 24')
+                e(f'  x = (vr << {IW - 8}) >> {IW - 8}')
+                e(f'  FZS = (vr << {IW - 16}) >> {IW - 8}')
             e('  If x <> vr')
-            e('    FC = $80000000')
-            e('    FO = $80000000')
+            e(f'    FC = {TOP()}')
+            e(f'    FO = {TOP()}')
             e('  Else')
             e('    FC = 0')
             e('    FO = 0')
@@ -1964,7 +2065,9 @@ def emit_grp3():
             e_read(kind, w, 'vb')
             if w:
                 e('  va = (R(2) << 16) | R(0)')
-                e('  y = (vb << 16) >> 16')
+                if IW == 64:
+                    e('  va = (va << 32) >> 32                    ; DX:AX as a signed 32-bit value')
+                e(f'  y = (vb << {IW - 16}) >> {IW - 16}')
                 e('  x = 0')
                 e('  If va < 0')
                 e('    va = 0 - va')
@@ -1998,7 +2101,7 @@ def emit_grp3():
                 e('  EndIf')
             else:
                 e('  va = PeekW(@R(0))                       ; AX read signed')
-                e('  y = (vb << 24) >> 24')
+                e(f'  y = (vb << {IW - 8}) >> {IW - 8}')
                 e('  x = 0')
                 e('  If va < 0')
                 e('    va = 0 - va')
@@ -2042,10 +2145,10 @@ def emit_grp45():
             e_read(kind, 0, 'va')
             if k % 2 == 0:
                 e('  vr = va + 1')
-                e('  FO = (vr & ~va) << 24')
+                e(f'  FO = (vr & ~va) << {T(7)}')
             else:
                 e('  vr = va - 1')
-                e('  FO = (va & ~vr) << 24')
+                e(f'  FO = (va & ~vr) << {T(7)}')
             e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
             set_zs(0, 'vr')
             e_write(kind, 0, 'vr')
@@ -2055,14 +2158,14 @@ def emit_grp45():
     def inc(kind):
         e_read(kind, 1, 'va')
         e('  vr = va + 1')
-        e('  FO = (vr & ~va) << 16')
+        e(f'  FO = (vr & ~va) << {T(15)}')
         e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e_write(kind, 1, 'vr')
     def dec(kind):
         e_read(kind, 1, 'va')
         e('  vr = va - 1')
-        e('  FO = (va & ~vr) << 16')
+        e(f'  FO = (va & ~vr) << {T(15)}')
         e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
         set_zs(1, 'vr')
         e_write(kind, 1, 'vr')
@@ -2114,7 +2217,7 @@ def emit_grp45():
 def main():
     import os
     out = Path(os.environ.get('CPU86_OUT', ROOT / 'src'))
-    for target, name in (('rp2040', 'cpu86.pico'), ('rp2350', 'cpu86.pico2')):
+    for target, name in (('rp2040', 'cpu86.pico'), ('rp2350', 'cpu86.pico2'), ('desktop', '../desktop/cpu86_core.pbi')):
         text = generate(target)
         (out / name).write_text(text, newline='\n')
         print(name, len(text.splitlines()), 'lines')

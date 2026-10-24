@@ -1,4 +1,4 @@
-# Intel 8086 on the Raspberry Pi Pico series — PureMetal
+# Intel 8086 on the Raspberry Pi Pico series â€” PureMetal
 
 A fast Intel 8086 interpreter core for the Raspberry Pi Pico W (RP2040) and
 Pico 2 W (RP2350), written in PureMetal. The interpreter runs from SRAM and
@@ -8,14 +8,19 @@ computed jump, so there is no procedure call per guest instruction.
 Status, results and the measured speed are in **Verification** and **Speed**
 below. Everything reported there ran on the physical boards.
 
+**On the PC:** the same core, generated from the same handlers, runs as a
+Windows program with a Neon Arcade Display Engine front end in [`desktop/`](desktop/README.md):
+it passes the same 646,000 reference tests with the board's own test code, and
+runs 230-490 M instructions a second.
+
 ## What it implements
 
 The whole 8086 instruction set, as the real chip behaves:
 
-- every opcode byte `00`–`FF`, including the 8086's aliases (`60`–`6F` as
+- every opcode byte `00`â€“`FF`, including the 8086's aliases (`60`â€“`6F` as
   `Jcc`, `C0`/`C1` as `RET`, `C8`/`C9` as `RETF`, `82` as `80`, `F1` as
   `LOCK`, `F6`/`F7 /1` as `TEST`, `FF /7` as `PUSH`), `POP CS` (`0F`),
-  `MOV CS` (`8E /1`), `SALC` (`D6`) and `SETMO`/`SETMOC` (`D0`–`D3 /6`);
+  `MOV CS` (`8E /1`), `SALC` (`D6`) and `SETMO`/`SETMOC` (`D0`â€“`D3 /6`);
 - segment override prefixes on every memory operand (string destinations stay
   on `ES`), `LOCK` accepted, `REP`/`REPE`/`REPNE` on all string instructions;
 - `MUL`/`IMUL`/`DIV`/`IDIV`/`AAM`/`AAD`, with the divide-error interrupt
@@ -25,14 +30,14 @@ The whole 8086 instruction set, as the real chip behaves:
   microcode does;
 - 8086 specifics: `PUSH SP` pushes the decremented value, shift and rotate
   counts are **not** masked (`CL` up to 255), word accesses at offset `FFFF`
-  wrap inside the segment, linear addresses wrap at 1 MB, `FLAGS` bits 12–15
+  wrap inside the segment, linear addresses wrap at 1 MB, `FLAGS` bits 12â€“15
   read as 1;
 - exact flags including AF and PF, and the undocumented flag results of
   `DAA`, `DAS`, `AAA` and `AAS` that the reference tests check;
 - `INT n`, `INT 3`, `INTO`, `IRET`, `HLT`, the trap flag (single step), NMI and
   a maskable interrupt line with the 8086's one-instruction delays after `STI`
   and after a load of `SS`;
-- `IN`/`OUT` through port hooks; `ESC` (`D8`–`DF`) decodes its operand and does
+- `IN`/`OUT` through port hooks; `ESC` (`D8`â€“`DF`) decodes its operand and does
   nothing (no 8087); `WAIT` returns at once.
 
 Not modelled: the prefetch queue (code modified just ahead of the instruction
@@ -55,12 +60,12 @@ or a hook page:
 
 Two tables hold, per page, a host pointer minus the page's linear base (or 0),
 so an ordinary read is `PeekA(PageR(lin >> 12) + lin)` and a single test of
-the pointer sends everything else — ROM writes, unmapped space, hooks, a word
-that crosses a page or the 64 KB segment end — to the slow procedures. RAM need
+the pointer sends everything else â€” ROM writes, unmapped space, hooks, a word
+that crosses a page or the 64 KB segment end â€” to the slow procedures. RAM need
 not be contiguous on the host: the demo joins two arrays into one guest range.
 
 Instruction fetch does not go through the tables at all. The instruction
-pointer is a host pointer into a *fetch window* — the current 4 KB page, cut
+pointer is a host pointer into a *fetch window* â€” the current 4 KB page, cut
 short so that any instruction starting inside it has all of its (at most six)
 bytes inside the page and inside the code segment. Leaving the window costs one
 re-computation; an instruction that crosses a page or the IP wrap is copied
@@ -74,7 +79,9 @@ the guest **156 KB on the Pico W** (100 KB below the USB buffers, 56 KB above;
 about 6 KB of SRAM is left for the program) and **420 KB on the Pico 2 W**
 (320 KB + 100 KB). That is the 8086's first 156 KB / 420 KB as RAM; a machine
 wanting the full 640 KB needs ROM pages in flash and PSRAM or hook pages for
-the rest, none of which needs a change to the core.
+the rest, none of which needs a change to the core. Re-measured with the
+compiler rebuilt on 2026-10-23 (largest-first placement): 160 KB is the most
+that fits on the Pico W (1.6 KB of SRAM left), so the demo keeps 156 KB.
 
 ## API
 
@@ -131,8 +138,8 @@ PureMetal Forge (the IDE application, used headless) compiles and uploads:
 ```
 
 Ready images: `firmware/8086-picow.uf2` (run on the Pico W; SHA-256
-`5bf8c34fb04eedd2606f112a33473d382e67f2678cbc8f9e3b2908024c2657eb`) and
-`firmware/8086-pico2w.uf2` (built, not run here; `7086e4f2ed43b42f24c01ba4fd8292d3a097f450aa6643cdd86776ac56f50359`).
+`3c0597b3ab08cb76174993ec98507b7b7bcf0b97cc41eb8e6adb480970b43452`) and
+`firmware/8086-pico2w.uf2` (built, not run here; `09e75cf17f9597e8caac60fbf59049b5d773cd3bde7d1c2da223a1e5886b2f26`).
 Copy one to the board's BOOTSEL drive and open its USB serial port within 30 s:
 it prints the smoke test and then the speed of each mix, once a second.
 
@@ -158,6 +165,7 @@ hook pages that count any data access as a failure.
 | SingleStepTests, 100 from every file (32,300) | plain PureMetal tail (`#CPU_ASM_TAIL = 0`) | 32,300 of 32,300 pass |
 | API, interrupt and memory-map checks (`Diagnostics/api_body.pmi`) | each of the three builds | 78 of 78 (assembly tail), 77 of 77 (clock budget), 78 of 78 (plain tail) |
 | Demo smoke test (sum 1..100, `LOOP`, `HLT`) and copy check | both tails | pass |
+| Whole program: `sieve.com` (primes below 10000) through the demo ROM's DOS services, its output compared | assembly tail | pass: `primes below 10000: 1229`, 120,169 instructions in 51 ms |
 
 The API checks cover what single-instruction tests cannot: the run budget, `HLT`,
 the interrupt line with the one-instruction `STI` delay and acknowledge, NMI with
@@ -206,7 +214,7 @@ second. What made the difference, measured one change at a time:
   decrements the budget in place and compares against the window end directly
   (two Thumb instructions fewer per guest instruction; every mix faster);
 - AF kept lazily (`FA` holds the operands' XOR, AF is bit 4 of `FA ^ result`);
-- pages 0�15 mirrored above 1 MB, so `segment * 16 + offset` needs no mask;
+- pages 0–15 mirrored above 1 MB, so `segment * 16 + offset` needs no mask;
 - one test (`offset ends in F`) sending every possibly-straddling word to the
   slow path, instead of separate page-end and segment-end tests;
 - `REP MOVS` / `REP STOS` moving whole runs between host pointers.

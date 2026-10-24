@@ -1,0 +1,31 @@
+; SingleStepTests 8086 runner: state. Shared by the board (vectors_body.pmi) and
+; the desktop program (desktop/), so both run the same test code. Originally: on the board. tools/vectors.py streams the
+; reference tests over USB serial; every test runs here, on the Pico, through
+; Cpu86Run(1), and is checked here: all registers, FLAGS under the reference
+; mask, every byte the test touches, and no write anywhere else.
+;
+; Stream (host -> board), little endian:
+;   $5A 'G' len name          start a group (one reference file)
+;   $5A 'T' u16 len payload   one test
+;   $5A 'E'                   end of group: the board reports it
+;   $5A 'Z'                   end of stream: the board reports the totals
+; payload: u16 initial[14], u16 final[14] (ax bx cx dx cs ss ds es sp bp si
+; di ip flags), u16 flag mask, u16 count, then count entries of
+;   u24 address (bit 23: a different final value and a mask follow), u8 initial
+;   [u8 final, u8 mask]
+#POOL_PAGES = 16
+#FILL = $A5
+#MAX_ENTRIES = 1536
+Global Dim Pool.l(#POOL_PAGES * 1024)   ; .l: word aligned, PeekL/PokeL on it
+Global Dim PoolGuest.i(#POOL_PAGES)       ; guest page held by each pool page, -1 free
+Global Dim EntA.i(#MAX_ENTRIES)
+Global Dim EntI.a(#MAX_ENTRIES)
+Global Dim EntF.a(#MAX_ENTRIES)
+Global Dim EntM.a(#MAX_ENTRIES)
+Global Dim Ini.i(14)
+Global Dim Fin.i(14)
+Global EntCount.i, FlagMask.i, Stray.i, PoolUsed.i
+Global GroupPass.i, GroupFail.i, GroupReported.i, TotalPass.i, TotalFail.i, GroupIndex.i
+Global Dim GroupName.a(64)
+Global TestStart.i, GroupCount.i, LastPass.i, LastFail.i
+

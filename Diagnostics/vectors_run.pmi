@@ -1,0 +1,214 @@
+; SingleStepTests 8086 runner: the test itself. Shared by the board and the
+; desktop program. The platform defines, before including this file:
+;   RxByte()                     next byte of the stream
+;   ReportFail(what, got, want)  one failed field ("what" is a string literal)
+;   SayGroupName()               prints GroupName()
+; and Say / Num / Hex / Eol / Micros.
+
+; An instruction that crosses a page or the IP wrap is prefetched six bytes at
+; a time (Cpu86Fetching = 1); bytes past its end may lie on a page the test
+; never listed, so only data accesses count as strays.
+Procedure.i VecHookRead(lin.i)
+  If Cpu86Fetching
+    ProcedureReturn $90
+  EndIf
+  Stray = Stray + 1
+  ProcedureReturn 0
+EndProcedure
+
+Procedure VecHookWrite(lin.i, v.i)
+  Stray = Stray + 1
+EndProcedure
+
+; The reference tests read $FF from every port.
+Procedure.i VecPortIn(port.i, wide.i)
+  If wide
+    ProcedureReturn $FFFF
+  EndIf
+  ProcedureReturn $FF
+EndProcedure
+
+Procedure.i RxWord()
+  Protected lo.i
+  lo = RxByte()
+  ProcedureReturn lo | (RxByte() << 8)
+EndProcedure
+
+; Host address of a guest byte; maps a pool page on first use.
+Procedure.i HostOf(lin.i)
+  Protected g.i, k.i
+  g = (lin >> 12) & 255
+  For k = 0 To PoolUsed - 1
+    If PoolGuest(k) = g
+      ProcedureReturn @Pool(0) + (k << 12) + (lin & $FFF)
+    EndIf
+  Next
+  If PoolUsed >= #POOL_PAGES
+    ProcedureReturn 0
+  EndIf
+  k = PoolUsed
+  PoolUsed = PoolUsed + 1
+  PoolGuest(k) = g
+  Cpu86MapRam(g << 12, 4096, @Pool(0) + (k << 12))
+  ProcedureReturn @Pool(0) + (k << 12) + (lin & $FFF)
+EndProcedure
+
+; Put every used pool page back to the fill, check nothing else was written,
+; and unmap it. Returns the number of stray bytes found.
+Procedure.i ReleasePool()
+  Protected k.i, i.i, h.i, bad.i, w.i
+  For i = 0 To EntCount - 1
+    h = HostOf(EntA(i))
+    PokeA(h, #FILL)
+  Next
+  bad = 0
+  For k = 0 To PoolUsed - 1
+    h = @Pool(0) + (k << 12)
+    For i = 0 To 1023
+      w = PeekL(h + (i << 2)) & $FFFFFFFF
+      If w <> ($A5A5A5A5 & $FFFFFFFF)
+        bad = bad + 1
+        PokeL(h + (i << 2), $A5A5A5A5)
+      EndIf
+    Next
+    Cpu86MapHook(PoolGuest(k) << 12, 4096)
+    PoolGuest(k) = -1
+  Next
+  PoolUsed = 0
+  ProcedureReturn bad
+EndProcedure
+
+Procedure RunTest()
+  Protected i.i, n.i, a.i, h.i, v.i, fails.i, got.i
+  For i = 0 To 13
+    Ini(i) = RxWord()
+  Next
+  For i = 0 To 13
+    Fin(i) = RxWord()
+  Next
+  FlagMask = RxWord()
+  n = RxWord()
+  EntCount = 0
+  For i = 0 To n - 1
+    a = RxByte()
+    a = a | (RxByte() << 8)
+    a = a | (RxByte() << 16)
+    v = RxByte()
+    If EntCount < #MAX_ENTRIES
+      EntA(EntCount) = a & $FFFFF
+      EntI(EntCount) = v
+      If a & $800000
+        EntF(EntCount) = RxByte()
+        EntM(EntCount) = RxByte()
+      Else
+        EntF(EntCount) = v
+        EntM(EntCount) = 255
+      EndIf
+      EntCount = EntCount + 1
+    EndIf
+  Next
+  ; Lay out memory.
+  For i = 0 To EntCount - 1
+    h = HostOf(EntA(i))
+    If h = 0
+      ReportFail("too-many-pages", PoolUsed, #POOL_PAGES)
+      ProcedureReturn
+    EndIf
+    PokeA(h, EntI(i))
+  Next
+  ; CPU state: ax bx cx dx cs ss ds es sp bp si di ip flags.
+  R(0) = Ini(0) : R(3) = Ini(1) : R(1) = Ini(2) : R(2) = Ini(3)
+  R(4) = Ini(8) : R(5) = Ini(9) : R(6) = Ini(10) : R(7) = Ini(11)
+  Cpu86SetSeg(1, Ini(4)) : Cpu86SetSeg(2, Ini(5))
+  Cpu86SetSeg(3, Ini(6)) : Cpu86SetSeg(0, Ini(7))
+  Cpu86SetIP(Ini(12))
+  Cpu86SetFlags(Ini(13))
+  EvPend = 0 : Halted = 0
+  Stray = 0
+  fails = GroupFail
+  Cpu86Run(1)
+  If R(0) <> Fin(0) : ReportFail("ax", R(0), Fin(0)) : EndIf
+  If R(3) <> Fin(1) : ReportFail("bx", R(3), Fin(1)) : EndIf
+  If R(1) <> Fin(2) : ReportFail("cx", R(1), Fin(2)) : EndIf
+  If R(2) <> Fin(3) : ReportFail("dx", R(2), Fin(3)) : EndIf
+  If Cpu86GetSeg(1) <> Fin(4) : ReportFail("cs", Cpu86GetSeg(1), Fin(4)) : EndIf
+  If Cpu86GetSeg(2) <> Fin(5) : ReportFail("ss", Cpu86GetSeg(2), Fin(5)) : EndIf
+  If Cpu86GetSeg(3) <> Fin(6) : ReportFail("ds", Cpu86GetSeg(3), Fin(6)) : EndIf
+  If Cpu86GetSeg(0) <> Fin(7) : ReportFail("es", Cpu86GetSeg(0), Fin(7)) : EndIf
+  If R(4) <> Fin(8) : ReportFail("sp", R(4), Fin(8)) : EndIf
+  If R(5) <> Fin(9) : ReportFail("bp", R(5), Fin(9)) : EndIf
+  If R(6) <> Fin(10) : ReportFail("si", R(6), Fin(10)) : EndIf
+  If R(7) <> Fin(11) : ReportFail("di", R(7), Fin(11)) : EndIf
+  If Cpu86GetIP() <> Fin(12) : ReportFail("ip", Cpu86GetIP(), Fin(12)) : EndIf
+  got = Cpu86Flags()
+  If ((got ! Fin(13)) & FlagMask) <> 0 : ReportFail("flags", got, Fin(13)) : EndIf
+  For i = 0 To EntCount - 1
+    h = HostOf(EntA(i))
+    v = PeekA(h)
+    If ((v ! EntF(i)) & EntM(i)) <> 0
+      ReportFail("mem", (EntA(i) << 8) | v, (EntA(i) << 8) | EntF(i))
+    EndIf
+  Next
+  If Stray <> 0 : ReportFail("unmapped-access", Stray, 0) : EndIf
+  v = ReleasePool()
+  If v <> 0 : ReportFail("stray-write-words", v, 0) : EndIf
+  If GroupFail = fails
+    GroupPass = GroupPass + 1
+  EndIf
+  GroupIndex = GroupIndex + 1
+EndProcedure
+
+; Map everything as hooks and fill the pool. Call once before the stream.
+Procedure VecInit()
+  Protected i.i
+  Cpu86Reset()
+  Cpu86MapHook(0, $100000)
+  PoolUsed = 0
+  For i = 0 To #POOL_PAGES - 1
+    PoolGuest(i) = -1
+  Next
+  For i = 0 To #POOL_PAGES * 1024 - 1
+    PokeL(@Pool(0) + (i << 2), $A5A5A5A5)
+  Next
+EndProcedure
+
+; One command of the stream. Returns 1 after the end-of-stream report.
+Procedure.i VecStep()
+  Protected c.i, i.i, n.i
+  c = RxByte()
+  If c <> $5A
+    ProcedureReturn 0
+  EndIf
+  c = RxByte()
+  If c = 84
+    n = RxWord()
+    RunTest()
+  ElseIf c = 71
+    n = RxByte()
+    For i = 0 To n - 1
+      GroupName(i) = RxByte()
+    Next
+    GroupName(n) = 0
+    GroupPass = 0 : GroupFail = 0 : GroupReported = 0 : GroupIndex = 0
+    TestStart = Micros()
+  ElseIf c = 69
+    Say("G ") : SayGroupName() : Say(" pass=") : Num(GroupPass)
+    Say(" fail=") : Num(GroupFail) : Say(" tests=") : Num(GroupIndex)
+    Say(" us=") : Num(Micros() - TestStart) : Eol()
+    TotalPass = TotalPass + GroupPass
+    If GroupPass <> GroupIndex
+      TotalFail = TotalFail + GroupIndex - GroupPass
+    EndIf
+  ElseIf c = 90
+    Say("TOTAL pass=") : Num(TotalPass) : Say(" fail=") : Num(TotalFail) : Eol()
+    If TotalFail = 0 And TotalPass > 0
+      Say("vectors PASS") : Eol()
+    Else
+      Say("vectors FAIL") : Eol()
+    EndIf
+    LastPass = TotalPass : LastFail = TotalFail
+    TotalPass = 0 : TotalFail = 0
+    ProcedureReturn 1
+  EndIf
+  ProcedureReturn 0
+EndProcedure

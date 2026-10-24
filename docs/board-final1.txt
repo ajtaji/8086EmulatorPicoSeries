@@ -1,424 +1,536 @@
-lease held: 8080-core 2026-10-23T18:46:50-05:00 batch - waiting
-lease taken 18:47:42
+lease held: z80-core 2026-10-23T19:39:54 expected-until 19:54:45 (17 upload+capture jobs) - waiting
+lease held: coco3 2026-10-23T19:46:41.9876660-05:00 bench 1 jobs - waiting
+lease held: z80-core 2026-10-23T19:47:44 expected-until 20:07:14 (long run: tests/_zex1_0.picow) - waiting
+lease held: 8080-core 2026-10-23T19:54:14.4562967-05:00 pid 109816 until 20:11 - waiting
+lease held: apple2c 2026-10-23T20:10:59.2361355-05:00 pid 131928 until 20:13 - waiting
+lease held: c64 2026-10-23T20:15:28.3614748-05:00 pid 101360 until 20:24 - waiting
+lease held: c64 71406 2026-10-23T20:27:59-05:00 upload+capture 420s, ends by 2026-10-23T20:35:59-05:00 - waiting
+lease held: cg-8051 2026-10-23T20:25:00.8131239-05:00 pid 123776 until 20:28 - waiting
+lease held:  - waiting
+lease held: 8080-core 2026-10-23T20:30:06-05:00 batch - waiting
+lease taken 20:30:26
 pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 53816 lines of assembly
+pmfc: 53927 lines of assembly
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2.asm
-> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89192 bytes of SRAM left free, stacks and reserved windows excluded.
-ROM_TOTAL_RP2040|104112|2097152
-CYCLES_TOTAL_RP2040|64445|straight-line, not-taken branches
-REGMAP_RP2040|6153|201|87|327|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1409|frame-slot loads taken from a register
-pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
+> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89184 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2040|104280|2097152
+CYCLES_TOTAL_RP2040|64609|straight-line, not-taken branches
+REGMAP_RP2040|6161|201|88|328|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1414|frame-slot loads taken from a register
+pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104280 bytes into 408 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: OK
-image ends at 0x10019700
+image ends at 0x10019800
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    A1244E447D3E9F7501B77D9CA44E60C9F48AC02ADB54DE244CBC66BCC3FFDB38 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    6BE72FBE9AF7BF02908CF9BE663DCC5239C2D4717F5128597F2CC3E3B02E0752 C:\Users\ajtaj\Desktop\Github\8086Emulato...
 
 
 pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 53816 lines of assembly
+pmfc: 53927 lines of assembly
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2.asm
-> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89192 bytes of SRAM left free, stacks and reserved windows excluded.
-ROM_TOTAL_RP2040|104112|2097152
-CYCLES_TOTAL_RP2040|64445|straight-line, not-taken branches
-REGMAP_RP2040|6153|201|87|327|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1409|frame-slot loads taken from a register
-pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
+> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89184 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2040|104280|2097152
+CYCLES_TOTAL_RP2040|64609|straight-line, not-taken branches
+REGMAP_RP2040|6161|201|88|328|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1414|frame-slot loads taken from a register
+pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104280 bytes into 408 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: uploading vectors.uf2 (RP2040) through COM7
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
-> [NATIVE UPLOADER] COM7 is still there 2.0 s after the 1200-baud touch (a program built before the touch existed does not answer it); sending the reset phrase.
+> [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (2.0 s): the board is going to its boot loader.
 > [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
 > [NATIVE UPLOADER] Found BOOTSEL drive at H:\
-> [NATIVE UPLOADER] Writing image: 65536 of 208384 bytes (31%)
-> [NATIVE UPLOADER] Writing image: 131072 of 208384 bytes (62%)
-> [NATIVE UPLOADER] Writing image: 196608 of 208384 bytes (94%)
-> [NATIVE UPLOADER] Writing image: 208384 of 208384 bytes (100%)
+> [NATIVE UPLOADER] Writing image: 65536 of 208896 bytes (31%)
+> [NATIVE UPLOADER] Writing image: 131072 of 208896 bytes (62%)
+> [NATIVE UPLOADER] Writing image: 196608 of 208896 bytes (94%)
+> [NATIVE UPLOADER] Writing image: 208896 of 208896 bytes (100%)
 > [NATIVE UPLOADER] Wrote vectors.uf2 to H:\
 > [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
 pmfc: uploaded.
 pmfc: OK
 8086 vectors clk_sys kHz=200000 timing=0 asm-tail=1
 READY
-G 00 pass=2000 fail=0 tests=2000 us=822817
-G 01 pass=2000 fail=0 tests=2000 us=847784
-G 02 pass=2000 fail=0 tests=2000 us=805344
-G 03 pass=2000 fail=0 tests=2000 us=830332
-G 04 pass=2000 fail=0 tests=2000 us=579551
-G 05 pass=2000 fail=0 tests=2000 us=578694
-G 06 pass=2000 fail=0 tests=2000 us=927224
-G 07 pass=2000 fail=0 tests=2000 us=907655
-G 08 pass=2000 fail=0 tests=2000 us=809919
-G 09 pass=2000 fail=0 tests=2000 us=840288
-G 0A pass=2000 fail=0 tests=2000 us=811788
-G 0B pass=2000 fail=0 tests=2000 us=836689
-G 0C pass=2000 fail=0 tests=2000 us=578915
-G 0D pass=2000 fail=0 tests=2000 us=576873
-G 0E pass=2000 fail=0 tests=2000 us=927789
-G 10 pass=2000 fail=0 tests=2000 us=815879
-G 11 pass=2000 fail=0 tests=2000 us=849648
-G 12 pass=2000 fail=0 tests=2000 us=811152
-G 13 pass=2000 fail=0 tests=2000 us=834988
-G 14 pass=2000 fail=0 tests=2000 us=577831
-G 15 pass=2000 fail=0 tests=2000 us=578277
-G 16 pass=2000 fail=0 tests=2000 us=927946
-G 17 pass=2000 fail=0 tests=2000 us=906505
-G 18 pass=2000 fail=0 tests=2000 us=814477
-G 19 pass=2000 fail=0 tests=2000 us=845800
-G 1A pass=2000 fail=0 tests=2000 us=811086
-G 1B pass=2000 fail=0 tests=2000 us=832633
-G 1C pass=2000 fail=0 tests=2000 us=577279
-G 1D pass=2000 fail=0 tests=2000 us=577746
-G 1E pass=2000 fail=0 tests=2000 us=925779
-G 1F pass=2000 fail=0 tests=2000 us=908125
-G 20 pass=2000 fail=0 tests=2000 us=815342
-G 21 pass=2000 fail=0 tests=2000 us=835702
-G 22 pass=2000 fail=0 tests=2000 us=818333
-G 23 pass=2000 fail=0 tests=2000 us=822550
-G 24 pass=2000 fail=0 tests=2000 us=577412
-G 25 pass=2000 fail=0 tests=2000 us=578036
-G 27 pass=2000 fail=0 tests=2000 us=579205
-G 28 pass=2000 fail=0 tests=2000 us=818537
-G 29 pass=2000 fail=0 tests=2000 us=837560
-G 2A pass=2000 fail=0 tests=2000 us=809128
-G 2B pass=2000 fail=0 tests=2000 us=826920
-G 2C pass=2000 fail=0 tests=2000 us=578086
-G 2D pass=2000 fail=0 tests=2000 us=577230
-G 2F pass=2000 fail=0 tests=2000 us=579420
-G 30 pass=2000 fail=0 tests=2000 us=820541
-G 31 pass=2000 fail=0 tests=2000 us=844619
-G 32 pass=2000 fail=0 tests=2000 us=808509
-G 33 pass=2000 fail=0 tests=2000 us=826831
-G 34 pass=2000 fail=0 tests=2000 us=578077
-G 35 pass=2000 fail=0 tests=2000 us=578648
-G 37 pass=2000 fail=0 tests=2000 us=577969
-G 38 pass=2000 fail=0 tests=2000 us=814156
-G 39 pass=2000 fail=0 tests=2000 us=837203
-G 3A pass=2000 fail=0 tests=2000 us=810769
-G 3B pass=2000 fail=0 tests=2000 us=830273
-G 3C pass=2000 fail=0 tests=2000 us=575940
-G 3D pass=2000 fail=0 tests=2000 us=576978
-G 3F pass=2000 fail=0 tests=2000 us=577345
-G 40 pass=2000 fail=0 tests=2000 us=577001
-G 41 pass=2000 fail=0 tests=2000 us=578702
-G 42 pass=2000 fail=0 tests=2000 us=576140
-G 43 pass=2000 fail=0 tests=2000 us=578721
-G 44 pass=2000 fail=0 tests=2000 us=576891
-G 45 pass=2000 fail=0 tests=2000 us=578087
-G 46 pass=2000 fail=0 tests=2000 us=576891
-G 47 pass=2000 fail=0 tests=2000 us=578824
-G 48 pass=2000 fail=0 tests=2000 us=578499
-G 49 pass=2000 fail=0 tests=2000 us=576538
-G 4A pass=2000 fail=0 tests=2000 us=576855
-G 4B pass=2000 fail=0 tests=2000 us=577541
-G 4C pass=2000 fail=0 tests=2000 us=577135
-G 4D pass=2000 fail=0 tests=2000 us=576517
-G 4E pass=2000 fail=0 tests=2000 us=577567
-G 4F pass=2000 fail=0 tests=2000 us=577102
-G 50 pass=2000 fail=0 tests=2000 us=926974
-G 51 pass=2000 fail=0 tests=2000 us=926326
-G 52 pass=2000 fail=0 tests=2000 us=927958
-G 53 pass=2000 fail=0 tests=2000 us=926803
-G 54 pass=2000 fail=0 tests=2000 us=926885
-G 55 pass=2000 fail=0 tests=2000 us=927204
-G 56 pass=2000 fail=0 tests=2000 us=925344
-G 57 pass=2000 fail=0 tests=2000 us=927279
-G 58 pass=2000 fail=0 tests=2000 us=907974
-G 59 pass=2000 fail=0 tests=2000 us=907655
-G 5A pass=2000 fail=0 tests=2000 us=908455
-G 5B pass=2000 fail=0 tests=2000 us=906775
-G 5C pass=2000 fail=0 tests=2000 us=907802
-G 5D pass=2000 fail=0 tests=2000 us=907629
-G 5E pass=2000 fail=0 tests=2000 us=907231
-G 5F pass=2000 fail=0 tests=2000 us=907177
-G 60 pass=2000 fail=0 tests=2000 us=574983
-G 61 pass=2000 fail=0 tests=2000 us=576869
-G 62 pass=2000 fail=0 tests=2000 us=576050
-G 63 pass=2000 fail=0 tests=2000 us=576887
-G 64 pass=2000 fail=0 tests=2000 us=576193
-G 65 pass=2000 fail=0 tests=2000 us=577098
-G 66 pass=2000 fail=0 tests=2000 us=577119
-G 67 pass=2000 fail=0 tests=2000 us=576530
-G 68 pass=2000 fail=0 tests=2000 us=576591
-G 69 pass=2000 fail=0 tests=2000 us=578719
-G 6A pass=2000 fail=0 tests=2000 us=576285
-G 6B pass=2000 fail=0 tests=2000 us=578246
-G 6C pass=2000 fail=0 tests=2000 us=576577
-G 6D pass=2000 fail=0 tests=2000 us=576395
-G 6E pass=2000 fail=0 tests=2000 us=576863
-G 6F pass=2000 fail=0 tests=2000 us=577737
-G 70 pass=2000 fail=0 tests=2000 us=578705
-G 71 pass=2000 fail=0 tests=2000 us=576222
-G 72 pass=2000 fail=0 tests=2000 us=579020
-G 73 pass=2000 fail=0 tests=2000 us=577819
-G 74 pass=2000 fail=0 tests=2000 us=577407
-G 75 pass=2000 fail=0 tests=2000 us=577909
-G 76 pass=2000 fail=0 tests=2000 us=577217
-G 77 pass=2000 fail=0 tests=2000 us=576291
-G 78 pass=2000 fail=0 tests=2000 us=577423
-G 79 pass=2000 fail=0 tests=2000 us=577343
-G 7A pass=2000 fail=0 tests=2000 us=576509
-G 7B pass=2000 fail=0 tests=2000 us=577141
-G 7C pass=2000 fail=0 tests=2000 us=576729
-G 7D pass=2000 fail=0 tests=2000 us=576659
-G 7E pass=2000 fail=0 tests=2000 us=577675
-G 7F pass=2000 fail=0 tests=2000 us=577304
-G 80.0 pass=2000 fail=0 tests=2000 us=821214
-G 80.1 pass=2000 fail=0 tests=2000 us=816458
-G 80.2 pass=2000 fail=0 tests=2000 us=823638
-G 80.3 pass=2000 fail=0 tests=2000 us=816739
-G 80.4 pass=2000 fail=0 tests=2000 us=819640
-G 80.5 pass=2000 fail=0 tests=2000 us=817377
-G 80.6 pass=2000 fail=0 tests=2000 us=815381
-G 80.7 pass=2000 fail=0 tests=2000 us=812983
-G 81.0 pass=2000 fail=0 tests=2000 us=848250
-G 81.1 pass=2000 fail=0 tests=2000 us=844356
-G 81.2 pass=2000 fail=0 tests=2000 us=846302
-G 81.3 pass=2000 fail=0 tests=2000 us=848718
-G 81.4 pass=2000 fail=0 tests=2000 us=846700
-G 81.5 pass=2000 fail=0 tests=2000 us=845063
-G 81.6 pass=2000 fail=0 tests=2000 us=851770
-G 81.7 pass=2000 fail=0 tests=2000 us=833765
-G 82.0 pass=2000 fail=0 tests=2000 us=817473
-G 82.1 pass=2000 fail=0 tests=2000 us=820188
-G 82.2 pass=2000 fail=0 tests=2000 us=817939
-G 82.3 pass=2000 fail=0 tests=2000 us=816878
-G 82.4 pass=2000 fail=0 tests=2000 us=821555
-G 82.5 pass=2000 fail=0 tests=2000 us=824353
-G 82.6 pass=2000 fail=0 tests=2000 us=818060
-G 82.7 pass=2000 fail=0 tests=2000 us=811993
-G 83.0 pass=2000 fail=0 tests=2000 us=840549
-G 83.1 pass=2000 fail=0 tests=2000 us=837368
-G 83.2 pass=2000 fail=0 tests=2000 us=833261
-G 83.3 pass=2000 fail=0 tests=2000 us=837692
-G 83.4 pass=2000 fail=0 tests=2000 us=839071
-G 83.5 pass=2000 fail=0 tests=2000 us=840761
-G 83.6 pass=2000 fail=0 tests=2000 us=840107
-G 83.7 pass=2000 fail=0 tests=2000 us=827994
-G 84 pass=2000 fail=0 tests=2000 us=813171
-G 85 pass=2000 fail=0 tests=2000 us=826325
-G 86 pass=2000 fail=0 tests=2000 us=817463
-G 87 pass=2000 fail=0 tests=2000 us=840817
-G 88 pass=2000 fail=0 tests=2000 us=815995
-G 89 pass=2000 fail=0 tests=2000 us=844470
-G 8A pass=2000 fail=0 tests=2000 us=806305
+G 00 pass=2000 fail=0 tests=2000 us=901428
+G 01 pass=2000 fail=0 tests=2000 us=923255
+G 02 pass=2000 fail=0 tests=2000 us=879304
+G 03 pass=2000 fail=0 tests=2000 us=905534
+G 04 pass=2000 fail=0 tests=2000 us=617090
+G 05 pass=2000 fail=0 tests=2000 us=618916
+G 06 pass=2000 fail=0 tests=2000 us=1014759
+G 07 pass=2000 fail=0 tests=2000 us=999286
+G 08 pass=2000 fail=0 tests=2000 us=885622
+G 09 pass=2000 fail=0 tests=2000 us=914983
+G 0A pass=2000 fail=0 tests=2000 us=887674
+G 0B pass=2000 fail=0 tests=2000 us=913947
+G 0C pass=2000 fail=0 tests=2000 us=616561
+G 0D pass=2000 fail=0 tests=2000 us=618260
+G 0E pass=2000 fail=0 tests=2000 us=1013368
+G 10 pass=2000 fail=0 tests=2000 us=890678
+G 11 pass=2000 fail=0 tests=2000 us=925104
+G 12 pass=2000 fail=0 tests=2000 us=888645
+G 13 pass=2000 fail=0 tests=2000 us=912289
+G 14 pass=2000 fail=0 tests=2000 us=618589
+G 15 pass=2000 fail=0 tests=2000 us=618262
+G 16 pass=2000 fail=0 tests=2000 us=1015261
+G 17 pass=2000 fail=0 tests=2000 us=998569
+G 18 pass=2000 fail=0 tests=2000 us=889330
+G 19 pass=2000 fail=0 tests=2000 us=919901
+G 1A pass=2000 fail=0 tests=2000 us=886236
+G 1B pass=2000 fail=0 tests=2000 us=908632
+G 1C pass=2000 fail=0 tests=2000 us=617591
+G 1D pass=2000 fail=0 tests=2000 us=618573
+G 1E pass=2000 fail=0 tests=2000 us=1014358
+G 1F pass=2000 fail=0 tests=2000 us=999245
+G 20 pass=2000 fail=0 tests=2000 us=890451
+G 21 pass=2000 fail=0 tests=2000 us=911271
+G 22 pass=2000 fail=0 tests=2000 us=894842
+G 23 pass=2000 fail=0 tests=2000 us=897974
+G 24 pass=2000 fail=0 tests=2000 us=620011
+G 25 pass=2000 fail=0 tests=2000 us=617798
+G 27 pass=2000 fail=0 tests=2000 us=618540
+G 28 pass=2000 fail=0 tests=2000 us=895127
+G 29 pass=2000 fail=0 tests=2000 us=913096
+G 2A pass=2000 fail=0 tests=2000 us=884794
+G 2B pass=2000 fail=0 tests=2000 us=904484
+G 2C pass=2000 fail=0 tests=2000 us=617781
+G 2D pass=2000 fail=0 tests=2000 us=618038
+G 2F pass=2000 fail=0 tests=2000 us=618100
+G 30 pass=2000 fail=0 tests=2000 us=897693
+G 31 pass=2000 fail=0 tests=2000 us=922159
+G 32 pass=2000 fail=0 tests=2000 us=884138
+G 33 pass=2000 fail=0 tests=2000 us=904544
+G 34 pass=2000 fail=0 tests=2000 us=618660
+G 35 pass=2000 fail=0 tests=2000 us=618468
+G 37 pass=2000 fail=0 tests=2000 us=617930
+G 38 pass=2000 fail=0 tests=2000 us=890066
+G 39 pass=2000 fail=0 tests=2000 us=914190
+G 3A pass=2000 fail=0 tests=2000 us=886774
+G 3B pass=2000 fail=0 tests=2000 us=907867
+G 3C pass=2000 fail=0 tests=2000 us=619022
+G 3D pass=2000 fail=0 tests=2000 us=617957
+G 3F pass=2000 fail=0 tests=2000 us=619025
+G 40 pass=2000 fail=0 tests=2000 us=617374
+G 41 pass=2000 fail=0 tests=2000 us=618685
+G 42 pass=2000 fail=0 tests=2000 us=618239
+G 43 pass=2000 fail=0 tests=2000 us=617155
+G 44 pass=2000 fail=0 tests=2000 us=618267
+G 45 pass=2000 fail=0 tests=2000 us=617130
+G 46 pass=2000 fail=0 tests=2000 us=618096
+G 47 pass=2000 fail=0 tests=2000 us=617522
+G 48 pass=2000 fail=0 tests=2000 us=617998
+G 49 pass=2000 fail=0 tests=2000 us=617601
+G 4A pass=2000 fail=0 tests=2000 us=618285
+G 4B pass=2000 fail=0 tests=2000 us=617811
+G 4C pass=2000 fail=0 tests=2000 us=617023
+G 4D pass=2000 fail=0 tests=2000 us=620012
+G 4E pass=2000 fail=0 tests=2000 us=616762
+G 4F pass=2000 fail=0 tests=2000 us=618660
+G 50 pass=2000 fail=0 tests=2000 us=1015037
+G 51 pass=2000 fail=0 tests=2000 us=1012990
+G 52 pass=2000 fail=0 tests=2000 us=1014440
+G 53 pass=2000 fail=0 tests=2000 us=1015550
+G 54 pass=2000 fail=0 tests=2000 us=1014653
+G 55 pass=2000 fail=0 tests=2000 us=1016335
+G 56 pass=2000 fail=0 tests=2000 us=1014517
+G 57 pass=2000 fail=0 tests=2000 us=1015066
+G 58 pass=2000 fail=0 tests=2000 us=999558
+G 59 pass=2000 fail=0 tests=2000 us=997784
+G 5A pass=2000 fail=0 tests=2000 us=998946
+G 5B pass=2000 fail=0 tests=2000 us=997265
+G 5C pass=2000 fail=0 tests=2000 us=998679
+G 5D pass=2000 fail=0 tests=2000 us=997927
+G 5E pass=2000 fail=0 tests=2000 us=997645
+G 5F pass=2000 fail=0 tests=2000 us=999425
+G 60 pass=2000 fail=0 tests=2000 us=617631
+G 61 pass=2000 fail=0 tests=2000 us=618493
+G 62 pass=2000 fail=0 tests=2000 us=616966
+G 63 pass=2000 fail=0 tests=2000 us=617034
+G 64 pass=2000 fail=0 tests=2000 us=618826
+G 65 pass=2000 fail=0 tests=2000 us=617209
+G 66 pass=2000 fail=0 tests=2000 us=617784
+G 67 pass=2000 fail=0 tests=2000 us=619818
+G 68 pass=2000 fail=0 tests=2000 us=617736
+G 69 pass=2000 fail=0 tests=2000 us=618024
+G 6A pass=2000 fail=0 tests=2000 us=618423
+G 6B pass=2000 fail=0 tests=2000 us=617213
+G 6C pass=2000 fail=0 tests=2000 us=616282
+G 6D pass=2000 fail=0 tests=2000 us=617374
+G 6E pass=2000 fail=0 tests=2000 us=617979
+G 6F pass=2000 fail=0 tests=2000 us=616739
+G 70 pass=2000 fail=0 tests=2000 us=617597
+G 71 pass=2000 fail=0 tests=2000 us=617816
+G 72 pass=2000 fail=0 tests=2000 us=617780
+G 73 pass=2000 fail=0 tests=2000 us=618101
+G 74 pass=2000 fail=0 tests=2000 us=617884
+G 75 pass=2000 fail=0 tests=2000 us=617468
+G 76 pass=2000 fail=0 tests=2000 us=617703
+G 77 pass=2000 fail=0 tests=2000 us=616511
+G 78 pass=2000 fail=0 tests=2000 us=616340
+G 79 pass=2000 fail=0 tests=2000 us=617699
+G 7A pass=2000 fail=0 tests=2000 us=618494
+G 7B pass=2000 fail=0 tests=2000 us=617351
+G 7C pass=2000 fail=0 tests=2000 us=618291
+G 7D pass=2000 fail=0 tests=2000 us=617965
+G 7E pass=2000 fail=0 tests=2000 us=618111
+G 7F pass=2000 fail=0 tests=2000 us=619640
+G 80.0 pass=2000 fail=0 tests=2000 us=897036
+G 80.1 pass=2000 fail=0 tests=2000 us=891345
+G 80.2 pass=2000 fail=0 tests=2000 us=900923
+G 80.3 pass=2000 fail=0 tests=2000 us=892605
+G 80.4 pass=2000 fail=0 tests=2000 us=897087
+G 80.5 pass=2000 fail=0 tests=2000 us=893427
+G 80.6 pass=2000 fail=0 tests=2000 us=890861
+G 80.7 pass=2000 fail=0 tests=2000 us=889260
+G 81.0 pass=2000 fail=0 tests=2000 us=922290
+G 81.1 pass=2000 fail=0 tests=2000 us=918966
+G 81.2 pass=2000 fail=0 tests=2000 us=919144
+G 81.3 pass=2000 fail=0 tests=2000 us=922353
+G 81.4 pass=2000 fail=0 tests=2000 us=921414
+G 81.5 pass=2000 fail=0 tests=2000 us=917305
+G 81.6 pass=2000 fail=0 tests=2000 us=924439
+G 81.7 pass=2000 fail=0 tests=2000 us=910095
+G 82.0 pass=2000 fail=0 tests=2000 us=895184
+G 82.1 pass=2000 fail=0 tests=2000 us=897338
+G 82.2 pass=2000 fail=0 tests=2000 us=894690
+G 82.3 pass=2000 fail=0 tests=2000 us=895905
+G 82.4 pass=2000 fail=0 tests=2000 us=897086
+G 82.5 pass=2000 fail=0 tests=2000 us=901919
+G 82.6 pass=2000 fail=0 tests=2000 us=894176
+G 82.7 pass=2000 fail=0 tests=2000 us=888194
+G 83.0 pass=2000 fail=0 tests=2000 us=913866
+G 83.1 pass=2000 fail=0 tests=2000 us=915287
+G 83.2 pass=2000 fail=0 tests=2000 us=910639
+G 83.3 pass=2000 fail=0 tests=2000 us=909723
+G 83.4 pass=2000 fail=0 tests=2000 us=913918
+G 83.5 pass=2000 fail=0 tests=2000 us=916816
+G 83.6 pass=2000 fail=0 tests=2000 us=917935
+G 83.7 pass=2000 fail=0 tests=2000 us=903674
+G 84 pass=2000 fail=0 tests=2000 us=889992
+G 85 pass=2000 fail=0 tests=2000 us=902552
+G 86 pass=2000 fail=0 tests=2000 us=896880
+G 87 pass=2000 fail=0 tests=2000 us=918233
+G 88 pass=2000 fail=0 tests=2000 us=893043
+G 89 pass=2000 fail=0 tests=2000 us=921795
+G 8A pass=2000 fail=0 tests=2000 us=883759
 TOTAL pass=324000 fail=0
 vectors PASS
-host: 162 files, 324000 tests, 29183652 bytes in 131.4 s
+host: 162 files, 324000 tests, 29183652 bytes in 142.8 s
 vectors exit 0
 pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 53816 lines of assembly
+pmfc: 53927 lines of assembly
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2.asm
-> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89192 bytes of SRAM left free, stacks and reserved windows excluded.
-ROM_TOTAL_RP2040|104112|2097152
-CYCLES_TOTAL_RP2040|64445|straight-line, not-taken branches
-REGMAP_RP2040|6153|201|87|327|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1409|frame-slot loads taken from a register
-pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
+> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89184 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2040|104280|2097152
+CYCLES_TOTAL_RP2040|64609|straight-line, not-taken branches
+REGMAP_RP2040|6161|201|88|328|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1414|frame-slot loads taken from a register
+pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104280 bytes into 408 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: OK
-image ends at 0x10019700
+image ends at 0x10019800
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    A1244E447D3E9F7501B77D9CA44E60C9F48AC02ADB54DE244CBC66BCC3FFDB38 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    6BE72FBE9AF7BF02908CF9BE663DCC5239C2D4717F5128597F2CC3E3B02E0752 C:\Users\ajtaj\Desktop\Github\8086Emulato...
 
 
 pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
-pmfc: 53816 lines of assembly
+pmfc: 53927 lines of assembly
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2.asm
-> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89192 bytes of SRAM left free, stacks and reserved windows excluded.
-ROM_TOTAL_RP2040|104112|2097152
-CYCLES_TOTAL_RP2040|64445|straight-line, not-taken branches
-REGMAP_RP2040|6153|201|87|327|materialisations seen|already in dest|already in another reg|nearby constant
-SLOTMAP_RP2040|1409|frame-slot loads taken from a register
-pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
+> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89184 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2040|104280|2097152
+CYCLES_TOTAL_RP2040|64609|straight-line, not-taken branches
+REGMAP_RP2040|6161|201|88|328|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1414|frame-slot loads taken from a register
+pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104280 bytes into 408 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
 pmfc: uploading vectors.uf2 (RP2040) through COM7
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
 > [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
 > [NATIVE UPLOADER] Found BOOTSEL drive at H:\
-> [NATIVE UPLOADER] Writing image: 65536 of 208384 bytes (31%)
-> [NATIVE UPLOADER] Writing image: 131072 of 208384 bytes (62%)
-> [NATIVE UPLOADER] Writing image: 196608 of 208384 bytes (94%)
-> [NATIVE UPLOADER] Writing image: 208384 of 208384 bytes (100%)
+> [NATIVE UPLOADER] Writing image: 65536 of 208896 bytes (31%)
+> [NATIVE UPLOADER] Writing image: 131072 of 208896 bytes (62%)
+> [NATIVE UPLOADER] Writing image: 196608 of 208896 bytes (94%)
+> [NATIVE UPLOADER] Writing image: 208896 of 208896 bytes (100%)
 > [NATIVE UPLOADER] Wrote vectors.uf2 to H:\
 > [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
 pmfc: uploaded.
 pmfc: OK
 8086 vectors clk_sys kHz=200000 timing=0 asm-tail=1
 READY
-G 8B pass=2000 fail=0 tests=2000 us=828791
-G 8C pass=2000 fail=0 tests=2000 us=840234
-G 8D pass=2000 fail=0 tests=2000 us=578232
-G 8E pass=2000 fail=0 tests=2000 us=829858
-G 8F pass=2000 fail=0 tests=2000 us=1178871
-G 90 pass=2000 fail=0 tests=2000 us=578249
-G 91 pass=2000 fail=0 tests=2000 us=575105
-G 92 pass=2000 fail=0 tests=2000 us=577211
-G 93 pass=2000 fail=0 tests=2000 us=578602
-G 94 pass=2000 fail=0 tests=2000 us=577165
-G 95 pass=2000 fail=0 tests=2000 us=578657
-G 96 pass=2000 fail=0 tests=2000 us=575716
-G 97 pass=2000 fail=0 tests=2000 us=575603
-G 98 pass=2000 fail=0 tests=2000 us=576560
-G 99 pass=2000 fail=0 tests=2000 us=577458
-G 9A pass=2000 fail=0 tests=2000 us=999151
-G 9C pass=2000 fail=0 tests=2000 us=926897
-G 9D pass=2000 fail=0 tests=2000 us=910827
-G 9E pass=2000 fail=0 tests=2000 us=579986
-G 9F pass=2000 fail=0 tests=2000 us=578086
-G A0 pass=2000 fail=0 tests=2000 us=884641
-G A1 pass=2000 fail=0 tests=2000 us=906723
-G A2 pass=2000 fail=0 tests=2000 us=892192
-G A3 pass=2000 fail=0 tests=2000 us=925059
-G A4 pass=2000 fail=0 tests=2000 us=3043246
-G A5 pass=2000 fail=0 tests=2000 us=4803148
-G A6 pass=2000 fail=0 tests=2000 us=1911680
-G A7 pass=2000 fail=0 tests=2000 us=2772900
-G A8 pass=2000 fail=0 tests=2000 us=576290
-G A9 pass=2000 fail=0 tests=2000 us=577313
-G AA pass=2000 fail=0 tests=2000 us=2020588
-G AB pass=2000 fail=0 tests=2000 us=2956752
-G AC pass=2000 fail=0 tests=2000 us=1645642
-G AD pass=2000 fail=0 tests=2000 us=2475015
-G AE pass=2000 fail=0 tests=2000 us=1215893
-G AF pass=2000 fail=0 tests=2000 us=1725146
-G B0 pass=2000 fail=0 tests=2000 us=577279
-G B1 pass=2000 fail=0 tests=2000 us=577811
-G B2 pass=2000 fail=0 tests=2000 us=576862
-G B3 pass=2000 fail=0 tests=2000 us=577362
-G B4 pass=2000 fail=0 tests=2000 us=577366
-G B5 pass=2000 fail=0 tests=2000 us=578302
-G B6 pass=2000 fail=0 tests=2000 us=576526
-G B7 pass=2000 fail=0 tests=2000 us=577628
-G B8 pass=2000 fail=0 tests=2000 us=577517
-G B9 pass=2000 fail=0 tests=2000 us=576966
-G BA pass=2000 fail=0 tests=2000 us=576774
-G BB pass=2000 fail=0 tests=2000 us=577855
-G BC pass=2000 fail=0 tests=2000 us=577761
-G BD pass=2000 fail=0 tests=2000 us=576214
-G BE pass=2000 fail=0 tests=2000 us=577896
-G BF pass=2000 fail=0 tests=2000 us=577925
-G C0 pass=2000 fail=0 tests=2000 us=906890
-G C1 pass=2000 fail=0 tests=2000 us=907396
-G C2 pass=2000 fail=0 tests=2000 us=910001
-G C3 pass=2000 fail=0 tests=2000 us=908183
-G C4 pass=2000 fail=0 tests=2000 us=948741
-G C5 pass=2000 fail=0 tests=2000 us=947354
-G C6 pass=2000 fail=0 tests=2000 us=826049
-G C7 pass=2000 fail=0 tests=2000 us=855507
-G C8 pass=2000 fail=0 tests=2000 us=951715
-G C9 pass=2000 fail=0 tests=2000 us=949802
-G CA pass=2000 fail=0 tests=2000 us=951318
-G CB pass=2000 fail=0 tests=2000 us=952170
-G CC pass=2000 fail=0 tests=2000 us=1487337
-G CD pass=2000 fail=0 tests=2000 us=1485623
-G CE pass=2000 fail=0 tests=2000 us=1038120
-G CF pass=2000 fail=0 tests=2000 us=996248
-G D0.0 pass=2000 fail=0 tests=2000 us=818094
-G D0.1 pass=2000 fail=0 tests=2000 us=821259
-G D0.2 pass=2000 fail=0 tests=2000 us=823651
-G D0.3 pass=2000 fail=0 tests=2000 us=815435
-G D0.4 pass=2000 fail=0 tests=2000 us=820160
-G D0.5 pass=2000 fail=0 tests=2000 us=812644
-G D0.6 pass=2000 fail=0 tests=2000 us=817567
-G D0.7 pass=2000 fail=0 tests=2000 us=816794
-G D1.0 pass=2000 fail=0 tests=2000 us=845183
-G D1.1 pass=2000 fail=0 tests=2000 us=844170
-G D1.2 pass=2000 fail=0 tests=2000 us=845553
-G D1.3 pass=2000 fail=0 tests=2000 us=852041
-G D1.4 pass=2000 fail=0 tests=2000 us=843538
-G D1.5 pass=2000 fail=0 tests=2000 us=840109
-G D1.6 pass=2000 fail=0 tests=2000 us=841390
-G D1.7 pass=2000 fail=0 tests=2000 us=839981
-G D2.0 pass=2000 fail=0 tests=2000 us=818682
-G D2.1 pass=2000 fail=0 tests=2000 us=822573
-G D2.2 pass=2000 fail=0 tests=2000 us=820289
-G D2.3 pass=2000 fail=0 tests=2000 us=821946
-G D2.4 pass=2000 fail=0 tests=2000 us=814861
-G D2.5 pass=2000 fail=0 tests=2000 us=819748
-G D2.6 pass=2000 fail=0 tests=2000 us=815649
-G D2.7 pass=2000 fail=0 tests=2000 us=814724
-G D3.0 pass=2000 fail=0 tests=2000 us=844487
-G D3.1 pass=2000 fail=0 tests=2000 us=846134
-G D3.2 pass=2000 fail=0 tests=2000 us=841758
-G D3.3 pass=2000 fail=0 tests=2000 us=844313
-G D3.4 pass=2000 fail=0 tests=2000 us=844856
-G D3.5 pass=2000 fail=0 tests=2000 us=840757
-G D3.6 pass=2000 fail=0 tests=2000 us=845715
-G D3.7 pass=2000 fail=0 tests=2000 us=844707
-G D4 pass=2000 fail=0 tests=2000 us=596822
-G D5 pass=2000 fail=0 tests=2000 us=578214
-G D6 pass=2000 fail=0 tests=2000 us=576964
-G D7 pass=2000 fail=0 tests=2000 us=884449
-G D8 pass=2000 fail=0 tests=2000 us=826802
-G D9 pass=2000 fail=0 tests=2000 us=825750
-G DA pass=2000 fail=0 tests=2000 us=823452
-G DB pass=2000 fail=0 tests=2000 us=826343
-G DC pass=2000 fail=0 tests=2000 us=825980
-G DD pass=2000 fail=0 tests=2000 us=828282
-G DE pass=2000 fail=0 tests=2000 us=829603
-G DF pass=2000 fail=0 tests=2000 us=827429
-G E0 pass=2000 fail=0 tests=2000 us=578942
-G E1 pass=2000 fail=0 tests=2000 us=578506
-G E2 pass=2000 fail=0 tests=2000 us=577586
-G E3 pass=2000 fail=0 tests=2000 us=577844
-G E4 pass=2000 fail=0 tests=2000 us=577401
-G E5 pass=2000 fail=0 tests=2000 us=577893
-G E6 pass=2000 fail=0 tests=2000 us=578088
-G E7 pass=2000 fail=0 tests=2000 us=576726
-G E8 pass=2000 fail=0 tests=2000 us=927766
-G E9 pass=2000 fail=0 tests=2000 us=577179
-G EA pass=2000 fail=0 tests=2000 us=583265
-G EB pass=2000 fail=0 tests=2000 us=576887
-G EC pass=2000 fail=0 tests=2000 us=577213
-G ED pass=2000 fail=0 tests=2000 us=577114
-G EE pass=2000 fail=0 tests=2000 us=577527
-G EF pass=2000 fail=0 tests=2000 us=576940
-G F5 pass=2000 fail=0 tests=2000 us=577594
-G F6.0 pass=2000 fail=0 tests=2000 us=809204
-G F6.1 pass=2000 fail=0 tests=2000 us=814863
-G F6.2 pass=2000 fail=0 tests=2000 us=820210
-G F6.3 pass=2000 fail=0 tests=2000 us=818419
-G F6.4 pass=2000 fail=0 tests=2000 us=815583
-G F6.5 pass=2000 fail=0 tests=2000 us=810245
-G F6.6 pass=2000 fail=0 tests=2000 us=1250051
-G F6.7 pass=2000 fail=0 tests=2000 us=1466337
-G F7.0 pass=2000 fail=0 tests=2000 us=840534
-G F7.1 pass=2000 fail=0 tests=2000 us=827505
-G F7.2 pass=2000 fail=0 tests=2000 us=839290
-G F7.3 pass=2000 fail=0 tests=2000 us=840068
-G F7.4 pass=2000 fail=0 tests=2000 us=828943
-G F7.5 pass=2000 fail=0 tests=2000 us=825180
-G F7.6 pass=2000 fail=0 tests=2000 us=1270958
-G F7.7 pass=2000 fail=0 tests=2000 us=1476086
-G F8 pass=2000 fail=0 tests=2000 us=576363
-G F9 pass=2000 fail=0 tests=2000 us=577279
-G FA pass=2000 fail=0 tests=2000 us=576722
-G FB pass=2000 fail=0 tests=2000 us=578343
-G FC pass=2000 fail=0 tests=2000 us=575923
-G FD pass=2000 fail=0 tests=2000 us=577062
-G FE.0 pass=2000 fail=0 tests=2000 us=817928
-G FE.1 pass=2000 fail=0 tests=2000 us=817005
-G FF.0 pass=2000 fail=0 tests=2000 us=832162
-G FF.1 pass=2000 fail=0 tests=2000 us=832237
-G FF.2 pass=2000 fail=0 tests=2000 us=1184566
-G FF.3 pass=2000 fail=0 tests=2000 us=1355795
-G FF.4 pass=2000 fail=0 tests=2000 us=820935
-G FF.5 pass=2000 fail=0 tests=2000 us=947160
-G FF.6 pass=2000 fail=0 tests=2000 us=1187804
-G FF.7 pass=2000 fail=0 tests=2000 us=1184362
+G 8B pass=2000 fail=0 tests=2000 us=903997
+G 8C pass=2000 fail=0 tests=2000 us=917997
+G 8D pass=2000 fail=0 tests=2000 us=618083
+G 8E pass=2000 fail=0 tests=2000 us=907435
+G 8F pass=2000 fail=0 tests=2000 us=1293237
+G 90 pass=2000 fail=0 tests=2000 us=618861
+G 91 pass=2000 fail=0 tests=2000 us=615820
+G 92 pass=2000 fail=0 tests=2000 us=619684
+G 93 pass=2000 fail=0 tests=2000 us=620099
+G 94 pass=2000 fail=0 tests=2000 us=617574
+G 95 pass=2000 fail=0 tests=2000 us=617464
+G 96 pass=2000 fail=0 tests=2000 us=617397
+G 97 pass=2000 fail=0 tests=2000 us=618101
+G 98 pass=2000 fail=0 tests=2000 us=619155
+G 99 pass=2000 fail=0 tests=2000 us=616666
+G 9A pass=2000 fail=0 tests=2000 us=1076881
+G 9C pass=2000 fail=0 tests=2000 us=1013879
+G 9D pass=2000 fail=0 tests=2000 us=999298
+G 9E pass=2000 fail=0 tests=2000 us=619788
+G 9F pass=2000 fail=0 tests=2000 us=619647
+G A0 pass=2000 fail=0 tests=2000 us=972759
+G A1 pass=2000 fail=0 tests=2000 us=997859
+G A2 pass=2000 fail=0 tests=2000 us=982554
+G A3 pass=2000 fail=0 tests=2000 us=1010088
+G A4 pass=2000 fail=0 tests=2000 us=3192426
+G A5 pass=2000 fail=0 tests=2000 us=4966994
+G A6 pass=2000 fail=0 tests=2000 us=2053329
+G A7 pass=2000 fail=0 tests=2000 us=2919530
+G A8 pass=2000 fail=0 tests=2000 us=617628
+G A9 pass=2000 fail=0 tests=2000 us=619197
+G AA pass=2000 fail=0 tests=2000 us=2122155
+G AB pass=2000 fail=0 tests=2000 us=3060795
+G AC pass=2000 fail=0 tests=2000 us=1752272
+G AD pass=2000 fail=0 tests=2000 us=2589071
+G AE pass=2000 fail=0 tests=2000 us=1305797
+G AF pass=2000 fail=0 tests=2000 us=1824534
+G B0 pass=2000 fail=0 tests=2000 us=617939
+G B1 pass=2000 fail=0 tests=2000 us=617868
+G B2 pass=2000 fail=0 tests=2000 us=618750
+G B3 pass=2000 fail=0 tests=2000 us=617732
+G B4 pass=2000 fail=0 tests=2000 us=617562
+G B5 pass=2000 fail=0 tests=2000 us=618297
+G B6 pass=2000 fail=0 tests=2000 us=619106
+G B7 pass=2000 fail=0 tests=2000 us=618758
+G B8 pass=2000 fail=0 tests=2000 us=617432
+G B9 pass=2000 fail=0 tests=2000 us=618766
+G BA pass=2000 fail=0 tests=2000 us=617985
+G BB pass=2000 fail=0 tests=2000 us=617906
+G BC pass=2000 fail=0 tests=2000 us=618076
+G BD pass=2000 fail=0 tests=2000 us=617937
+G BE pass=2000 fail=0 tests=2000 us=617598
+G BF pass=2000 fail=0 tests=2000 us=617904
+G C0 pass=2000 fail=0 tests=2000 us=998319
+G C1 pass=2000 fail=0 tests=2000 us=998807
+G C2 pass=2000 fail=0 tests=2000 us=998289
+G C3 pass=2000 fail=0 tests=2000 us=999416
+G C4 pass=2000 fail=0 tests=2000 us=1039475
+G C5 pass=2000 fail=0 tests=2000 us=1038048
+G C6 pass=2000 fail=0 tests=2000 us=902361
+G C7 pass=2000 fail=0 tests=2000 us=930052
+G C8 pass=2000 fail=0 tests=2000 us=1042423
+G C9 pass=2000 fail=0 tests=2000 us=1038880
+G CA pass=2000 fail=0 tests=2000 us=1042172
+G CB pass=2000 fail=0 tests=2000 us=1041304
+G CC pass=2000 fail=0 tests=2000 us=1605699
+G CD pass=2000 fail=0 tests=2000 us=1601958
+G CE pass=2000 fail=0 tests=2000 us=1125694
+G CF pass=2000 fail=0 tests=2000 us=1082264
+G D0.0 pass=2000 fail=0 tests=2000 us=892510
+G D0.1 pass=2000 fail=0 tests=2000 us=896984
+G D0.2 pass=2000 fail=0 tests=2000 us=899031
+G D0.3 pass=2000 fail=0 tests=2000 us=890286
+G D0.4 pass=2000 fail=0 tests=2000 us=897717
+G D0.5 pass=2000 fail=0 tests=2000 us=886493
+G D0.6 pass=2000 fail=0 tests=2000 us=894348
+G D0.7 pass=2000 fail=0 tests=2000 us=892788
+G D1.0 pass=2000 fail=0 tests=2000 us=918242
+G D1.1 pass=2000 fail=0 tests=2000 us=919768
+G D1.2 pass=2000 fail=0 tests=2000 us=916835
+G D1.3 pass=2000 fail=0 tests=2000 us=926667
+G D1.4 pass=2000 fail=0 tests=2000 us=917778
+G D1.5 pass=2000 fail=0 tests=2000 us=914841
+G D1.6 pass=2000 fail=0 tests=2000 us=916902
+G D1.7 pass=2000 fail=0 tests=2000 us=915000
+G D2.0 pass=2000 fail=0 tests=2000 us=897601
+G D2.1 pass=2000 fail=0 tests=2000 us=898351
+G D2.2 pass=2000 fail=0 tests=2000 us=895918
+G D2.3 pass=2000 fail=0 tests=2000 us=897583
+G D2.4 pass=2000 fail=0 tests=2000 us=892466
+G D2.5 pass=2000 fail=0 tests=2000 us=899271
+G D2.6 pass=2000 fail=0 tests=2000 us=893378
+G D2.7 pass=2000 fail=0 tests=2000 us=888003
+G D3.0 pass=2000 fail=0 tests=2000 us=921365
+G D3.1 pass=2000 fail=0 tests=2000 us=921606
+G D3.2 pass=2000 fail=0 tests=2000 us=915668
+G D3.3 pass=2000 fail=0 tests=2000 us=919122
+G D3.4 pass=2000 fail=0 tests=2000 us=923273
+G D3.5 pass=2000 fail=0 tests=2000 us=918420
+G D3.6 pass=2000 fail=0 tests=2000 us=921056
+G D3.7 pass=2000 fail=0 tests=2000 us=921778
+G D4 pass=2000 fail=0 tests=2000 us=628052
+G D5 pass=2000 fail=0 tests=2000 us=617918
+G D6 pass=2000 fail=0 tests=2000 us=619030
+G D7 pass=2000 fail=0 tests=2000 us=974881
+G D8 pass=2000 fail=0 tests=2000 us=904105
+G D9 pass=2000 fail=0 tests=2000 us=901031
+G DA pass=2000 fail=0 tests=2000 us=901866
+G DB pass=2000 fail=0 tests=2000 us=903876
+G DC pass=2000 fail=0 tests=2000 us=902645
+G DD pass=2000 fail=0 tests=2000 us=907244
+G DE pass=2000 fail=0 tests=2000 us=907631
+G DF pass=2000 fail=0 tests=2000 us=903994
+G E0 pass=2000 fail=0 tests=2000 us=617705
+G E1 pass=2000 fail=0 tests=2000 us=618426
+G E2 pass=2000 fail=0 tests=2000 us=617195
+G E3 pass=2000 fail=0 tests=2000 us=617778
+G E4 pass=2000 fail=0 tests=2000 us=618031
+G E5 pass=2000 fail=0 tests=2000 us=618242
+G E6 pass=2000 fail=0 tests=2000 us=618848
+G E7 pass=2000 fail=0 tests=2000 us=618690
+G E8 pass=2000 fail=0 tests=2000 us=1013714
+G E9 pass=2000 fail=0 tests=2000 us=618301
+G EA pass=2000 fail=0 tests=2000 us=621969
+G EB pass=2000 fail=0 tests=2000 us=617444
+G EC pass=2000 fail=0 tests=2000 us=619097
+G ED pass=2000 fail=0 tests=2000 us=617267
+G EE pass=2000 fail=0 tests=2000 us=618811
+G EF pass=2000 fail=0 tests=2000 us=618255
+G F5 pass=2000 fail=0 tests=2000 us=617391
+G F6.0 pass=2000 fail=0 tests=2000 us=883604
+G F6.1 pass=2000 fail=0 tests=2000 us=891915
+G F6.2 pass=2000 fail=0 tests=2000 us=898074
+G F6.3 pass=2000 fail=0 tests=2000 us=895872
+G F6.4 pass=2000 fail=0 tests=2000 us=892688
+G F6.5 pass=2000 fail=0 tests=2000 us=884103
+G F6.6 pass=2000 fail=0 tests=2000 us=1367078
+G F6.7 pass=2000 fail=0 tests=2000 us=1606197
+G F7.0 pass=2000 fail=0 tests=2000 us=914083
+G F7.1 pass=2000 fail=0 tests=2000 us=903225
+G F7.2 pass=2000 fail=0 tests=2000 us=916182
+G F7.3 pass=2000 fail=0 tests=2000 us=916486
+G F7.4 pass=2000 fail=0 tests=2000 us=905489
+G F7.5 pass=2000 fail=0 tests=2000 us=901217
+G F7.6 pass=2000 fail=0 tests=2000 us=1384171
+G F7.7 pass=2000 fail=0 tests=2000 us=1611226
+G F8 pass=2000 fail=0 tests=2000 us=617862
+G F9 pass=2000 fail=0 tests=2000 us=617313
+G FA pass=2000 fail=0 tests=2000 us=618109
+G FB pass=2000 fail=0 tests=2000 us=618125
+G FC pass=2000 fail=0 tests=2000 us=618464
+G FD pass=2000 fail=0 tests=2000 us=618216
+G FE.0 pass=2000 fail=0 tests=2000 us=893011
+G FE.1 pass=2000 fail=0 tests=2000 us=892927
+G FF.0 pass=2000 fail=0 tests=2000 us=908583
+G FF.1 pass=2000 fail=0 tests=2000 us=909223
+G FF.2 pass=2000 fail=0 tests=2000 us=1299948
+G FF.3 pass=2000 fail=0 tests=2000 us=1512179
+G FF.4 pass=2000 fail=0 tests=2000 us=896365
+G FF.5 pass=2000 fail=0 tests=2000 us=1038647
+G FF.6 pass=2000 fail=0 tests=2000 us=1300152
+G FF.7 pass=2000 fail=0 tests=2000 us=1297782
 TOTAL pass=322000 fail=0
 vectors PASS
-host: 161 files, 322000 tests, 34483291 bytes in 171.8 s
+host: 161 files, 322000 tests, 34483291 bytes in 183.6 s
 vectors exit 0
-lease released 18:53:21
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 53550 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2.asm
+> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 5740 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2040|103912|2097152
+CYCLES_TOTAL_RP2040|63947|straight-line, not-taken branches
+REGMAP_RP2040|6144|196|92|336|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1400|frame-slot loads taken from a register
+pmfc: 8086-picow.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 103912 bytes into 406 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: OK
+image ends at 0x10019600
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    F04F46609FAACA97BAEEDB314D524DBDE85DAD35CFD8CCFB516D365B8A0B6C6E C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.picow  ->  RP2040
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
+pmfc: 53550 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2.asm
+> RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 5740 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest2' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest2' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest2' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest2' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2040|103912|2097152
+CYCLES_TOTAL_RP2040|63947|straight-line, not-taken branches
+REGMAP_RP2040|6144|196|92|336|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2040|1400|frame-slot loads taken from a register
+pmfc: 8086-picow.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 103912 bytes into 406 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\firmware\8086-picow.uf2
+pmfc: uploading 8086-picow.uf2 (RP2040) through COM7
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RPI-RP2 (RP2040)...
+> [NATIVE UPLOADER] Found BOOTSEL drive at H:\
+> [NATIVE UPLOADER] Writing image: 65536 of 207872 bytes (31%)
+> [NATIVE UPLOADER] Writing image: 131072 of 207872 bytes (63%)
+> [NATIVE UPLOADER] Writing image: 196608 of 207872 bytes (94%)
+> [NATIVE UPLOADER] Writing image: 207872 of 207872 bytes (100%)
+> [NATIVE UPLOADER] Wrote 8086-picow.uf2 to H:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+> [NATIVE UPLOADER] Serial monitor: board found on COM7 (USB vendor ID 2E8A), on the same USB connection it was flashed through.
+pmfc: reading COM7 at 9600 baud for 25 s (the port opened 2 ms after the upload, attempt 1).
+8086 PureMetal clk_sys kHz=200000 guest RAM KB=156 timing=0 asm-tail=1
+sum test AX=5050 CX=0 instructions=203 PASS
+sieve.com printed: primes below 10000: 1229 instructions=120169 us=51473 FAIL
+register/branch instructions=1000000 us=217503 instructions/s=4597637
+alu instructions=1000000 us=414289 instructions/s=2413773
+memory instructions=1000000 us=547276 instructions/s=1827231
+call/stack instructions=1000000 us=405628 instructions/s=2465313
+rep movsw bytes=524288 us=55372 bytes/s=9468467
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547275 instructions/s=1827234
+call/stack instructions=1000000 us=405627 instructions/s=2465319
+rep movsw bytes=524288 us=55369 bytes/s=9468980
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547275 instructions/s=1827234
+call/stack instructions=1000000 us=405628 instructions/s=2465313
+rep movsw bytes=524288 us=55370 bytes/s=9468809
+register/branch instructions=1000000 us=217502 instructions/s=4597658
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547275 instructions/s=1827234
+call/stack instructions=1000000 us=405627 instructions/s=2465319
+rep movsw bytes=524288 us=55370 bytes/s=9468809
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547274 instructions/s=1827238
+call/stack instructions=1000000 us=405627 instructions/s=2465319
+rep movsw bytes=524288 us=55370 bytes/s=9468809
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547275 instructions/s=1827234
+call/stack instructions=1000000 us=405626 instructions/s=2465325
+rep movsw bytes=524288 us=55370 bytes/s=9468809
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547275 instructions/s=1827234
+call/stack instructions=1000000 us=405627 instructions/s=2465319
+rep movsw bytes=524288 us=55370 bytes/s=9468809
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547274 instructions/s=1827238
+call/stack instructions=1000000 us=405626 instructions/s=2465325
+rep movsw bytes=524288 us=55370 bytes/s=9468809
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+memory instructions=1000000 us=547275 instructions/s=1827234
+call/stack instructions=1000000 us=405627 instructions/s=2465319
+rep movsw bytes=524288 us=55370 bytes/s=9468809
+register/branch instructions=1000000 us=217501 instructions/s=4597680
+alu instructions=1000000 us=414288 instructions/s=2413779
+pmfc: read COM7 for 25 s: 3089 bytes.
+pmfc: OK
+lease released 20:37:09
