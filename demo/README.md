@@ -30,7 +30,12 @@ The parts loop forever: ten seconds of title, twenty-five of plasma, ten of copp
 ## Build and run
 
     PureMetalForge.exe --compile demo.pc8086           (writes demo.com; needs the 8086 back end, compiler of 2026-10-23 or later)
-    desktop\cpu86_pc.exe --com demo.com --pc            (the window, with sound)
+    desktop\cpu86_desktop.exe demo.com --pc --run       (the window, with sound)
+    desktop\cpu86_pc.exe --com demo.com --pc --frames N  (headless; --screenshot f.png for a picture)
     py -3 tools\make_pcprogram.py demo\demo.com          (then build src\pc.picow for the Pico W)
+
+On the Pico W (docs/pc-demo-picow.log) the plasma and the copper run in real time; the 80-column title runs
+at about 0.8x (the 80-column text costs core 0 most of its time), its music with it. The speaker is not
+wired there.
 
 `py -3 make_demo_assets.py --check` fails if `demo_assets.pc8086` is not what the script writes.
