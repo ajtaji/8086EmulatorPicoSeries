@@ -3,7 +3,7 @@
 #CPU_TIMING = 0
 #CPU_ASM_TAIL = 1
 #GUEST_KB = 320
-#GUEST2_KB = 88
+#GUEST2_KB = 100
 XIncludeFile "RP2350/Lib/clocks.pico2"
 XIncludeFile "RP2350/Lib/timer.pico2"
 XIncludeFile "RP2350/Lib/uart.pico2"

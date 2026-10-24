@@ -7650,6 +7650,7 @@ OpD4:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
   If x = 0
+    FZS = 0                       ; the 8086 leaves ZF = PF = 1, SF = 0 here
     Cpu86Interrupt(0)
   Else
     va = PeekA(@R(0) + 0)

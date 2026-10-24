@@ -66,12 +66,15 @@ bytes inside the page and inside the code segment. Leaving the window costs one
 re-computation; an instruction that crosses a page or the IP wrap is copied
 into a six-byte buffer and executed from there.
 
-**How much guest RAM fits.** The RP2040's SRAM is split by the USB serial
-library's fixed buffers at `$20030000`, and about 95 KB of it holds the
-interpreter. The demo gives the guest **144 KB** on the Pico W (88 KB below the
-USB buffers and 56 KB above) and **408 KB** on the Pico 2 W (320 KB + 88 KB).
-More can be added from PSRAM or flash-backed ROM pages without touching the
-core.
+**How much guest RAM fits.** The interpreter's code runs from SRAM and takes
+about 89 KB (88,864 bytes on the RP2040, 87,304 on the RP2350); the page
+tables, dispatch tables and registers take about 5 KB more. The SRAM is also
+split by the USB serial library's fixed buffers at `$20030000`. The demo gives
+the guest **156 KB on the Pico W** (100 KB below the USB buffers, 56 KB above;
+about 6 KB of SRAM is left for the program) and **420 KB on the Pico 2 W**
+(320 KB + 100 KB). That is the 8086's first 156 KB / 420 KB as RAM; a machine
+wanting the full 640 KB needs ROM pages in flash and PSRAM or hook pages for
+the rest, none of which needs a change to the core.
 
 ## API
 
@@ -127,17 +130,90 @@ PureMetal Forge (the IDE application, used headless) compiles and uploads:
 .\tools\build.ps1 -Source src/demo.pico2w -Output firmware/8086-pico2w.uf2
 ```
 
+Ready images: `firmware/8086-picow.uf2` (run on the Pico W; SHA-256
+`5bf8c34fb04eedd2606f112a33473d382e67f2678cbc8f9e3b2908024c2657eb`) and
+`firmware/8086-pico2w.uf2` (built, not run here; `7086e4f2ed43b42f24c01ba4fd8292d3a097f450aa6643cdd86776ac56f50359`).
+Copy one to the board's BOOTSEL drive and open its USB serial port within 30 s:
+it prints the smoke test and then the speed of each mix, once a second.
+
 `build.ps1` compiles first, refuses an image that would reach flash offset
 `$50000` (where the bench boards keep a NES ROM store) and only then uploads.
 The generated core is checked in; to regenerate it: `py -3 tools/gen_cpu.py`.
 
 ## Verification
 
-(see below)
+Everything below ran **on the physical Pico W** (COM7, RP2040 at 200 MHz). The
+reference tests are streamed to the board over USB by `tools/vectors.py`, which
+only converts the published JSON into a compact stream; the board runs each
+test through `Cpu86Run(1)` and checks it itself (`Diagnostics/vectors_body.pmi`):
+all fourteen registers, FLAGS under the reference's mask of undefined flags,
+every byte the test touches (the pushed FLAGS word of a divide error under the
+same mask), and that nothing else was written. Pages the test does not name are
+hook pages that count any data access as a failure.
+
+| Check | Build | Result |
+|---|---|---|
+| SingleStepTests 8086 v1, **every test of every file** (323 files, 2,000 each) | assembly tail, instruction budget | **646,000 of 646,000 pass** |
+| SingleStepTests, 100 from every file (32,300) | clock budget (`#CPU_TIMING = 1`) | 32,300 of 32,300 pass |
+| SingleStepTests, 100 from every file (32,300) | plain PureMetal tail (`#CPU_ASM_TAIL = 0`) | 32,300 of 32,300 pass |
+| API, interrupt and memory-map checks (`Diagnostics/api_body.pmi`) | each of the three builds | 78 of 78 (assembly tail), 77 of 77 (clock budget), 78 of 78 (plain tail) |
+| Demo smoke test (sum 1..100, `LOOP`, `HLT`) and copy check | both tails | pass |
+
+The API checks cover what single-instruction tests cannot: the run budget, `HLT`,
+the interrupt line with the one-instruction `STI` delay and acknowledge, NMI with
+IF clear, the trap flag (the trap follows the instruction after `POPF`, and
+`IRET` does not trap after itself), the divide-error return address, ROM,
+unmapped and hook pages, a word across two host arrays, a word at offset `FFFF`,
+instructions across a page boundary and across the IP wrap, self-modifying code,
+prefixes within one budget step, `REP MOVS`/`STOS` with overlap, page crossing,
+ROM targets and the segment wrap, `PUSH SP` and the port hooks.
+
+Logs: `docs/verify-full-1.log`, `docs/verify-full-2.log`, `docs/verify-timed.log`,
+`docs/verify-pure.log`, and `docs/board-*.txt` for the API and demo runs. The
+reference corpus is not stored here: `py -3 tools/fetch_tests.py` downloads the
+pinned commit (about 180 MB), then
+
+```bash
+tools/board.sh 'vectors Diagnostics/vectors.picow Diagnostics/build/vectors.uf2 --per-file 2000 --log docs/verify.log'
+```
+
+builds, uploads and streams it (`board.sh` takes the bench's COM7 lease; on
+another bench run `tools/build.ps1 ... -Port <port>` and `tools/vectors.py --port <port>`).
+About 70 MB go over USB serial at roughly 75 KB/s, about 16 minutes.
+
+The Pico 2 W builds (`src/demo.pico2w`, `Diagnostics/vectors.pico2w`,
+`Diagnostics/api.pico2w`) compile from the same generator with the same
+register reservation; they have not been run on a Pico 2 W in this work.
 
 ## Speed
 
-(see below)
+Physical Pico W, RP2040 at 200 MHz, instruction budget, 1,000,000 guest
+instructions per sample, USB and set-up outside the timed interval
+(`src/demo_body.pmi`; logs `docs/board-*.txt`):
+
+| Mix | first version | tuned, assembly tail | tuned, plain PureMetal tail |
+|---|---:|---:|---:|
+| register / branch (`DEC CX` / `JNZ`) | 3.85 M instr/s | **4.60 M** | 3.96 M |
+| ALU (`ADD` `XOR` `SHL` `ADC` `SUB` `INC` on registers) | 2.29 M | **2.41 M** | 2.25 M |
+| memory (`MOV`/`ADD` through `[SI]`, `[DI+2]`, immediates) | 1.69 M | **1.83 M** | 1.74 M |
+| call / stack (`PUSH` `CALL` `INC` `RET` `POP`) | 2.11 M | **2.47 M** | 2.30 M |
+| `REP MOVSW`, 8 KB blocks | 2.07 MB/s | **9.47 MB/s** | 9.47 MB/s |
+
+For scale, a 4.77 MHz IBM PC's 8088 runs well under a million instructions a
+second. What made the difference, measured one change at a time:
+
+- the budget counter in r6 and the window end in r11, so the dispatch tail
+  decrements the budget in place and compares against the window end directly
+  (two Thumb instructions fewer per guest instruction; every mix faster);
+- AF kept lazily (`FA` holds the operands' XOR, AF is bit 4 of `FA ^ result`);
+- pages 0–15 mirrored above 1 MB, so `segment * 16 + offset` needs no mask;
+- one test (`offset ends in F`) sending every possibly-straddling word to the
+  slow path, instead of separate page-end and segment-end tests;
+- `REP MOVS` / `REP STOS` moving whole runs between host pointers.
+
+Reserving a seventh register for AF is refused by the compiler (the RP2040
+allocator needs one of r5/r6 for its spill pool), and r12 cannot hold state
+because the flash/SRAM call veneers write it.
 
 ## Credits
 

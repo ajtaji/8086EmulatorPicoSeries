@@ -1217,6 +1217,7 @@ def emit_handlers():
     e('  x = PeekA(PIP + 1)')
     e('  PIP = PIP + 2')
     e('  If x = 0')
+    e('    FZS = 0                       ; the 8086 leaves ZF = PF = 1, SF = 0 here')
     e('    Cpu86Interrupt(0)')
     e('  Else')
     e(f'    va = {rd_reg8_const(0)}')

@@ -81,6 +81,7 @@ def main():
     ap.add_argument('--per-file', type=int, default=2000)
     ap.add_argument('--only', default='')
     ap.add_argument('--skip', default='')
+    ap.add_argument('--part', default='', help='k/n: the k-th of n equal slices of the file list')
     ap.add_argument('--log', default='')
     ap.add_argument('--wait', type=float, default=40.0)
     args = ap.parse_args()
@@ -93,6 +94,10 @@ def main():
     if args.skip:
         skip = args.skip.split(',')
         names = [n for n in names if n not in skip and n.split('.')[0] not in skip]
+    if args.part:
+        k, n = (int(v) for v in args.part.split('/'))
+        size = (len(names) + n - 1) // n
+        names = names[(k - 1) * size:k * size]
     log = open(args.log, 'w', encoding='utf-8') if args.log else None
     def out(line):
         print(line, flush=True)

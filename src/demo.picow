@@ -2,7 +2,7 @@
 #CLOCK_KHZ = 200000
 #CPU_TIMING = 0
 #CPU_ASM_TAIL = 1
-#GUEST_KB = 88
+#GUEST_KB = 100
 #GUEST2_KB = 56
 XIncludeFile "RP2040/Lib/clocks.pico"
 XIncludeFile "RP2040/Lib/timer.pico"

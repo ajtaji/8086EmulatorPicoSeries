@@ -1,0 +1,13 @@
+; 8086 demo with the plain PureMetal computed-Goto tail (speed comparison).
+#CLOCK_KHZ = 200000
+#CPU_TIMING = 0
+#CPU_ASM_TAIL = 0
+#GUEST_KB = 88
+#GUEST2_KB = 56
+XIncludeFile "RP2040/Lib/clocks.pico"
+XIncludeFile "RP2040/Lib/timer.pico"
+XIncludeFile "RP2040/Lib/uart.pico"
+XIncludeFile "RP2040/Lib/usb_serial.pico"
+XIncludeFile "RP2040/Lib/safety.pico"
+XIncludeFile "../src/cpu86.pico"
+XIncludeFile "../src/demo_body.pmi"
