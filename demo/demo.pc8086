@@ -1,0 +1,293 @@
+; ======================================================================
+; demo.pc8086 - "PUREMETAL 8086", a PC demo written in PureMetal
+;
+; For the PC board of the 8086 emulator (CGA, the 8253 and its speaker, the
+; 8259; no BIOS). Build:  PureMetalForge.exe --compile demo.pc8086
+; which writes demo.com - the 8086 emulator loads and runs it.
+;
+;   the title     80 x 25 text: PUREMETAL in big letters whose colours roll,
+;                 under raster bars in the border, changed on every scan line
+;   the plasma    40 x 25 text: every cell a shade character between two of
+;                 sixteen colours, two sine waves across and two down, with a
+;                 rainbow scroller under it
+;   the music     one voice on the PC speaker from the timer interrupt, 60 times
+;                 a second: a melody, and the chords as fast arpeggios between
+;
+; The tables (sine, the speaker's divisors, the colour ramp, the letters and
+; the tune) are made by make_demo_assets.py into demo_assets.pc8086.
+; ======================================================================
+XIncludeFile "I8086/Lib/pc.i8086"
+XIncludeFile "demo_assets.pc8086"
+
+#TICK_HZ   = 60
+#TITLE_TICKS  = 600              ; ten seconds of title
+#PLASMA_TICKS = 1500             ; twenty-five seconds of plasma
+
+Global ticks.w                    ; timer interrupts since the start
+Global songRow.w, rowTick.w, arpStep.w
+
+Global Dim colv.w(40)             ; the plasma's per-column sum, per frame
+Global Dim cells.w(80)            ; one screen row being built
+Global Dim barImg.a(256)          ; the bars, one colour a scan line
+Global Dim barImgP.a(256)         ; the same with the other palette and intensity (320 x 200)
+Global Dim rainbow.a(40)          ; the scroller's colour per column
+
+; ----------------------------------------------------------------------
+; THE MUSIC - from the timer interrupt
+; ----------------------------------------------------------------------
+Procedure MusicTick()
+  Protected n.w, c.w, note.w
+  n = PeekA(?SongRows + songRow)
+  If n <> 0
+    If rowTick < 6
+      note = n
+    Else
+      note = 0                    ; a short gap: the notes are detached
+    EndIf
+  Else
+    c = PeekA(?SongChord + songRow)
+    note = PeekA(?ChordNotes + c * 3 + arpStep) + 12
+    arpStep = arpStep + 1
+    If arpStep = 3 : arpStep = 0 : EndIf
+  EndIf
+  PcSpeakerDivisor(PeekW(?NoteDivisor + note * 2))
+  rowTick = rowTick + 1
+  If rowTick = 7
+    rowTick = 0
+    songRow = songRow + 1
+    If songRow = 128 : songRow = 0 : EndIf
+  EndIf
+EndProcedure
+
+ProcedureInterrupt Timer()
+  ticks = ticks + 1
+  MusicTick()
+  PcPicEoi()
+EndProcedure
+
+; ----------------------------------------------------------------------
+; THE TITLE
+; ----------------------------------------------------------------------
+
+; Big letters from a 5 x 5 font: column, row, the table, the letter count.
+Procedure BigText(col.w, row.w, *bits, letters.w)
+  Protected r.w, l.w, b.w, v.w, off.w
+  For r = 0 To 4
+    For l = 0 To letters - 1
+      v = PeekA(*bits + r * letters + l)
+      For b = 0 To 4
+        off = ((row + r) * 80 + col + l * 6 + b) * 2
+        If v & (16 >> b)
+          i8086_far_pokew(#CGA_SEG, off, $0FDB)
+        Else
+          i8086_far_pokew(#CGA_SEG, off, $0020)
+        EndIf
+      Next
+    Next
+  Next
+EndProcedure
+
+; The letters' colours roll: each row of the big text a colour from a cycle.
+Procedure RollTitle(row.w, col.w, width.w, phase.w)
+  Protected r.w, x.w, off.w, colour.w, cell.w
+  For r = 0 To 4
+    colour = PeekA(?RollColours + ((r + phase) & 7))
+    For x = 0 To width - 1
+      off = ((row + r) * 80 + col + x) * 2
+      cell = i8086_far_peekw(#CGA_SEG, off)
+      If (cell & $FF) = $DB
+        i8086_far_pokew(#CGA_SEG, off, $DB | (colour << 8))
+      EndIf
+    Next
+  Next
+EndProcedure
+
+; The bars: a colour every third scan line, 66 of them down the picture. The
+; next colour is read while a line is drawn and written in the blank after
+; it; *top's colours for the upper half of the screen, *bottom's for the lower.
+; Three lines a colour leave the loop time to spare, so it ends before the next
+; vertical retrace and no frame is missed. In a text mode the colour is the
+; border's; in 320 x 200 it is colour 0, the background behind the picture.
+Procedure RasterBars(scroll.w, *top, *bottom)
+  Protected i.w, c.w, idx.w = scroll, *t = *top
+  c = PeekA(*t + (idx & 255))
+  While i8086_in(#CGA_STATUS) & 8 : Wend          ; out of the retrace
+  While i8086_in(#CGA_STATUS) & 1 : Wend          ; the blank lines above the picture: line 0 starts
+  For i = 0 To 65
+    While (i8086_in(#CGA_STATUS) & 1) = 0 : Wend  ; the blank after this line
+    i8086_out(#CGA_COLOR, c)
+    idx = idx + 2
+    If i = 32 : *t = *bottom : EndIf
+    c = PeekA(*t + (idx & 255))
+    While i8086_in(#CGA_STATUS) & 1 : Wend        ; the next line
+    While (i8086_in(#CGA_STATUS) & 1) = 0 : Wend
+    While i8086_in(#CGA_STATUS) & 1 : Wend        ; the one after
+    While (i8086_in(#CGA_STATUS) & 1) = 0 : Wend
+    While i8086_in(#CGA_STATUS) & 1 : Wend        ; and the third
+  Next
+  i8086_out(#CGA_COLOR, 0)
+EndProcedure
+
+Procedure MakeBars()
+  Protected i.w, p.w
+  For i = 0 To 255 : barImg(i) = 0 : Next
+  For i = 0 To 6
+    p = PeekA(?BarRed + i)
+    barImg(20 + i) = p
+    barImg(20 + 13 - i) = p
+    p = PeekA(?BarGreen + i)
+    barImg(100 + i) = p
+    barImg(100 + 13 - i) = p
+    p = PeekA(?BarBlue + i)
+    barImg(180 + i) = p
+    barImg(180 + 13 - i) = p
+  Next
+  For i = 0 To 255 : barImgP(i) = barImg(i) | #CGA_PAL_CMY | #CGA_PAL_BRIGHT : Next
+EndProcedure
+
+Procedure TitleScene()
+  Protected seen.w, phase.w, start.w = ticks
+  CgaSetMode(#CGA_TEXT80_16BG)
+  i8086_far_fillw(#CGA_SEG, 0, $0020, 2000)
+  BigText(13, 5, ?TitleBits, 9)
+  BigText(28, 12, ?SubBits, 4)
+  CgaText(26, 19, $0B, ?Line1)
+  CgaText(24, 21, $07, ?Line2)
+  While ticks - start < #TITLE_TICKS
+    CgaWaitVRetrace()
+    RasterBars(PeekA(?SineTable + ((ticks * 2) & 255)) * 2, @barImg(0), @barImg(0))
+    ; The colours move on every 12 ticks, the big word and the number in turn:
+    ; re-colouring takes most of a frame, so it is done in the frames the bars
+    ; are not drawn in, as seldom as the roll needs.
+    If (ticks / 12) <> seen
+      seen = ticks / 12
+      phase = seen & 7
+      If seen & 1
+        RollTitle(5, 13, 54, phase)
+      Else
+        RollTitle(12, 28, 24, phase + 3)
+      EndIf
+    EndIf
+  Wend
+EndProcedure
+
+; ----------------------------------------------------------------------
+; THE PLASMA AND THE SCROLLER
+; ----------------------------------------------------------------------
+Procedure PlasmaFrame(t.w)
+  Protected x.w, y.w, rv.w
+  For x = 0 To 39
+    colv(x) = PeekA(?SineTable + ((x * 7 + t * 3) & 255)) + PeekA(?SineTable + ((x * 3 - t * 2) & 255))
+  Next
+  For y = 0 To 22
+    rv = PeekA(?SineTable + ((y * 9 + t * 4) & 255)) + PeekA(?SineTable + ((y * 5 + t) & 255))
+    For x = 0 To 39
+      cells(x) = PeekW(?PlasmaRamp + (((colv(x) + rv) >> 2) & 63) * 2)
+    Next
+    i8086_far_copyw(#CGA_SEG, y * 80, @cells(0), 40)
+  Next
+EndProcedure
+
+Global scrollPos.w, scrollLen.w
+
+Procedure ScrollerFrame(t.w)
+  Protected x.w, p.w, c.w
+  For x = 0 To 39
+    p = scrollPos + x
+    If p >= scrollLen : p = p - scrollLen : EndIf
+    c = PeekA(?ScrollText + p)
+    cells(x) = c | (rainbow((x + t) % 40) << 8)
+  Next
+  i8086_far_copyw(#CGA_SEG, 24 * 80, @cells(0), 40)
+EndProcedure
+
+Procedure PlasmaScene()
+  Protected seen.w, start.w = ticks, x.w
+  CgaSetMode(#CGA_TEXT40_16BG)
+  i8086_far_fillw(#CGA_SEG, 0, $0020, 1000)
+  CgaColor(1)
+  scrollLen = 0
+  While PeekA(?ScrollText + scrollLen) <> 0 : scrollLen = scrollLen + 1 : Wend
+  For x = 0 To 39 : rainbow(x) = PeekA(?RollColours + (x >> 1) & 7) : Next
+  scrollPos = 0
+  While ticks - start < #PLASMA_TICKS
+    PlasmaFrame(ticks)
+    ScrollerFrame(ticks >> 1)
+    If (ticks >> 3) <> seen
+      seen = ticks >> 3
+      scrollPos = scrollPos + 1
+      If scrollPos >= scrollLen : scrollPos = 0 : EndIf
+    EndIf
+  Wend
+EndProcedure
+
+; ----------------------------------------------------------------------
+; THE COPPER: 320 x 200, where colour 0 IS the background register ($3D9)
+; ----------------------------------------------------------------------
+
+; 5 x 5 letters as blocks of one byte (4 pixels) by 8 lines, in colour blockColour (1-3).
+Global blockColour.w
+
+Procedure BlockText(byteCol.w, line.w, *bits, letters.w)
+  Protected r.w, l.w, b.w, v.w, k.w, y.w, off.w, fill.w, c.w = blockColour
+  fill = c | (c << 2) | (c << 4) | (c << 6)
+  For r = 0 To 4
+    For l = 0 To letters - 1
+      v = PeekA(*bits + r * letters + l)
+      For b = 0 To 4
+        If v & (16 >> b)
+          For k = 0 To 7
+            y = line + r * 8 + k
+            off = (y >> 1) * 80 + byteCol + l * 6 + b
+            If y & 1 : off = off + $2000 : EndIf
+            i8086_far_poke(#CGA_SEG, off, fill)
+          Next
+        EndIf
+      Next
+    Next
+  Next
+EndProcedure
+
+#COPPER_TICKS = 600               ; ten seconds
+
+Procedure CopperScene()
+  Protected start.w = ticks
+  CgaSetMode(#CGA_GFX320)
+  CgaClear(0)
+  blockColour = 3 : BlockText(13, 40, ?TitleBits, 9)
+  blockColour = 2 : BlockText(28, 120, ?SubBits, 4)
+  While ticks - start < #COPPER_TICKS
+    CgaWaitVRetrace()
+    RasterBars(ticks * 3, @barImg(0), @barImgP(0))
+  Wend
+EndProcedure
+
+Procedure Main()
+  PcPicInit()
+  PcTimerHz(#TICK_HZ)
+  PcSpeakerTone(440)
+  PcSpeakerOff()
+  PcPicUnmask(0)
+  MakeBars()
+  EnableInterrupts
+  Repeat
+    TitleScene()
+    PlasmaScene()
+    CopperScene()
+  ForEver
+EndProcedure
+
+DataSection
+RollColours:
+  Data.a 9, 11, 15, 14, 12, 13, 5, 1
+BarRed:
+  Data.a 4, 4, 12, 12, 14, 15, 15
+BarGreen:
+  Data.a 2, 2, 10, 10, 11, 15, 15
+BarBlue:
+  Data.a 1, 1, 9, 9, 11, 15, 15
+Line1:
+  Data.s "a PureMetal Forge demo"
+Line2:
+  Data.s "compiled for the Intel 8086"
+EndDataSection
