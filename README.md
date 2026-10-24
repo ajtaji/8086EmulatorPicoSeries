@@ -181,13 +181,17 @@ Logs: `docs/verify-full-1.log`, `docs/verify-full-2.log`, `docs/verify-timed.log
 reference corpus is not stored here: `py -3 tools/fetch_tests.py` downloads the
 pinned commit (about 180 MB), then
 
-```bash
-tools/board.sh 'vectors Diagnostics/vectors.picow Diagnostics/build/vectors.uf2 --per-file 2000 --log docs/verify.log'
+```powershell
+.\tools\board.ps1 -Minutes 8 -Jobs @(
+  'vectors Diagnostics/vectors.picow Diagnostics/build/vectors.uf2 --per-file 2000 --part 1/2 --log docs/verify-full-1.log',
+  'vectors Diagnostics/vectors.picow Diagnostics/build/vectors.uf2 --per-file 2000 --part 2/2 --log docs/verify-full-2.log')
 ```
 
-builds, uploads and streams it (`board.sh` takes the bench's COM7 lease; on
-another bench run `tools/build.ps1 ... -Port <port>` and `tools/vectors.py --port <port>`).
-About 70 MB go over USB serial at roughly 75 KB/s, about 16 minutes.
+builds, uploads and streams it. `board.ps1` takes the bench's COM7 lease through
+the shared `C:\PMFBuild\board-leases\lease.ps1` and holds it for the whole
+batch; on another bench run `tools/build.ps1 ... -Port <port>` and
+`tools/vectors.py --port <port>`. About 64 MB go over USB serial at roughly
+200 KB/s, about 5 minutes.
 
 The Pico 2 W builds (`src/demo.pico2w`, `Diagnostics/vectors.pico2w`,
 `Diagnostics/api.pico2w`) compile from the same generator with the same

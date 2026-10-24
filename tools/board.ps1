@@ -1,54 +1,45 @@
-# Board work on the shared Pico W, under its lease:
-#   C:\PMFBuild\board-leases\COM7.lease is created exclusively before the upload
-#   and deleted as soon as the upload and capture are over.
-# Builds and uploads -Source; then either streams vectors (-Vectors '<args for
-# tools/vectors.py>') or captures the program's output for -Seconds.
+# Board work on the shared Pico W (COM7) under ONE lease for a batch of jobs,
+# taken and released only through the bench's shared C:\PMFBuild\board-leases\lease.ps1.
+#
+#   .\tools\board.ps1 -Minutes 8 -Jobs @(
+#       'flash Diagnostics/api.picow Diagnostics/build/api.uf2 10',
+#       'vectors Diagnostics/vectors.picow Diagnostics/build/vectors.uf2 --per-file 100 --log docs/x.log')
+#
+#   flash   <source> <output.uf2> [seconds]              build, upload, capture output
+#   vectors <source> <output.uf2> <vectors.py args...>   build, upload, stream the reference tests
+# COM7 leases are limited to 15 minutes: split the full corpus with --part 1/2 and 2/2.
 param(
-    [string]$Source,
-    [string]$Output,
-    [string]$Port = 'COM7',
-    [int]$Seconds = 0,
-    [string]$Vectors = '',
-    [string]$Log = ''
+    [Parameter(Mandatory)][string[]]$Jobs,
+    [int]$Minutes = 5,
+    [string]$Port = 'COM7'
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
-$leaseDir = 'C:\PMFBuild\board-leases'
-$lease = Join-Path $leaseDir ($Port + '.lease')
-New-Item -ItemType Directory -Force $leaseDir | Out-Null
-while ($true) {
-    try { New-Item -ItemType File $lease -ErrorAction Stop | Out-Null; break }
-    catch {
-        $held = Get-Item $lease -ErrorAction SilentlyContinue
-        if (-not $held) { Start-Sleep -Seconds 1; continue }
-        $age = (Get-Date) - $held.LastWriteTime
-        if ($age.TotalMinutes -gt 30) {
-            "lease is $([int]$age.TotalMinutes) min old (" + (Get-Content $lease -Raw) + "): removing it"
-            Remove-Item $lease -Force
-        } else {
-            "lease held: " + (Get-Content $lease -Raw -ErrorAction SilentlyContinue) + " - waiting 30 s"
-            Start-Sleep -Seconds 30
+. C:\PMFBuild\board-leases\lease.ps1
+$l = Get-BoardLease -Port $Port -Owner 'cg-8086' -Minutes $Minutes
+"lease taken $(Get-Date -Format HH:mm:ss)"
+try {
+    foreach ($job in $Jobs) {
+        $w = $job -split ' '
+        try {
+            switch ($w[0]) {
+                'flash' {
+                    $sec = 0; if ($w.Count -gt 3) { $sec = [int]$w[3] }
+                    & (Join-Path $PSScriptRoot 'build.ps1') -Source $w[1] -Output $w[2] -Port $Port -Seconds $sec
+                }
+                'vectors' {
+                    & (Join-Path $PSScriptRoot 'build.ps1') -Source $w[1] -Output $w[2] -Port $Port -Seconds 0
+                    $a = @((Join-Path $PSScriptRoot 'vectors.py'), '--port', $Port) + $w[3..($w.Count - 1)]
+                    & py -3 @a
+                    "vectors exit $LASTEXITCODE"
+                }
+                default { "unknown job: $job" }
+            }
+        } catch {
+            "JOB FAILED: $job - $($_.Exception.Message)"
         }
     }
-}
-$tag = "8086-emulator worker " + (Get-Date -Format o)
-Set-Content $lease $tag
-try {
-    & (Join-Path $PSScriptRoot 'build.ps1') -Source $Source -Output $Output -Port $Port -Seconds $Seconds
-    if ($Vectors) {
-        $a = @((Join-Path $PSScriptRoot 'vectors.py'), '--port', $Port) + ($Vectors -split ' ')
-        if ($Log) { $a += @('--log', $Log) }
-        & py -3 @a
-        $code = $LASTEXITCODE
-        "vectors exit $code"
-    }
 } finally {
-    $now = ''
-    try { $now = [IO.File]::ReadAllText($lease) } catch { $now = '(unreadable: ' + $_.Exception.Message + ')' }
-    if ($now -and $now.Trim() -eq $tag) {
-        Remove-Item $lease -Force
-        "lease released"
-    } else {
-        "lease file no longer ours at release (now: '$now') - left alone"
-    }
+    Release-BoardLease $l
+    "lease released $(Get-Date -Format HH:mm:ss)"
 }

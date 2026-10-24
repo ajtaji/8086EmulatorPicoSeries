@@ -18,7 +18,26 @@ cpu86_desktop.exe [program.com] [--run] [--show-tests] [--screenshot file.png]
 cpu86_console.exe --test [stream]     the board's test suites (default ../Diagnostics/vectors-bin/all.bin)
 cpu86_console.exe --bench             instructions per second, the Pico demo's mixes
 cpu86_console.exe --run program.com   run a program, print its console output and exit code
+cpu86_console.exe --com file [--seg hex] [--max n] [--dump file]
+cpu86_console.exe --raw file --at linear --entry SEG:OFF [--max n] [--dump file]
 ```
+
+`--com` / `--raw` is the runner for the PureMetal 8086 back end's gates: a bare CPU
+with the whole 1 MB as RAM (no ROM, no BIOS, nothing in the vector table). `--com`
+loads the file at SEG:0100 (SEG defaults to 0050) with CS=DS=ES=SS=SEG, IP=0100,
+SP=FFFE; `--raw` loads it at a linear address and starts at SEG:OFF. OUT E9h prints
+the byte to stdout; OUT F4h ends the run at once. It stops on HLT, on a jump to
+itself (`EB FE`, `E9 FD FF`) or after `--max` instructions (default 10^9), then prints
+
+```text
+STOP exit=7|hlt|hlt (IF=1)|selfjump|budget instr=<n> ms=<t>
+CS=.... DS=.... ES=.... SS=.... IP=.... SP=.... AX=.... BX=.... CX=.... DX=.... SI=.... DI=.... BP=.... FLAGS=....
+```
+
+and `--dump` writes the 1 MB raw. A self-jump is noticed between 10,000-instruction
+slices, so its `instr=` includes the spinning. Exit code 0 when the run stopped, 2
+with a sentence when the file could not be read or written; `--pc` (the PC machine)
+is refused for now. Test images: `Diagnostics/gate/*.com`.
 
 The window has a toolbar (Open, the two examples, Reset, Run/Stop, Step,
 Step 100, a breakpoint at an IP, Run tests, and the speed), the registers and

@@ -9,6 +9,12 @@
 ;                                      default ../Diagnostics/vectors-bin/all.bin)
 ;   cpu86_console.exe --bench          instructions per second, in a console
 ;   cpu86_console.exe --run <file.com> run a program, print its console output
+;   cpu86_console.exe --com <file> [--seg hex] [--max n] [--dump file]
+;                                      the compiler gates' runner: bare CPU, 1 MB RAM,
+;                                      E9h out = stdout, F4h out = exit; stops on HLT,
+;                                      a jump to itself or the budget (see GateMain);
+;                                      a self-jump is seen between 10,000-instruction
+;                                      slices, so its instr= includes the spinning
 ; Window options (any order, with or without a program):
 ;   --show-tests        run the test suites as soon as the window is up
 ;   --run               start the loaded program running
@@ -108,9 +114,96 @@ Procedure BenchRep()
   PrintN(LSet("rep movsw", 22) + RSet(StrF(200.0 * 64 * 8192 / t / 1000.0, 1), 7) + " MB/s")
 EndProcedure
 
+; --com <file> | --raw <file> --at <linear hex> --entry SEG:OFF, with --seg <hex>
+; (default 0050), --max <instructions>, --dump <file>: the runner the PureMetal
+; 8086 back end's gates use. Bare CPU, the whole 1 MB as RAM, no BIOS, no ROM.
+Procedure.i GateMain()
+  Protected i.i, a.s, file.s, raw.i, seg.i = $50, at.i = -1, entry.s, maxn.q = 1000000000, dump.s
+  Protected f.i, n.i, ran.i, count.q, why.s, chunk.i, cs.i, ip.i, lin.i, b0.i, b1.i, b2.i, t.q
+  For i = 0 To CountProgramParameters() - 1
+    a = LCase(ProgramParameter(i))
+    Select a
+      Case "--com" : i + 1 : file = ProgramParameter(i)
+      Case "--raw" : i + 1 : file = ProgramParameter(i) : raw = 1
+      Case "--seg" : i + 1 : seg = Val("$" + ProgramParameter(i)) & $FFFF
+      Case "--at" : i + 1 : at = Val("$" + ProgramParameter(i)) & $FFFFF
+      Case "--entry" : i + 1 : entry = ProgramParameter(i)
+      Case "--max" : i + 1 : maxn = Val(ProgramParameter(i))
+      Case "--dump" : i + 1 : dump = ProgramParameter(i)
+      Case "--pc"
+        PrintN("The PC machine (--pc: CGA, 8253, 8259, keyboard) is not built yet; only the bare CPU runs.")
+        ProcedureReturn 3
+    EndSelect
+  Next
+  f = ReadFile(#PB_Any, file)
+  If f = 0
+    PrintN("Cannot read the program file '" + file + "'.") : ProcedureReturn 2
+  EndIf
+  n = Lof(f)
+  MachineBare()
+  GateMode = 1 : GateExit = 0 : TestMode = 0
+  Cpu86Reset()
+  If raw
+    If at < 0 Or entry = ""
+      CloseFile(f) : PrintN("--raw needs --at <linear hex> and --entry SEG:OFF.") : ProcedureReturn 2
+    EndIf
+    If at + n > $100000 : n = $100000 - at : EndIf
+    ReadData(f, *MachineRam + at, n)
+    cs = Val("$" + StringField(entry, 1, ":")) & $FFFF
+    ip = Val("$" + StringField(entry, 2, ":")) & $FFFF
+    For i = 0 To 3 : Cpu86SetSeg(i, cs) : Next
+  Else
+    lin = seg * 16 + $100
+    If lin + n > $100000 : n = $100000 - lin : EndIf
+    ReadData(f, *MachineRam + lin, n)
+    For i = 0 To 3 : Cpu86SetSeg(i, seg) : Next
+    ip = $100
+  EndIf
+  CloseFile(f)
+  R(4) = $FFFE
+  Cpu86SetIP(ip)
+  t = ElapsedMilliseconds()
+  why = "budget"
+  While count < maxn
+    chunk = 10000
+    If maxn - count < chunk : chunk = maxn - count : EndIf
+    ran = Cpu86Run(chunk)
+    If GateExit
+      count + GateExitAt
+      why = "exit=" + Str(GateExitCode) : Break
+    EndIf
+    count + ran
+    If Halted
+      why = "hlt" : If Cpu86Flags() & $200 : why + " (IF=1)" : EndIf
+      Break
+    EndIf
+    lin = (SegB(1) + Cpu86GetIP()) & $FFFFF
+    b0 = PeekA(*MachineRam + lin) : b1 = PeekA(*MachineRam + ((lin + 1) & $FFFFF)) : b2 = PeekA(*MachineRam + ((lin + 2) & $FFFFF))
+    If (b0 = $EB And b1 = $FE) Or (b0 = $E9 And b1 = $FD And b2 = $FF)
+      why = "selfjump" : Break
+    EndIf
+    If ran = 0 : Break : EndIf
+  Wend
+  PrintN("")
+  PrintN("STOP " + why + " instr=" + Str(count) + " ms=" + Str(ElapsedMilliseconds() - t))
+  PrintN("CS=" + H4(Cpu86GetSeg(1)) + " DS=" + H4(Cpu86GetSeg(3)) + " ES=" + H4(Cpu86GetSeg(0)) + " SS=" + H4(Cpu86GetSeg(2)) +
+         " IP=" + H4(Cpu86GetIP()) + " SP=" + H4(R(4)) + " AX=" + H4(R(0)) + " BX=" + H4(R(3)) + " CX=" + H4(R(1)) +
+         " DX=" + H4(R(2)) + " SI=" + H4(R(6)) + " DI=" + H4(R(7)) + " BP=" + H4(R(5)) + " FLAGS=" + H4(Cpu86Flags()))
+  If dump <> ""
+    f = CreateFile(#PB_Any, dump)
+    If f = 0 : PrintN("Cannot write the dump file '" + dump + "'.") : ProcedureReturn 2 : EndIf
+    WriteData(f, *MachineRam, $100000)
+    CloseFile(f)
+  EndIf
+  ProcedureReturn 0
+EndProcedure
+
 Procedure.i ConsoleMain()
   Protected arg.s = LCase(ProgramParameter(0)), t.q
-  If arg = "--test"
+  If arg = "--com" Or arg = "--raw"
+    OpenConsole()
+    ProcedureReturn GateMain()
+  ElseIf arg = "--test"
     OpenConsole()
     TestConsole = 1
     ProcedureReturn Bool(RunAllTests(StreamPath(ProgramParameter(1))) <> 0)

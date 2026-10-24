@@ -56,7 +56,29 @@ Procedure.i MachinePortIn(port.i, wide.i)
   ProcedureReturn $FF
 EndProcedure
 
+; Gate mode (cpu86_console.exe --com / --raw, for the compiler's tests): a bare
+; CPU with the whole 1 MB as RAM; port E9h prints straight to stdout, a write to
+; port F4h ends the run at once with that value.
+Global GateMode.i, GateExit.i, GateExitCode.i, GateExitAt.i
+
+Procedure MachineBare()
+  MachineInit()
+  FillMemory(*MachineRam, $100000, 0)
+  Cpu86MapRam(0, $100000, *MachineRam)
+EndProcedure
+
 Procedure MachinePortOut(port.i, v.i, wide.i)
+  If GateMode
+    Select port & $FFFF
+      Case $E9
+        Print(Chr(v & 255))
+      Case $F4
+        GateExit = 1 : GateExitCode = v & $FFFF
+        GateExitAt = Budget - Left + 1 ; instructions of this Cpu86Run, the OUT included
+        Left = 1                       ; the core stops after this instruction
+    EndSelect
+    ProcedureReturn
+  EndIf
   Select port & $FFFF
     Case $E9
       v & 255
