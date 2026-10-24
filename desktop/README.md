@@ -68,7 +68,7 @@ A minimal IBM PC with **no BIOS ROM**: the program brings its own vectors and dr
 The same device code (`src/pc86.pmi`) runs here and on the Pico W (`src/pc.picow`).
 
 ```text
-cpu86_pc.exe --com program.com --pc [--frames n] [--keys 1E,9E,..] [--screenshot file.png] [--halfcheck]
+cpu86_pc.exe --com program.com --pc [--frames n] [--keys 1E,9E,..] [--screenshot file.png] [--halfcheck] [--portlog FRAME:N]
 cpu86_desktop.exe program.com --pc --run       (the window: PC machine, PC screen tab, keys, speaker)
 ```
 
@@ -99,6 +99,9 @@ as it begins ($3D9 bits 0-3; black in 640 x 200, where those bits are the foregr
 so raster effects on $3D9 show in it. `--keys` queues set-1 scan codes in hex.
 `--halfcheck` also draws every line with the Pico's half-width renderer and counts the
 lines where its pixel x differs from pixel 2x here (exit 4 if any).
+`--portlog FRAME:N` prints the first N port accesses from frame FRAME on, each with
+its scanline, the clock within the line, CS:IP and IF: the tool for "why does this
+loop miss a line".
 
 No port 64h (that is the AT's controller), no DMA, no disks. Timing: 4.77 MHz,
 304 clocks a scanline, 262 scanlines (200 in the picture, display enable for the

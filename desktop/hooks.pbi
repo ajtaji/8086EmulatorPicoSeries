@@ -19,7 +19,20 @@ Procedure Cpu86HookWrite(lin.i, v.i)
   EndSelect
 EndProcedure
 
+; cpu86_pc.exe --portlog FRAME:N: the first N PC port accesses from frame FRAME on,
+; each with its scanline and the clock within it (timing investigations).
+Global PortLogFrom.i = -1, PortLogLeft.i
+
+Procedure PortLog(dir.s, port.i, v.i)
+  If PortLogLeft > 0 And PortLogFrom >= 0 And PcFrames >= PortLogFrom
+    PortLogLeft - 1
+    PrintN(dir + " " + RSet(Hex(port & $FFFF), 4, "0") + " " + RSet(Hex(v & $FFFF), 2, "0") + "  line " + Str(PcLineNo) +
+           " clock " + Str(Pc86LineClock()) + "  at " + RSet(Hex(Cpu86GetSeg(1)), 4, "0") + ":" + RSet(Hex(Cpu86GetIP()), 4, "0") + "  IF " + Str(Bool(Cpu86Flags() & $200)))
+  EndIf
+EndProcedure
+
 Procedure.i Cpu86PortIn(port.i, wide.i)
+  Protected v.i
   Select TestMode
     Case 1 : ProcedureReturn VecPortIn(port, wide)
     Case 2 : ProcedureReturn ApiPortIn(port, wide)
@@ -27,7 +40,11 @@ Procedure.i Cpu86PortIn(port.i, wide.i)
   If MachineKind = 1 And GateMode = 0
     ProcedureReturn Pc86PortIn(port, wide)
   ElseIf MachineKind = 1
-    If (port & $FFFF) <> $E9 And (port & $FFFF) <> $F4 : ProcedureReturn Pc86PortIn(port, wide) : EndIf
+    If (port & $FFFF) <> $E9 And (port & $FFFF) <> $F4
+      v = Pc86PortIn(port, wide)
+      If PortLogLeft : PortLog("IN ", port, v) : EndIf
+      ProcedureReturn v
+    EndIf
   EndIf
   ProcedureReturn MachinePortIn(port, wide)
 EndProcedure
@@ -35,6 +52,7 @@ EndProcedure
 Procedure Cpu86PortOut(port.i, v.i, wide.i)
   If TestMode <> 0 : ProcedureReturn : EndIf
   If MachineKind = 1
+    If PortLogLeft And GateMode : PortLog("OUT", port, v) : EndIf
     Select port & $FFFF
       Case $E9, $F4
         If GateMode

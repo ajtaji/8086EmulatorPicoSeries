@@ -145,6 +145,7 @@ Procedure.i GateMain()
       Case "--screenshot" : i + 1 : shot = ProgramParameter(i)
       Case "--keys" : i + 1 : keys = ProgramParameter(i)
       Case "--halfcheck" : PcHalfCheck = 1
+      Case "--portlog" : i + 1 : PortLogFrom = Val(StringField(ProgramParameter(i), 1, ":")) : PortLogLeft = Val(StringField(ProgramParameter(i), 2, ":"))
     EndSelect
   Next
   If pc And #CPU_TIMING = 0
