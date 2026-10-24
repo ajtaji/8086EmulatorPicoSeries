@@ -88,32 +88,30 @@ Procedure BigText(col.w, row.w, *bits, letters.w)
 EndProcedure
 
 ; The letters' colours roll: each row of the big text a colour from a cycle.
-Procedure RollTitle(row.w, col.w, width.w, phase.w)
-  Protected r.w, x.w, off.w, colour.w, cell.w
-  For r = 0 To 4
-    colour = PeekA(?RollColours + ((r + phase) & 7))
-    For x = 0 To width - 1
-      off = ((row + r) * 80 + col + x) * 2
-      cell = i8086_far_peekw(#CGA_SEG, off)
-      If (cell & $FF) = $DB
-        i8086_far_pokew(#CGA_SEG, off, $DB | (colour << 8))
-      EndIf
-    Next
+Procedure RollRow(row.w, col.w, width.w, colour.w)
+  Protected x.w, off.w = (row * 80 + col) * 2, cell.w
+  For x = 0 To width - 1
+    cell = i8086_far_peekw(#CGA_SEG, off)
+    If (cell & $FF) = $DB
+      i8086_far_pokew(#CGA_SEG, off, $DB | (colour << 8))
+    EndIf
+    off = off + 2
   Next
 EndProcedure
 
-; The bars: a colour every third scan line, 66 of them down the picture. The
-; next colour is read while a line is drawn and written in the blank after
-; it; *top's colours for the upper half of the screen, *bottom's for the lower.
-; Three lines a colour leave the loop time to spare, so it ends before the next
-; vertical retrace and no frame is missed. In a text mode the colour is the
+; The bars: a colour every third scan line, 64 of them down the picture - 192
+; lines, eight to spare, so a timer interrupt in the middle cannot push the last
+; waits past the picture into the blank lines (where display enable never comes
+; back until the next frame) and lose a frame. The next colour is read while a
+; line is drawn and written in the blank after it; *top's colours for the upper
+; half of the screen, *bottom's for the lower. In a text mode the colour is the
 ; border's; in 320 x 200 it is colour 0, the background behind the picture.
 Procedure RasterBars(scroll.w, *top, *bottom)
   Protected i.w, c.w, idx.w = scroll, *t = *top
   c = PeekA(*t + (idx & 255))
   While i8086_in(#CGA_STATUS) & 8 : Wend          ; out of the retrace
   While i8086_in(#CGA_STATUS) & 1 : Wend          ; the blank lines above the picture: line 0 starts
-  For i = 0 To 65
+  For i = 0 To 63
     While (i8086_in(#CGA_STATUS) & 1) = 0 : Wend  ; the blank after this line
     i8086_out(#CGA_COLOR, c)
     idx = idx + 2
@@ -146,7 +144,7 @@ Procedure MakeBars()
 EndProcedure
 
 Procedure TitleScene()
-  Protected seen.w, phase.w, start.w = ticks
+  Protected phase.w, start.w = ticks, rollRow.w
   CgaSetMode(#CGA_TEXT80_16BG)
   i8086_far_fillw(#CGA_SEG, 0, $0020, 2000)
   BigText(13, 5, ?TitleBits, 9)
@@ -154,20 +152,20 @@ Procedure TitleScene()
   CgaText(26, 19, $0B, ?Line1)
   CgaText(24, 21, $07, ?Line2)
   While ticks - start < #TITLE_TICKS
-    CgaWaitVRetrace()
+    ; RasterBars waits for the start of the picture itself, so no wait for the
+    ; retrace is needed here: what follows the bars runs in the blank lines.
     RasterBars(PeekA(?SineTable + ((ticks * 2) & 255)) * 2, @barImg(0), @barImg(0))
-    ; The colours move on every 12 ticks, the big word and the number in turn:
-    ; re-colouring takes most of a frame, so it is done in the frames the bars
-    ; are not drawn in, as seldom as the roll needs.
-    If (ticks / 12) <> seen
-      seen = ticks / 12
-      phase = seen & 7
-      If seen & 1
-        RollTitle(5, 13, 54, phase)
-      Else
-        RollTitle(12, 28, 24, phase + 3)
-      EndIf
+    ; The colours roll one step every 12 ticks; ONE ROW of the big letters is
+    ; re-coloured a frame (ten rows: the word, then the number), short enough
+    ; to finish in the blank lines before the next picture starts.
+    phase = (ticks / 12) & 7
+    If rollRow < 5
+      RollRow(5 + rollRow, 13, 54, PeekA(?RollColours + ((rollRow + phase) & 7)))
+    Else
+      RollRow(12 + rollRow - 5, 28, 24, PeekA(?RollColours + ((rollRow - 5 + phase + 3) & 7)))
     EndIf
+    rollRow = rollRow + 1
+    If rollRow = 10 : rollRow = 0 : EndIf
   Wend
 EndProcedure
 
