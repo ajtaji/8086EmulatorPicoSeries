@@ -19,10 +19,17 @@
 ;   --show-tests        run the test suites as soon as the window is up
 ;   --run               start the loaded program running
 ;   --screenshot <png>  save the window's own picture after two seconds and close
+;   --pc                the PC machine (before the program's name)
 ;
 ; Build with desktop/build.ps1 (x64, C back end, /DPIAWARE, /OPTIMIZER).
 
-#CPU_TIMING = 0
+; #CPU_TIMING: 0 (cpu86_console.exe: the budget counts instructions, for --test,
+; --bench and the gates) or 1 (cpu86_desktop.exe and cpu86_pc.exe, built with
+; /CONSTANT CPU_TIMING=1: the budget counts 8086 clocks, which the PC machine's
+; video and timer need).
+CompilerIf Not Defined(CPU_TIMING, #PB_Constant)
+  #CPU_TIMING = 0
+CompilerEndIf
 EnableExplicit
 
 ; The engine first: the test code's globals have plain names (K, Checks...)
@@ -48,6 +55,8 @@ CompilerElse
 CompilerEndIf
 XIncludeFile "tests.pbi"
 XIncludeFile "machine.pbi"
+XIncludeFile "pcmachine.pbi"
+XIncludeFile "hooks.pbi"
 XIncludeFile "disasm.pbi"
 
 #STREAM_DEFAULT$ = "../Diagnostics/vectors-bin/all.bin"
@@ -120,6 +129,7 @@ EndProcedure
 Procedure.i GateMain()
   Protected i.i, a.s, file.s, raw.i, seg.i = $50, at.i = -1, entry.s, maxn.q = 1000000000, dump.s
   Protected f.i, n.i, ran.i, count.q, why.s, chunk.i, cs.i, ip.i, lin.i, b0.i, b1.i, b2.i, t.q
+  Protected pc.i, frames.i = 600, shot.s, *img, fr.i, ln.i, keys.s, tone.i, k.i
   For i = 0 To CountProgramParameters() - 1
     a = LCase(ProgramParameter(i))
     Select a
@@ -130,16 +140,63 @@ Procedure.i GateMain()
       Case "--entry" : i + 1 : entry = ProgramParameter(i)
       Case "--max" : i + 1 : maxn = Val(ProgramParameter(i))
       Case "--dump" : i + 1 : dump = ProgramParameter(i)
-      Case "--pc"
-        PrintN("The PC machine (--pc: CGA, 8253, 8259, keyboard) is not built yet; only the bare CPU runs.")
-        ProcedureReturn 3
+      Case "--pc" : pc = 1
+      Case "--frames" : i + 1 : frames = Val(ProgramParameter(i))
+      Case "--screenshot" : i + 1 : shot = ProgramParameter(i)
+      Case "--keys" : i + 1 : keys = ProgramParameter(i)
     EndSelect
   Next
+  If pc And #CPU_TIMING = 0
+    PrintN("--pc needs the clock-counted build: run cpu86_pc.exe instead of cpu86_console.exe.") : ProcedureReturn 3
+  EndIf
   f = ReadFile(#PB_Any, file)
   If f = 0
     PrintN("Cannot read the program file '" + file + "'.") : ProcedureReturn 2
   EndIf
   n = Lof(f)
+  If pc
+    ; The PC machine (pc86.pmi), headless: frames of 262 scanlines until an OUT F4h,
+    ; a HLT with IF = 0, or --frames (default 600 = 10 s of machine time).
+    *img = AllocateMemory(n + 1)
+    ReadData(f, *img, n)
+    CloseFile(f)
+    MachineKind = 1 : GateMode = 1 : GateExit = 0 : TestMode = 0
+    PcStart(*img, n)
+    FreeMemory(*img)
+    For k = 1 To CountString(keys, ",") + 1          ; --keys 1E,9E: set-1 scan codes, in order
+      If Trim(StringField(keys, k, ",")) <> "" : Pc86Key(Val("$" + Trim(StringField(keys, k, ",")))) : EndIf
+    Next
+    t = ElapsedMilliseconds()
+    why = "frames"
+    For fr = 1 To frames
+      For ln = 1 To #PC86_LINES
+        count + Pc86RunLine()
+        If SpkFreq((PcLineNo + #PC86_LINES - 1) % #PC86_LINES) > tone : tone = SpkFreq((PcLineNo + #PC86_LINES - 1) % #PC86_LINES) : EndIf
+        If GateExit : Break : EndIf
+        If Halted And (Cpu86Flags() & $200) = 0 : Break : EndIf
+      Next
+      If GateExit : why = "exit=" + Str(GateExitCode) : Break : EndIf
+      If Halted And (Cpu86Flags() & $200) = 0 : why = "hlt" : Break : EndIf
+    Next
+    PrintN("")
+    PrintN("STOP " + why + " frames=" + Str(PcFrames) + " clocks=" + Str(PcClocks) + " ms=" + Str(ElapsedMilliseconds() - t))
+    PrintN("CS=" + H4(Cpu86GetSeg(1)) + " DS=" + H4(Cpu86GetSeg(3)) + " ES=" + H4(Cpu86GetSeg(0)) + " SS=" + H4(Cpu86GetSeg(2)) +
+           " IP=" + H4(Cpu86GetIP()) + " SP=" + H4(R(4)) + " AX=" + H4(R(0)) + " BX=" + H4(R(3)) + " CX=" + H4(R(1)) +
+           " DX=" + H4(R(2)) + " SI=" + H4(R(6)) + " DI=" + H4(R(7)) + " BP=" + H4(R(5)) + " FLAGS=" + H4(Cpu86Flags()))
+    PrintN("PIC IMR=" + H2(PicImr) + " ISR=" + H2(PicIsr) + " base=" + H2(PicBase) + "  PIT0 reload=" + Str(PitReload(0)) +
+           " mode=" + Str(PitMode(0)) + "  CGA mode=" + H2(PcMode) + " colour=" + H2(PcColor) + "  highest tone=" + Str(tone) + " Hz")
+    If shot <> ""
+      If PcSavePng(shot) = 0 : PrintN("Cannot write the picture '" + shot + "'.") : ProcedureReturn 2 : EndIf
+    EndIf
+    If dump <> ""
+      f = CreateFile(#PB_Any, dump)
+      If f = 0 : PrintN("Cannot write the dump file '" + dump + "'.") : ProcedureReturn 2 : EndIf
+      WriteData(f, *MachineRam, $A0000)
+      WriteData(f, *PcVramMem, $4000)
+      CloseFile(f)
+    EndIf
+    ProcedureReturn 0
+  EndIf
   MachineBare()
   GateMode = 1 : GateExit = 0 : TestMode = 0
   Cpu86Reset()
@@ -209,6 +266,10 @@ Procedure.i ConsoleMain()
     ProcedureReturn Bool(RunAllTests(StreamPath(ProgramParameter(1))) <> 0)
   ElseIf arg = "--bench"
     OpenConsole()
+    If #CPU_TIMING
+      PrintN("This is the clock-counted build: --bench measures instructions, run cpu86_console.exe --bench.")
+      ProcedureReturn 3
+    EndIf
     PrintN("8086 desktop core, " + #DISPATCH_NAME$ + ", 100 x 1,000,000 instructions per mix")
     BenchOne("register/branch", "4975FDEBFB")
     BenchOne("alu", "01D831C2D1E011D329C647EBF3")
@@ -244,6 +305,26 @@ Global Wheel.i, KeyCode.i, KeyChar.i
 Global TestsRun.i, TestsFailed.i, ShotPath$, ShotFrames.i
 Global AddrText.String, AddrCaret.i, MemBase.i
 
+Procedure ResetProgram()
+  If MachineKind = 1
+    PcStart(*MachineImage, MachineImageLen)
+    MachineExited = 0 : MachineExitCode = 0
+  Else
+    MachineReset()
+  EndIf
+EndProcedure
+
+Procedure.i LoadProgram(path.s)
+  If MachineLoadFile(path) = 0 : ProcedureReturn 0 : EndIf
+  If MachineKind = 1 : ResetProgram() : EndIf
+  ProcedureReturn 1
+EndProcedure
+
+Procedure.s LoadText()
+  If MachineKind = 1 : ProcedureReturn " at 0050:0100 on the PC machine." : EndIf
+  ProcedureReturn " at 1000:0100."
+EndProcedure
+
 Procedure StepOne()
   Executed + Cpu86Run(1)
 EndProcedure
@@ -258,7 +339,30 @@ EndProcedure
 ; Runs for about budgetMs of wall time, stopping at the breakpoint, at HLT and
 ; when the program exits.
 Procedure RunFor(budgetMs.i)
-  Protected t0.q = ElapsedMilliseconds(), ran.i, k.i
+  Protected t0.q = ElapsedMilliseconds(), ran.i, k.i, ln.i, n.i
+  If MachineKind = 1
+    While Running And n < 3
+      For ln = 1 To #PC86_LINES
+        ran + Pc86RunLine()
+        If BreakAt >= 0 And Cpu86GetIP() = BreakAt
+          Running = 0 : Status$ = "Stopped at the breakpoint " + H4(Cpu86GetSeg(1)) + ":" + H4(BreakAt) + " (checked once a scanline)."
+          Break
+        EndIf
+        If MachineExited
+          Running = 0 : Status$ = "The program wrote " + Str(MachineExitCode) + " to port F4h (exit)." : Break
+        EndIf
+        If Halted And (Cpu86Flags() & $200) = 0
+          Running = 0 : Status$ = "HLT with interrupts off at " + H4(Cpu86GetSeg(1)) + ":" + H4(Cpu86GetIP()) + "." : Break
+        EndIf
+      Next
+      PcSoundFrame()
+      n + 1
+      If PcSndOpen = 0 Or PcSoundPending() >= 3 : Break : EndIf
+    Wend
+    RateWindowCount + ran
+    Executed + ran
+    ProcedureReturn
+  EndIf
   While Running And ElapsedMilliseconds() - t0 < budgetMs
     If BreakAt >= 0
       For k = 1 To 20000
@@ -316,7 +420,15 @@ Procedure DrawCpuPanel(x.f, y.f, w.f, h.f)
   DrawLine(xx, yy, "SS " + H4(Cpu86GetSeg(2))) : yy + lh * 1.4
   DrawLine(xx, yy, "FLAGS " + H4(f)) : yy + lh
   DrawLine(xx, yy, FlagString(f), Neon_C_AmbR, Neon_C_AmbG, Neon_C_AmbB) : yy + lh * 1.4
-  DrawLine(xx, yy, "executed  " + Str(Executed)) : yy + lh
+  If #CPU_TIMING
+    DrawLine(xx, yy, "clocks    " + Str(Executed)) : yy + lh
+  Else
+    DrawLine(xx, yy, "executed  " + Str(Executed)) : yy + lh
+  EndIf
+  If MachineKind = 1
+    DrawLine(xx, yy, "line " + Str(PcLineNo) + "  frame " + Str(PcFrames)) : yy + lh
+    DrawLine(xx, yy, "PIC " + H2(PicImr) + "/" + H2(PicIsr) + "  PIT0 " + Str(PitReload(0))) : yy + lh
+  EndIf
   DrawLine(xx, yy, "state     " + StateText()) : yy + lh * 1.4
   DrawLine(xx, yy, "stack (SS:SP)") : yy + lh
   Protected k.i, s.s
@@ -376,10 +488,29 @@ Procedure DrawScreen(x.f, y.f, w.f, h.f)
   Next
 EndProcedure
 
+; The PC machine's picture: 640 x 200, each line drawn twice (640 x 400).
+Procedure DrawPcScreen(x.f, y.f, w.f, h.f)
+  Protected sc.f, sw.f, sh.f
+  If PcTexReady = 0 : ProcedureReturn : EndIf
+  PcTextureUpload()
+  sc = w / #PC_W
+  If (h - Neon_S(22)) / (#PC_H * 2) < sc : sc = (h - Neon_S(22)) / (#PC_H * 2) : EndIf
+  sw = #PC_W * sc : sh = #PC_H * 2 * sc
+  Neon_Box(x + (w - sw) / 2 - 2, y - 2, sw + 4, sh + 4, 0.15, 0.20, 0.30)
+  DrawGLSprite(@PcSprite, x + (w - sw) / 2, y, 0.0, sc, 1.0, 1.0, 1.0, 1.0, #True, -1, -1, -1, -1, #True)
+  If MachineKind = 1 And Running
+    Neon_Text(*Neon_FontSmall, x, y + sh + Neon_S(6), "Keys go to the PC while this tab shows it.", Neon_C_DimR, Neon_C_DimG, Neon_C_DimB)
+  EndIf
+EndProcedure
+
 Procedure DrawMemory(x.f, y.f, w.f, h.f)
   Protected lh.f = Neon_S(18), rows.i, total.i = 65536, r.i, c.i, a.i, s.s, yy.f, base.i, txt.s, v.i
   Neon_Panel(x, y, w, h, "Memory", Neon_C_GrnR, Neon_C_GrnG, Neon_C_GrnB)
-  MemTab = Neon_TabStrip(101, x + Neon_S(2), y + Neon_S(28), w - Neon_S(4), Neon_S(26), "DS:0000|SS:SP|ES:DI|Address|Screen B800", MemTab)
+  MemTab = Neon_TabStrip(101, x + Neon_S(2), y + Neon_S(28), w - Neon_S(4), Neon_S(26), "DS:0000|SS:SP|ES:DI|Address|Screen B800|PC screen", MemTab)
+  If MemTab = 5
+    DrawPcScreen(x + Neon_S(6), y + Neon_S(60), w - Neon_S(12), h - Neon_S(64))
+    ProcedureReturn
+  EndIf
   If MemTab = 4
     DrawScreen(x + Neon_S(10), y + Neon_S(62), w - Neon_S(20), h - Neon_S(66))
     ProcedureReturn
@@ -458,7 +589,7 @@ EndProcedure
 
 Procedure LoadExample(name.s)
   Running = 0
-  If MachineLoadFile(GetPathPart(ProgramFilename()) + "examples\" + name)
+  If LoadProgram(GetPathPart(ProgramFilename()) + "examples\" + name)
     Status$ = "Loaded " + name + "." : DisTop = $100 : Executed = 0 : LogTab = 0
   Else
     Status$ = "Could not read examples\" + name
@@ -472,7 +603,7 @@ Procedure DrawToolbar(w.f)
     f = OpenFileRequester("Load an 8086 program", "", "DOS programs (*.com)|*.com|Binary (*.bin)|*.bin|All files (*.*)|*.*", 0)
     If f <> ""
       Running = 0
-      If MachineLoadFile(f) : Status$ = "Loaded " + MachineName$ + " (" + Str(MachineLoadBytes) + " bytes) at 1000:0100." : DisTop = $100 : Executed = 0 : LogTab = 0
+      If LoadProgram(f) : Status$ = "Loaded " + MachineName$ + " (" + Str(MachineLoadBytes) + " bytes)" + LoadText() : DisTop = $100 : Executed = 0 : LogTab = 0
       Else : Status$ = "Could not read " + f : EndIf
     EndIf
   EndIf
@@ -484,9 +615,21 @@ Procedure DrawToolbar(w.f)
   If Neon_Button(x, y, Neon_S(70), bh, "Sieve")
     LoadExample("sieve.com")
   EndIf
-  x + Neon_S(86)
+  x + Neon_S(78)
+  If MachineKind = 1 : label = "PC machine" : Else : label = "DOS machine" : EndIf
+  If Neon_Button(x, y, Neon_S(110), bh, label, Bool(MachineKind = 1), Bool(#CPU_TIMING = 1))
+    Running = 0
+    MachineKind = 1 - MachineKind
+    ResetProgram() : MachineConsole$ = "" : Executed = 0
+    If MachineKind = 1
+      MemTab = 5 : Status$ = "The PC machine: 640 KB, CGA at B800, 8253, 8259, keyboard, speaker; programs load at 0050:0100."
+    Else
+      MemTab = 0 : Status$ = "The DOS-style machine: programs load at 1000:0100 with INT 21h services."
+    EndIf
+  EndIf
+  x + Neon_S(118)
   If Neon_Button(x, y, Neon_S(70), bh, "Reset")
-    Running = 0 : MachineReset() : MachineConsole$ = "" : Executed = 0 : Status$ = "Reset."
+    Running = 0 : ResetProgram() : MachineConsole$ = "" : Executed = 0 : Status$ = "Reset."
   EndIf
   x + Neon_S(78)
   label = "Run"
@@ -528,7 +671,9 @@ Procedure DrawToolbar(w.f)
     RunTestsInWindow()
   EndIf
   r = RateShown / 1000000.0
-  Neon_TextRight(*Neon_FontUI, w - Neon_S(12), y + Neon_S(6), StrF(r, 1) + " M instructions/s",
+  label = StrF(r, 1) + " M instructions/s"
+  If #CPU_TIMING : label = StrF(r, 2) + " MHz (" + StrF(r / 4.772727, 1) + "x a 4.77 MHz 8086)" : EndIf
+  Neon_TextRight(*Neon_FontUI, w - Neon_S(12), y + Neon_S(6), label,
                  Neon_C_AccR, Neon_C_AccG, Neon_C_AccB)
 EndProcedure
 
@@ -621,7 +766,7 @@ EndProcedure
 
 Procedure WindowMain()
   Protected lib.i, fn.i, ev.i, s.f, w.i = 1500, h.i = 920, quit.i, et.i, sysdpi.i, sc.f = 1.0
-  Protected wa.RECT
+  Protected wa.RECT, k.i
   lib = OpenLibrary(#PB_Any, "user32.dll")
   If lib
     fn = GetFunction(lib, "SetProcessDpiAwarenessContext")
@@ -648,6 +793,8 @@ Procedure WindowMain()
   GLFontSetSnapToPixel(*Neon_FontSmall, #True)
   GLFontSetSnapToPixel(*Neon_FontBold, #True)
   GLFontSetSnapToPixel(*Neon_FontMono, #True)
+  PcTextureInit()
+  If #CPU_TIMING : PcSoundOpen() : EndIf
   RateWindowStart = ElapsedMilliseconds()
   Repeat
     Repeat
@@ -657,6 +804,14 @@ Procedure WindowMain()
         et = EventType()
         If et = #PB_EventType_MouseWheel
           Wheel + GetGadgetAttribute(Gl, #PB_OpenGL_WheelDelta)
+        ElseIf MachineKind = 1 And Running And MemTab = 5 And (et = #PB_EventType_KeyDown Or et = #PB_EventType_KeyUp)
+          k = PcScanCode(GetGadgetAttribute(Gl, #PB_OpenGL_Key))
+          If k
+            If et = #PB_EventType_KeyUp : k | $80 : EndIf
+            Pc86Key(k)
+          EndIf
+        ElseIf MachineKind = 1 And Running And MemTab = 5 And et = #PB_EventType_Input
+          ; the key went to the PC
         ElseIf et = #PB_EventType_KeyDown
           KeyCode = GetGadgetAttribute(Gl, #PB_OpenGL_Key)
         ElseIf et = #PB_EventType_Input
@@ -668,6 +823,7 @@ Procedure WindowMain()
     If ShotFrames < 0 : quit = 1 : EndIf
     If Running = 0 : Delay(10) : EndIf
   Until quit
+  PcSoundClose()
 EndProcedure
 
 UsePNGImageEncoder()
@@ -689,8 +845,10 @@ For argi = 0 To CountProgramParameters() - 1
   ElseIf LCase(arg$) = "--screenshot"
     argi + 1
     ShotPath$ = ProgramParameter(argi)
-  ElseIf MachineLoadFile(arg$)
-    Status$ = "Loaded " + MachineName$ + " (" + Str(MachineLoadBytes) + " bytes) at 1000:0100." : DisTop = $100
+  ElseIf LCase(arg$) = "--pc"
+    If #CPU_TIMING : MachineKind = 1 : MemTab = 5 : ResetProgram() : EndIf
+  ElseIf LoadProgram(arg$)
+    Status$ = "Loaded " + MachineName$ + " (" + Str(MachineLoadBytes) + " bytes)" + LoadText() : DisTop = $100
   EndIf
 Next
 If showTests : RunTestsInWindow() : EndIf

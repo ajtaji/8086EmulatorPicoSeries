@@ -1,0 +1,389 @@
+; A minimal BIOS-less PC around the 8086 core: the devices. No BIOS ROM: the
+; program sets up its own vectors and devices; the 8259 starts as a BIOS
+; leaves it (vector base 8, IRQ0 and IRQ1 unmasked) and the 8253's channel 0
+; runs at 18.2 Hz, so a program that only sets a vector and STI gets ticks.
+;
+;   $20-$21  8259 PIC: ICW1-ICW4 (single or cascaded, ICW4 accepted), OCW1 mask,
+;            OCW2 non-specific ($20) and specific ($60+n) EOI, OCW3 IRR/ISR read
+;   $40-$43  8253 PIT: channels 0-2, modes 0-5 (0 one-shot, 2/3 periodic, the
+;            others counted as 2), LSB/MSB/both, counter latch; channel 0 -> IRQ0,
+;            channel 2 -> the speaker, gated by port $61 bit 0
+;   $60      keyboard scan code (set 1, make/break), IRQ1; a read takes it
+;   $61      bit 0 channel 2 gate, bit 1 speaker data, bit 7 keyboard acknowledge;
+;            reads back bits 0-1, bit 5 = channel 2's output
+;   $3D4/$3D5 (and $3D0-$3D7) 6845 index/data: start address R12/R13, cursor
+;            R10/R11/R14/R15 used; $3D8 mode; $3D9 colour select; $3DA status
+;            (bit 0 = not in the picture, bit 3 = vertical retrace), from the clock
+; CGA memory: 16 KB at B800:0000 (mirrored at BC00:0000). Text 40x25 and 80x25
+; (8x8 glyphs, 16 colours, blink or bright background, cursor), 320x200x4 with
+; both palettes, intensity and the background from $3D9 bits 0-3, 640x200x2.
+; $3D8 and $3D9 and the start address are taken at the START of each scanline,
+; so writes made in a line's horizontal retrace show from the next line (raster
+; bars). A scanline is drawn into PcLine() and handed to Pc86PutLine(line).
+
+Procedure Pc86Reset()
+  Protected i.i
+  For i = 0 To 17 : PcCrtc(i) = 0 : Next
+  PcCrtc(10) = 6 : PcCrtc(11) = 7              ; an underline cursor
+  PcMode = $29 : PcColor = 0                  ; 80x25 text, video on, blink
+  For i = 0 To 2
+    PitMode(i) = 3 : PitRw(i) = 3 : PitReload(i) = 65536 : PitCount(i) = 65536
+    PitOut(i) = 1 : PitWriteHi(i) = 0 : PitReadHi(i) = 0 : PitLatched(i) = 0 : PitArmed(i) = 0
+  Next
+  PitArmed(0) = 1                             ; 18.2 Hz until the program sets its own rate
+  PicIrr = 0 : PicIsr = 0 : PicImr = $FC : PicBase = 8 : PicInitStep = 0 : PicReadIsr = 0
+  PicOut = -1
+  Port61 = 0 : KeyData = 0 : KeyFull = 0 : KeyHead = 0 : KeyTail = 0
+  PcLineNo = 0 : PcCarry = 0 : PcFrames = 0 : PcClocks = 0
+  Cpu86IrqCancel()
+EndProcedure
+
+; A key from the host: a set-1 scan code (make; OR $80 for the break).
+Procedure Pc86Key(code.i)
+  If ((KeyHead + 1) & (#PC86_KEYQ - 1)) <> KeyTail
+    KeyQ(KeyHead) = code & 255
+    KeyHead = (KeyHead + 1) & (#PC86_KEYQ - 1)
+  EndIf
+EndProcedure
+
+; Clocks since the current scanline began (the core is mid-run in a port access).
+Procedure.i Pc86LineClock()
+  ProcedureReturn PcCarry + Budget - Left
+EndProcedure
+
+; ---- 8253 ----
+Procedure Pc86PitTick(ch.i, n.i)
+  If PitArmed(ch) = 0 : ProcedureReturn : EndIf
+  If ch = 2 And (Port61 & 1) = 0
+    PitOut(2) = 1                             ; gate low: held, output high
+    ProcedureReturn
+  EndIf
+  PitCount(ch) = PitCount(ch) - n
+  If PitMode(ch) = 0
+    If PitCount(ch) <= 0
+      If PitOut(ch) = 0
+        PitOut(ch) = 1
+        If ch = 0 : PicIrr = PicIrr | 1 : EndIf
+      EndIf
+      While PitCount(ch) <= 0
+        PitCount(ch) = PitCount(ch) + 65536
+      Wend
+    EndIf
+  Else
+    While PitCount(ch) <= 0
+      PitCount(ch) = PitCount(ch) + PitReload(ch)
+      If ch = 0 : PicIrr = PicIrr | 1 : EndIf
+    Wend
+    If PitMode(ch) = 3
+      If PitCount(ch) * 2 > PitReload(ch) : PitOut(ch) = 1 : Else : PitOut(ch) = 0 : EndIf
+    EndIf
+  EndIf
+EndProcedure
+
+Procedure Pc86PitWrite(ch.i, v.i)
+  Protected r.i
+  If PitRw(ch) = 1
+    r = v
+  ElseIf PitRw(ch) = 2
+    r = v << 8
+  ElseIf PitWriteHi(ch) = 0
+    PitLatch(ch) = v : PitWriteHi(ch) = 1         ; LSB now, the count starts on the MSB
+    ProcedureReturn
+  Else
+    r = PitLatch(ch) | (v << 8) : PitWriteHi(ch) = 0
+  EndIf
+  If r = 0 : r = 65536 : EndIf
+  PitReload(ch) = r : PitCount(ch) = r : PitArmed(ch) = 1
+  If PitMode(ch) = 0 : PitOut(ch) = 0 : Else : PitOut(ch) = 1 : EndIf
+EndProcedure
+
+Procedure.i Pc86PitRead(ch.i)
+  Protected v.i, c.i
+  If PitLatched(ch) : c = PitLatch(ch) : Else : c = PitCount(ch) & $FFFF : EndIf
+  If PitRw(ch) = 1
+    v = c & 255 : PitLatched(ch) = 0
+  ElseIf PitRw(ch) = 2
+    v = (c >> 8) & 255 : PitLatched(ch) = 0
+  ElseIf PitReadHi(ch) = 0
+    v = c & 255 : PitReadHi(ch) = 1
+  Else
+    v = (c >> 8) & 255 : PitReadHi(ch) = 0 : PitLatched(ch) = 0
+  EndIf
+  ProcedureReturn v
+EndProcedure
+
+Procedure Pc86PitControl(v.i)
+  Protected ch.i = (v >> 6) & 3, rw.i = (v >> 4) & 3, md.i = (v >> 1) & 7
+  If ch = 3 : ProcedureReturn : EndIf             ; 8254 read-back: not on the 8253
+  If rw = 0
+    If PitLatched(ch) = 0
+      PitLatch(ch) = PitCount(ch) & $FFFF : PitLatched(ch) = 1 : PitReadHi(ch) = 0
+    EndIf
+    ProcedureReturn
+  EndIf
+  If md > 5 : md = md - 4 : EndIf                  ; 6 and 7 are 2 and 3
+  PitRw(ch) = rw : PitMode(ch) = md : PitWriteHi(ch) = 0 : PitReadHi(ch) = 0 : PitLatched(ch) = 0
+  PitArmed(ch) = 0                                 ; counting starts when the count is written
+  If md = 0 : PitOut(ch) = 0 : Else : PitOut(ch) = 1 : EndIf
+EndProcedure
+
+; ---- 8259 ----
+; Has the CPU taken the request it was given? Then it is in service from now.
+; Called before every access to the 8259's ports too: a handler's EOI usually
+; comes in the same scanline as the acknowledge.
+Procedure Pc86PicAck()
+  If PicOut >= 0
+    If (EvPend & 4) = 0
+      PicIrr = PicIrr & ~(1 << PicOut)
+      PicIsr = PicIsr | (1 << PicOut)
+      PicOut = -1
+    EndIf
+  EndIf
+EndProcedure
+
+; Hand the CPU the highest-priority request, and notice when the CPU took one.
+Procedure Pc86PicUpdate()
+  Protected k.i
+  Pc86PicAck()
+  If PicOut >= 0
+    If ((PicIrr & ~PicImr) & (1 << PicOut)) = 0
+      Cpu86IrqCancel() : PicOut = -1
+    EndIf
+  EndIf
+  If PicOut < 0 And PicInitStep = 0
+    For k = 0 To 7
+      If PicIsr & (1 << k) : Break : EndIf            ; one of higher or equal priority is in service
+      If (PicIrr & ~PicImr) & (1 << k)
+        PicOut = k
+        Cpu86Irq((PicBase & $F8) + k)
+        Break
+      EndIf
+    Next
+  EndIf
+EndProcedure
+
+Procedure Pc86PicWrite(port.i, v.i)
+  Protected k.i
+  Pc86PicAck()
+  If port = $20
+    If v & $10                                    ; ICW1
+      PicInitStep = 1 : PicNeed4 = v & 1 : PicSingle = (v >> 1) & 1
+      PicImr = 0 : PicIsr = 0 : PicIrr = 0 : PicReadIsr = 0
+      If PicOut >= 0 : Cpu86IrqCancel() : PicOut = -1 : EndIf
+    ElseIf (v & $18) = $08                        ; OCW3
+      If (v & 3) = 2 : PicReadIsr = 0 : EndIf
+      If (v & 3) = 3 : PicReadIsr = 1 : EndIf
+    ElseIf (v & $E0) = $20                        ; non-specific EOI: the highest in service
+      For k = 0 To 7
+        If PicIsr & (1 << k) : PicIsr = PicIsr & ~(1 << k) : Break : EndIf
+      Next
+    ElseIf (v & $E0) = $60                        ; specific EOI
+      PicIsr = PicIsr & ~(1 << (v & 7))
+    EndIf
+  Else
+    If PicInitStep = 1
+      PicBase = v & $F8
+      If PicSingle
+        If PicNeed4 : PicInitStep = 3 : Else : PicInitStep = 0 : EndIf
+      Else
+        PicInitStep = 2
+      EndIf
+    ElseIf PicInitStep = 2
+      If PicNeed4 : PicInitStep = 3 : Else : PicInitStep = 0 : EndIf
+    ElseIf PicInitStep = 3
+      PicInitStep = 0
+    Else
+      PicImr = v & 255
+    EndIf
+  EndIf
+EndProcedure
+
+; ---- ports ----
+Procedure.i Pc86In8(port.i)
+  Protected c.i
+  Select port
+    Case $20
+      Pc86PicAck()
+      If PicReadIsr : ProcedureReturn PicIsr : EndIf
+      ProcedureReturn PicIrr
+    Case $21
+      ProcedureReturn PicImr
+    Case $40, $41, $42
+      ProcedureReturn Pc86PitRead(port - $40)
+    Case $60
+      KeyFull = 0
+      ProcedureReturn KeyData
+    Case $61
+      ProcedureReturn (Port61 & $CF) | (PitOut(2) << 5)
+    Case $3D1, $3D3, $3D5, $3D7
+      If PcCrtcIndex >= 12 And PcCrtcIndex <= 17 : ProcedureReturn PcCrtc(PcCrtcIndex) : EndIf
+      ProcedureReturn 0
+    Case $3DA
+      c = $F0
+      If PcLineNo >= #PC86_VISIBLE Or Pc86LineClock() >= #PC86_HDISP_CLOCKS : c = c | 1 : EndIf
+      If PcLineNo >= #PC86_VSYNC_FIRST And PcLineNo <= #PC86_VSYNC_LAST : c = c | 8 : EndIf
+      ProcedureReturn c
+  EndSelect
+  ProcedureReturn $FF
+EndProcedure
+
+Procedure Pc86Out8(port.i, v.i)
+  v = v & 255
+  Select port
+    Case $20, $21
+      Pc86PicWrite(port, v)
+    Case $40, $41, $42
+      Pc86PitWrite(port - $40, v)
+    Case $43
+      Pc86PitControl(v)
+    Case $61
+      If (v & $80) And (Port61 & $80) = 0 : KeyFull = 0 : EndIf   ; acknowledge
+      Port61 = v
+    Case $3D0, $3D2, $3D4, $3D6
+      PcCrtcIndex = v & 31
+    Case $3D1, $3D3, $3D5, $3D7
+      If PcCrtcIndex < 18 : PcCrtc(PcCrtcIndex) = v : EndIf
+    Case $3D8
+      PcMode = v
+    Case $3D9
+      PcColor = v
+  EndSelect
+EndProcedure
+
+Procedure.i Pc86PortIn(port.i, wide.i)
+  If wide
+    ProcedureReturn Pc86In8(port & $FFFF) | (Pc86In8((port + 1) & $FFFF) << 8)
+  EndIf
+  ProcedureReturn Pc86In8(port & $FFFF)
+EndProcedure
+
+Procedure Pc86PortOut(port.i, v.i, wide.i)
+  Pc86Out8(port & $FFFF, v)
+  If wide : Pc86Out8((port + 1) & $FFFF, v >> 8) : EndIf
+EndProcedure
+
+; ---- CGA ----
+Procedure Pc86RenderLine(line.i)
+  Protected x.i, b.i, p.i, c.i, start.i, addr.i, row.i, scan.i, cols.i, ch.i, at.i, fg.i, bg.i, bits.i
+  Protected pal.i, k.i, cur.i, cs.i, ce.i
+  start = ((PcCrtc(12) << 8) | PcCrtc(13)) & $3FFF
+  If (PcMode & 8) = 0
+    For x = 0 To 639 : PcLine(x) = 0 : Next
+    ProcedureReturn
+  EndIf
+  If PcMode & 2
+    If PcMode & $10                               ; 640 x 200 x 2
+      addr = (line & 1) << 13
+      For b = 0 To 79
+        p = PeekA(PcVram + addr + (((start << 1) + (line >> 1) * 80 + b) & $1FFF))
+        For k = 0 To 7
+          If p & ($80 >> k) : PcLine(b * 8 + k) = PcColor & 15 : Else : PcLine(b * 8 + k) = 0 : EndIf
+        Next
+      Next
+    Else                                          ; 320 x 200 x 4, each pixel twice
+      If PcMode & 4
+        pal = 3                                   ; mode 5: cyan, red, white
+      ElseIf PcColor & $20
+        pal = 1                                   ; cyan, magenta, white
+      Else
+        pal = 0                                   ; green, red, brown
+      EndIf
+      addr = (line & 1) << 13
+      For b = 0 To 79
+        p = PeekA(PcVram + addr + (((start << 1) + (line >> 1) * 80 + b) & $1FFF))
+        For k = 0 To 3
+          c = (p >> (6 - k * 2)) & 3
+          If c = 0
+            c = PcColor & 15
+          Else
+            If pal = 0 : c = c * 2 : ElseIf pal = 1 : c = c * 2 + 1 : Else : c = PeekA(?Pc86Pal5 + c) : EndIf
+            If PcColor & $10 : c = c | 8 : EndIf
+          EndIf
+          PcLine(b * 8 + k * 2) = c : PcLine(b * 8 + k * 2 + 1) = c
+        Next
+      Next
+    EndIf
+    ProcedureReturn
+  EndIf
+  ; text: 40 or 80 columns of 8x8 cells
+  If PcMode & 1 : cols = 80 : Else : cols = 40 : EndIf
+  row = line >> 3 : scan = line & 7
+  cur = ((PcCrtc(14) << 8) | PcCrtc(15)) & $3FFF
+  cs = PcCrtc(10) & 31 : ce = PcCrtc(11) & 31
+  For x = 0 To cols - 1
+    addr = ((start + row * cols + x) << 1) & $3FFF
+    ch = PeekA(PcVram + addr) : at = PeekA(PcVram + ((addr + 1) & $3FFF))
+    fg = at & 15
+    If PcMode & $20
+      bg = (at >> 4) & 7
+      If (at & $80) And (PcFrames & 16) : fg = bg : EndIf
+    Else
+      bg = (at >> 4) & 15
+    EndIf
+    bits = PeekA(?CgaFont + ch * 8 + scan)
+    If ((start + row * cols + x) & $3FFF) = cur And scan >= cs And scan <= ce And (PcCrtc(10) & $60) <> $20 And (PcFrames & 8)
+      bits = 255
+    EndIf
+    If cols = 80
+      For k = 0 To 7
+        If bits & ($80 >> k) : PcLine(x * 8 + k) = fg : Else : PcLine(x * 8 + k) = bg : EndIf
+      Next
+    Else
+      For k = 0 To 7
+        If bits & ($80 >> k) : c = fg : Else : c = bg : EndIf
+        PcLine(x * 16 + k * 2) = c : PcLine(x * 16 + k * 2 + 1) = c
+      Next
+    EndIf
+  Next
+EndProcedure
+
+; ---- time ----
+; One scanline: draw it (if visible) with the registers as they are now, run
+; the CPU for its 304 clocks, advance the 8253, hand interrupts over.
+Procedure.i Pc86RunLine()
+  Protected budget.i, ran.i, ch.i
+  If PcLineNo < #PC86_VISIBLE
+    Pc86RenderLine(PcLineNo)
+    Pc86PutLine(PcLineNo)
+  EndIf
+  ; the speaker during this line
+  If (Port61 & 3) = 3 And PitArmed(2) And PitMode(2) = 3 And PitReload(2) > 1
+    SpkFreq(PcLineNo) = 1193182 / PitReload(2)
+  Else
+    SpkFreq(PcLineNo) = 0
+  EndIf
+  SpkLevel(PcLineNo) = ((Port61 >> 1) & 1) & PitOut(2)
+  budget = #PC86_LINE_CLOCKS - PcCarry
+  If budget < 1 : budget = 1 : EndIf
+  ran = Cpu86Run(budget)                          ; a halted CPU wakes here if an IRQ is taken
+  If ran < budget And Halted : ran = budget : EndIf   ; halted: the rest of the line still passes
+  PcCarry = PcCarry + ran - #PC86_LINE_CLOCKS
+  If PcCarry < 0 : PcCarry = 0 : EndIf
+  PcClocks = PcClocks + ran
+  For ch = 0 To 2
+    Pc86PitTick(ch, #PC86_PIT_PER_LINE)
+  Next
+  If KeyFull = 0 And KeyHead <> KeyTail And (PcLineNo & 63) = 0
+    KeyData = KeyQ(KeyTail) : KeyTail = (KeyTail + 1) & (#PC86_KEYQ - 1)
+    KeyFull = 1 : PicIrr = PicIrr | 2
+  EndIf
+  Pc86PicUpdate()
+  PcLineNo = PcLineNo + 1
+  If PcLineNo >= #PC86_LINES
+    PcLineNo = 0 : PcFrames = PcFrames + 1
+  EndIf
+  ProcedureReturn ran
+EndProcedure
+
+Procedure.i Pc86RunFrame()
+  Protected n.i, c.i
+  For n = 1 To #PC86_LINES
+    c = c + Pc86RunLine()
+  Next
+  ProcedureReturn c
+EndProcedure
+
+DataSection
+  Pc86Pal5:
+  Data.a 0, 3, 4, 7
+EndDataSection

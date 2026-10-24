@@ -14,6 +14,7 @@
 
 Global *MachineRam, *MachineRom
 Global MachineConsole$, MachineExited.i, MachineExitCode.i
+Global MachineKind.i               ; 0 the DOS-style demo machine, 1 the PC (pcmachine.pbi)
 Global MachineName$ = "(none)", MachineLoadBytes.i
 Global *MachineImage, MachineImageLen.i
 
@@ -92,38 +93,6 @@ Procedure MachinePortOut(port.i, v.i, wide.i)
     Case $EA
       MachineExited = 1 : MachineExitCode = v & 255
   EndSelect
-EndProcedure
-
-; The core's four hooks, routed by what is running: the machine, or one of
-; the board's test suites (desktop/tests.pbi sets TestMode).
-Procedure.i Cpu86HookRead(lin.i)
-  Select TestMode
-    Case 1 : ProcedureReturn VecHookRead(lin)
-    Case 2 : ProcedureReturn ApiHookRead(lin)
-  EndSelect
-  ProcedureReturn MachineHookRead(lin)
-EndProcedure
-
-Procedure Cpu86HookWrite(lin.i, v.i)
-  Select TestMode
-    Case 1 : VecHookWrite(lin, v)
-    Case 2 : ApiHookWrite(lin, v)
-    Default : MachineHookWrite(lin, v)
-  EndSelect
-EndProcedure
-
-Procedure.i Cpu86PortIn(port.i, wide.i)
-  Select TestMode
-    Case 1 : ProcedureReturn VecPortIn(port, wide)
-    Case 2 : ProcedureReturn ApiPortIn(port, wide)
-  EndSelect
-  ProcedureReturn MachinePortIn(port, wide)
-EndProcedure
-
-Procedure Cpu86PortOut(port.i, v.i, wide.i)
-  If TestMode = 0
-    MachinePortOut(port, v, wide)
-  EndIf
 EndProcedure
 
 ; Put the loaded image back and start it: CS=DS=ES=SS=1000h, IP=0100h,

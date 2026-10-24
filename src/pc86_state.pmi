@@ -1,0 +1,37 @@
+; A minimal BIOS-less PC around the 8086 core: state. Shared by the desktop
+; program and the Pico build (the platform includes pc86_state.pmi, defines
+; Pc86PutLine(line), then includes pc86.pmi). See pc86.pmi for the devices.
+;
+; Timing, from the CPU clock (4.77 MHz, the core built with #CPU_TIMING = 1):
+; one scanline = 304 CPU clocks, 262 lines a frame (59.92 Hz), 200 visible;
+; the 8253 counts at a quarter of the CPU clock (1.193 MHz), 76 counts a line.
+
+#PC86_LINE_CLOCKS = 304
+#PC86_LINES = 262
+#PC86_VISIBLE = 200
+#PC86_HDISP_CLOCKS = 213          ; display enable within a line (640 of 912 dots)
+#PC86_VSYNC_FIRST = 224           ; vertical retrace ($3DA bit 3), 16 lines
+#PC86_VSYNC_LAST = 239
+#PC86_PIT_PER_LINE = 76
+#PC86_KEYQ = 64
+
+Global Dim PcLine.a(640)          ; one rendered scanline: CGA colour 0-15 per pixel
+Global Dim PcCrtc.a(18)           ; 6845 registers R0-R17
+Global Dim PitMode.i(3)
+Global Dim PitRw.i(3)             ; 1 LSB, 2 MSB, 3 LSB then MSB
+Global Dim PitReload.i(3)         ; 1..65536
+Global Dim PitCount.i(3)
+Global Dim PitOut.i(3)
+Global Dim PitWriteHi.i(3)        ; LSB/MSB: the next write is the MSB
+Global Dim PitReadHi.i(3)
+Global Dim PitLatched.i(3)
+Global Dim PitLatch.i(3)
+Global Dim PitArmed.i(3)          ; a count has been loaded and is running
+Global Dim KeyQ.a(#PC86_KEYQ)
+Global Dim SpkFreq.i(#PC86_LINES) ; per line: tone in Hz (PIT channel 2), 0 = none
+Global Dim SpkLevel.a(#PC86_LINES) ; per line: the speaker's level when there is no tone
+Global PcVram.i                   ; host address of the 16 KB CGA memory
+Global PcCrtcIndex.i, PcMode.i, PcColor.i, PcLineNo.i, PcCarry.i, PcFrames.i
+Global PicIrr.i, PicIsr.i, PicImr.i, PicBase.i, PicInitStep.i, PicNeed4.i, PicSingle.i, PicReadIsr.i
+Global PicOut.i                   ; the IRQ line given to the CPU and not yet taken, or -1
+Global Port61.i, KeyData.i, KeyFull.i, KeyHead.i, KeyTail.i, PcClocks.i

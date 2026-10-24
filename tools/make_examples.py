@@ -32,6 +32,8 @@ class Asm:
             t = self.labels[name]
             if kind == 'abs':
                 self.b[at:at + 2] = struct.pack('<H', t)
+            elif kind == 'rel16':
+                self.b[at:at + 2] = struct.pack('<H', (t - (self.org + at + 2)) & 0xFFFF)
             else:
                 d = t - (self.org + at + 1)
                 assert -128 <= d <= 127, (name, d)
@@ -118,3 +120,151 @@ for name, label, fn in (('hello.com', 'HelloCom', hello), ('sieve.com', 'SieveCo
     lines.append(f'  {label}End:')
 lines.append('EndDataSection')
 (ROOT / 'src' / 'examples.pmi').write_text(chr(10).join(lines) + chr(10), newline=chr(10))
+
+# ---------------------------------------------------------------- PC machine tests
+# Loaded at 0050:0100 by the PC machine (no BIOS, no DOS); E9h prints, F4h exits.
+
+def printnum(a):
+    """Print AX in decimal through port E9h (uses BX CX DX)."""
+    a.emit(0xBB); a.w(10)                # mov bx, 10
+    a.emit(0x31, 0xC9)                   # xor cx, cx
+    a.label('pn_d1')
+    a.emit(0x31, 0xD2, 0xF7, 0xF3)       # xor dx, dx / div bx
+    a.emit(0x52, 0x41, 0x09, 0xC0)       # push dx / inc cx / or ax, ax
+    a.jr(0x75, 'pn_d1')
+    a.label('pn_d2')
+    a.emit(0x58, 0x04, 0x30, 0xE6, 0xE9) # pop ax / add al, '0' / out E9h, al
+    a.jr(0xE2, 'pn_d2')
+    a.emit(0xC3)
+
+def putc(a, ch):
+    a.emit(0xB0, ord(ch), 0xE6, 0xE9)
+
+def pctest():
+    """Timer IRQ0 at 1 kHz through the 8259, counted against $3DA's vertical
+    retrace (100 ticks = 100 ms ~ 6 frames), then 320x200 graphics with raster
+    bars: the background colour ($3D9) changed in every scanline's retrace.
+    Prints R=<retraces> T=<ticks> and exits (OUT F4h) with the retrace count."""
+    a = Asm()
+    a.emit(0x31, 0xC0, 0x8E, 0xC0)       # xor ax,ax / mov es,ax
+    a.emit(0x26, 0xC7, 0x06, 0x20, 0x00); a.wl('irq0')   # mov word [es:20h], irq0
+    a.emit(0x8C, 0xC8, 0x26, 0xA3, 0x22, 0x00)           # mov ax,cs / mov [es:22h],ax
+    a.emit(0xB0, 0x34, 0xE6, 0x43)       # PIT ch0: lo/hi, mode 2
+    a.emit(0xB8); a.w(1193)              # 1 kHz
+    a.emit(0xE6, 0x40, 0x88, 0xE0, 0xE6, 0x40)
+    a.emit(0xB0, 0xFC, 0xE6, 0x21)       # PIC: IRQ0 and IRQ1 unmasked
+    a.emit(0xC7, 0x06); a.wl('ticks'); a.w(0)
+    a.emit(0xC7, 0x06); a.wl('rets'); a.w(0)
+    a.emit(0xFB)                         # sti
+    a.emit(0xBA); a.w(0x3DA)             # mov dx, 3DAh
+    a.label('vr1')
+    a.emit(0xEC, 0xA8, 0x08); a.jr(0x74, 'vr1')   # wait for retrace
+    a.label('vr2')
+    a.emit(0xEC, 0xA8, 0x08); a.jr(0x75, 'vr2')   # and its end
+    a.emit(0xFF, 0x06); a.wl('rets')     # inc word [rets]
+    a.emit(0x83, 0x3E); a.wl('ticks'); a.emit(100)  # cmp word [ticks], 100
+    a.jr(0x72, 'vr1')
+    a.emit(0xFA)                         # cli
+    putc(a, 'R'); putc(a, '=')
+    a.emit(0xA1); a.wl('rets'); a.emit(0xE8); a.fix.append(('rel16', len(a.b), 'printnum')); a.b += b'\0\0'
+    putc(a, ' '); putc(a, 'T'); putc(a, '=')
+    a.emit(0xA1); a.wl('ticks'); a.emit(0xE8); a.fix.append(('rel16', len(a.b), 'printnum')); a.b += b'\0\0'
+    putc(a, '\n')
+    # 320 x 200 x 4, palette 1 bright, stripes of colours 0-3
+    a.emit(0xBA); a.w(0x3D8); a.emit(0xB0, 0x0A, 0xEE)
+    a.emit(0xBA); a.w(0x3D9); a.emit(0xB0, 0x30, 0xEE)
+    a.emit(0xB8); a.w(0xB800); a.emit(0x8E, 0xC0, 0x31, 0xFF)
+    a.emit(0xB9); a.w(0x2000); a.emit(0xB8); a.w(0x1B1B); a.emit(0xFC, 0xF3, 0xAB)
+    # 30 frames of raster bars
+    a.emit(0xBA); a.w(0x3DA)
+    a.emit(0xB9); a.w(30)
+    a.label('frame')
+    a.label('f1'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x74, 'f1')
+    a.label('f2'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x75, 'f2')
+    a.emit(0x31, 0xDB)                   # xor bx, bx
+    a.label('line')
+    a.label('de'); a.emit(0xEC, 0xA8, 0x01); a.jr(0x75, 'de')     # wait for the picture
+    a.label('hb'); a.emit(0xEC, 0xA8, 0x01); a.jr(0x74, 'hb')     # then for its retrace
+    a.emit(0x88, 0xD8, 0x24, 0x0F, 0x0C, 0x30)                    # al = (bl & 15) | 30h
+    a.emit(0x52, 0xBA); a.w(0x3D9); a.emit(0xEE, 0x5A)            # out 3D9h, al
+    a.emit(0x43, 0x81, 0xFB); a.w(200); a.jr(0x72, 'line')
+    a.jr(0xE2, 'frame')
+    a.emit(0xA1); a.wl('rets'); a.emit(0xE7, 0xF4)                # out F4h, ax
+    a.emit(0xF4)
+    a.label('printnum'); printnum(a)
+    a.label('irq0')
+    a.emit(0x50, 0x2E, 0xFF, 0x06); a.wl('ticks')                 # push ax / inc word [cs:ticks]
+    a.emit(0xB0, 0x20, 0xE6, 0x20, 0x58, 0xCF)                    # EOI / pop ax / iret
+    a.label('ticks'); a.w(0)
+    a.label('rets'); a.w(0)
+    return a.done()
+
+def keytest():
+    """IRQ1: each scan code printed as two hex digits and a space; HLT between keys."""
+    a = Asm()
+    a.emit(0x31, 0xC0, 0x8E, 0xC0)
+    a.emit(0x26, 0xC7, 0x06, 0x24, 0x00); a.wl('irq1')
+    a.emit(0x8C, 0xC8, 0x26, 0xA3, 0x26, 0x00)
+    a.emit(0xB0, 0xFD, 0xE6, 0x21, 0xFB)  # only IRQ1 unmasked (no IRQ0 handler here)
+    a.label('idle'); a.emit(0xF4); a.jr(0xEB, 'idle')
+    a.label('irq1')
+    a.emit(0x50, 0x53)                    # push ax / push bx
+    a.emit(0xE4, 0x60, 0x88, 0xC3)        # in al, 60h / mov bl, al
+    a.emit(0xE4, 0x61, 0x0C, 0x80, 0xE6, 0x61, 0x24, 0x7F, 0xE6, 0x61)   # acknowledge
+    a.emit(0x88, 0xD8, 0xD0, 0xE8, 0xD0, 0xE8, 0xD0, 0xE8, 0xD0, 0xE8)   # mov al,bl / shr al,1 x4
+    a.emit(0xE8); a.fix.append(('rel16', len(a.b), 'hex')); a.b += b'\0\0'
+    a.emit(0x88, 0xD8, 0x24, 0x0F)        # mov al, bl / and al, 0Fh
+    a.emit(0xE8); a.fix.append(('rel16', len(a.b), 'hex')); a.b += b'\0\0'
+    putc(a, ' ')
+    a.emit(0xB0, 0x20, 0xE6, 0x20, 0x5B, 0x58, 0xCF)
+    a.label('hex')                         # al 0-15 -> '0'-'9','A'-'F' out E9h
+    a.emit(0x04, 0x30, 0x3C, 0x39); a.jr(0x76, 'hx1'); a.emit(0x04, 0x07)
+    a.label('hx1'); a.emit(0xE6, 0xE9, 0xC3)
+    return a.done()
+
+def beep():
+    """PIT channel 2 at 1 kHz on the speaker for 30 frames, then off; exits 0."""
+    a = Asm()
+    a.emit(0xB0, 0xB6, 0xE6, 0x43)       # ch2: lo/hi, mode 3
+    a.emit(0xB8); a.w(1193); a.emit(0xE6, 0x42, 0x88, 0xE0, 0xE6, 0x42)
+    a.emit(0xE4, 0x61, 0x0C, 0x03, 0xE6, 0x61)    # gate and speaker on
+    a.emit(0xBA); a.w(0x3DA); a.emit(0xB9); a.w(30)
+    a.label('w1'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x74, 'w1')
+    a.label('w2'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x75, 'w2')
+    a.jr(0xE2, 'w1')
+    a.emit(0xE4, 0x61, 0x24, 0xFC, 0xE6, 0x61)    # off
+    a.emit(0x31, 0xC0, 0xE7, 0xF4, 0xF4)
+    return a.done()
+
+for name, fn in (('pctest.com', pctest), ('keytest.com', keytest), ('beep.com', beep)):
+    data = fn()
+    (OUT / name).write_bytes(data)
+    print(name, len(data), 'bytes')
+
+def bars():
+    """Endless: 320x200 stripes with raster bars that move one line a frame,
+    a text banner in 80-column mode would need a font; this stays graphical.
+    The frame counter is in BP; each line's colour is (line + frame) & 15."""
+    a = Asm()
+    a.emit(0xBA); a.w(0x3D8); a.emit(0xB0, 0x0A, 0xEE)
+    a.emit(0xBA); a.w(0x3D9); a.emit(0xB0, 0x30, 0xEE)
+    a.emit(0xB8); a.w(0xB800); a.emit(0x8E, 0xC0, 0x31, 0xFF)
+    a.emit(0xB9); a.w(0x2000); a.emit(0xB8); a.w(0x1B1B); a.emit(0xFC, 0xF3, 0xAB)
+    a.emit(0xBA); a.w(0x3DA); a.emit(0x31, 0xED)   # mov dx, 3DAh / xor bp, bp
+    a.label('frame')
+    a.label('f1'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x74, 'f1')
+    a.label('f2'); a.emit(0xEC, 0xA8, 0x08); a.jr(0x75, 'f2')
+    a.emit(0x89, 0xEB)                   # mov bx, bp
+    a.emit(0xB9); a.w(200)               # mov cx, 200
+    a.label('line')
+    a.label('de'); a.emit(0xEC, 0xA8, 0x01); a.jr(0x75, 'de')
+    a.label('hb'); a.emit(0xEC, 0xA8, 0x01); a.jr(0x74, 'hb')
+    a.emit(0x88, 0xD8, 0xD0, 0xE8, 0x24, 0x0F, 0x0C, 0x30)   # al = ((bl >> 1) & 15) | 30h
+    a.emit(0x52, 0xBA); a.w(0x3D9); a.emit(0xEE, 0x5A)
+    a.emit(0x43); a.jr(0xE2, 'line')     # inc bx / loop line
+    a.emit(0x45); a.jr(0xEB, 'frame')    # inc bp / jmp frame
+    return a.done()
+
+data = bars()
+(OUT / 'bars.com').write_bytes(data)
+print('bars.com', len(data), 'bytes')
