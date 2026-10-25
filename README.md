@@ -165,25 +165,50 @@ The corpus is not stored here; `py -3 tools/fetch_tests.py` downloads the pinned
 
 ## Building from source
 
-You need **PureMetal Forge** (compiler build of 2026-10-25 or later) and Python 3; the desktop
-version also needs **PureBasic 6** (x64, C back end) and the
-[Neon Arcade Display Engine](https://github.com/ajtaji/Neon-Arcade-Dispay-Engine).
+### The Pico firmware
+
+You need **PureMetal Forge** (compiler build of 2026-10-25 or later) and Python 3.
 
 ```powershell
 $env:PUREMETALFORGE = 'C:\path\to\PureMetalForge.exe'
 .\tools\build.ps1 -Source src/pc.picow    -Output firmware/8086-pc-picow.uf2     # add -Port COMx to upload
 .\tools\build.ps1 -Source src/pc.pico2w   -Output firmware/8086-pc-pico2w.uf2
 .\tools\build.ps1 -Source src/demo.picow  -Output firmware/8086-picow.uf2
-
-$env:NEON_ENGINE = 'C:\path\to\Neon-Arcade-Dispay-Engine'   # or clone it beside this repository
-.\desktop\build.ps1                                           # all five desktop programs
 ```
 
 The cores are generated: `py -3 tools/gen_cpu.py` writes `src/cpu86.pico` (RP2040),
 `src/cpu86.pico2` (RP2350) and `desktop/cpu86_core.pbi` from one description of the handlers;
-edit the generator, not its output. `build.ps1` refuses an image that would reach flash offset
-`0x50000` (the boards this was developed on keep other data there). `tools/board.ps1` batches
-board runs on the development bench and is specific to it.
+edit the generator, not its output (the generated files are committed, so a build does not need
+Python). `build.ps1` refuses an image that would reach flash offset `0x50000` (the boards this was
+developed on keep other data there). `tools/board.ps1` batches board runs on the development bench
+and is specific to it.
+
+### The desktop version
+
+You need **PureBasic 6.41 x64** (C back end, `pbcompilerc.exe`; built and tested with 6.41) and the
+[Neon Arcade Display Engine](https://github.com/ajtaji/Neon-Arcade-Dispay-Engine), cloned **beside**
+this repository (the source looks for `../../Neon-Arcade-Dispay-Engine/` relative to `desktop/`):
+
+```powershell
+git clone https://github.com/ajtaji/8086EmulatorPicoSeries.git
+git clone https://github.com/ajtaji/Neon-Arcade-Dispay-Engine.git
+cd 8086EmulatorPicoSeries
+& "C:\Program Files\PureBasic\Compilers\pbcompilerc.exe" desktop\cpu86_desktop.pb /EXE desktop\cpu86_desktop.exe /THREAD /DPIAWARE /OPTIMIZER /CONSTANT CPU_TIMING=1
+& "C:\Program Files\PureBasic\Compilers\pbcompilerc.exe" desktop\cpu86_desktop.pb /EXE desktop\cpu86_pc.exe /CONSOLE /THREAD /DPIAWARE /OPTIMIZER /CONSTANT CPU_TIMING=1
+& "C:\Program Files\PureBasic\Compilers\pbcompilerc.exe" desktop\cpu86_desktop.pb /EXE desktop\cpu86_run.exe /CONSOLE /THREAD /OPTIMIZER /CONSTANT CPU86_LEAN=1
+```
+
+The first line is the window, the second the PC machine without a window, the third the bare-CPU
+test runner (it needs no engine). Run the PureMetal demo in the window:
+
+```powershell
+.\desktop\cpu86_desktop.exe demo\demo.com --pc --run
+```
+
+The engine can live elsewhere: add `/CONSTANT GL_ENGINE_DIR$=C:\path\to\engine\` (with the
+trailing backslash). `desktop\build.ps1` does all of this at once (and regenerates the cores
+first, which needs Python): it takes the engine from `NEON_ENGINE`, or the clone beside the
+repository.
 
 ## How it works
 

@@ -43,7 +43,7 @@ EnableExplicit
 ; The engine first: the test code's globals have plain names (K, Checks...)
 ; that the engine's procedures use as locals.
 CompilerIf Not Defined(GL_ENGINE_DIR$, #PB_Constant)
-  CompilerError "Pass the Neon Arcade Display Engine folder: /CONSTANT GL_ENGINE_DIR$=<folder>/ (desktop/build.ps1 does)"
+  #GL_ENGINE_DIR$ = "../../Neon-Arcade-Dispay-Engine/"   ; github.com/ajtaji/Neon-Arcade-Dispay-Engine, cloned beside this repository
 CompilerEndIf
 CompilerIf #CPU86_LEAN = 0
 XIncludeFile #GL_ENGINE_DIR$ + "GlTypes.pbi"
