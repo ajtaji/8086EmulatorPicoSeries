@@ -262,10 +262,14 @@ Each has its PureMetal body beside it for the plain-tail build (`#CPU_ASM_TAIL =
 | ALU | 2.20 M | **3.57 M** | +62% |
 | memory | 1.65 M | 1.71 M | +4% |
 | call / stack | 2.23 M | **3.31 M** | +48% |
-| `REP MOVSW`, 8 KB blocks | 8.97 MB/s | 8.71 MB/s | -3% (compiled code, not changed here: the new compiler's) |
+| `REP MOVSW`, 8 KB blocks | 8.97 MB/s | 8.71 MB/s | -3% (see below) |
 | `sieve.com` | 57.0 ms | 47.5 ms | |
 
-The tail alone (first step) gave 2-5%; the handlers gave the rest. Checked on the Pico 2 W after the
+The tail alone (first step) gave 2-5%; the handlers gave the rest. `REP MOVSW`'s copy loop is compiled
+PureMetal that this work did not touch, and the two compilers (`9777f6cd6`, `341fd5aca`) give it the
+same instructions - their listings of the plain-tail build differ only in line comments. The 3% came
+with the new layout of the core around it (likely instruction fetch alignment in SRAM; not proven);
+re-measured with `341fd5aca`: 8.71 MB/s (`docs/rep-341f.log`). Checked on the Pico 2 W after the
 change: SingleStepTests **646,000 of 646,000** (the whole corpus, first time on this chip), 32,300 of
 32,300 clock-counted and 32,300 of 32,300 plain-tail, API 78 of 78 and 77 of 77, sum and sieve
 (`docs/t2-*.log`). The Pico W, rebuilt with the same compiler: 4.60 / 2.41 / 1.83 / 2.47 M

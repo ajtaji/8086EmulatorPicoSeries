@@ -1,0 +1,108 @@
+﻿pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 49442 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\rep-341f.uf2.asm
+> RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 13476 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2350|90340|4194304
+CYCLES_TOTAL_RP2350|58702|straight-line, not-taken branches
+REGMAP_RP2350|5665|192|75|350|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1316|frame-slot loads taken from a register
+pmfc: rep-341f.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90340 bytes into 353 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\rep-341f.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\rep-341f.uf2
+pmfc: OK
+image ends at 0x10016100
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    1CD899091CF0BF7CA6488F66BCAAF1C9F7F9406801A404E9AFE5C5698C041AF3 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 49442 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\rep-341f.uf2.asm
+> RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 13476 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2350|90340|4194304
+CYCLES_TOTAL_RP2350|58702|straight-line, not-taken branches
+REGMAP_RP2350|5665|192|75|350|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1316|frame-slot loads taken from a register
+pmfc: rep-341f.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90340 bytes into 353 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\rep-341f.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\rep-341f.uf2
+pmfc: uploading rep-341f.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.1 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 180736 bytes (36%)
+> [NATIVE UPLOADER] Writing image: 131072 of 180736 bytes (72%)
+> [NATIVE UPLOADER] Writing image: 180736 of 180736 bytes (100%)
+> [NATIVE UPLOADER] Wrote rep-341f.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+> [NATIVE UPLOADER] Serial monitor: board found on COM6 (USB vendor ID 2E8A), on the same USB connection it was flashed through.
+pmfc: reading COM6 at 9600 baud for 25 s (the port opened 2 ms after the upload, attempt 1).
+8086 PureMetal clk_sys kHz=150000 guest RAM KB=420 timing=0 asm-tail=1
+sum test AX=5050 CX=0 instructions=203 PASS
+sieve.com printed: primes below 10000: 1229 instructions=120169 us=47514 PASS
+register/branch instructions=1000000 us=170006 instructions/s=5882145
+alu instructions=1000000 us=280003 instructions/s=3571390
+memory instructions=1000000 us=583927 instructions/s=1712542
+call/stack instructions=1000000 us=302503 instructions/s=3305752
+rep movsw bytes=524288 us=60181 bytes/s=8711852
+register/branch instructions=1000000 us=170001 instructions/s=5882318
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583926 instructions/s=1712545
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170002 instructions/s=5882283
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583926 instructions/s=1712545
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60180 bytes/s=8711997
+register/branch instructions=1000000 us=170001 instructions/s=5882318
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583925 instructions/s=1712548
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170002 instructions/s=5882283
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583926 instructions/s=1712545
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170002 instructions/s=5882283
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583925 instructions/s=1712548
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170001 instructions/s=5882318
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583926 instructions/s=1712545
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170002 instructions/s=5882283
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583925 instructions/s=1712548
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170002 instructions/s=5882283
+alu instructions=1000000 us=280001 instructions/s=3571415
+memory instructions=1000000 us=583926 instructions/s=1712545
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170001 instructions/s=5882318
+alu instructions=1000000 us=280002 instructions/s=3571403
+memory instructions=1000000 us=583926 instructions/s=1712545
+call/stack instructions=1000000 us=302502 instructions/s=3305763
+rep movsw bytes=524288 us=60179 bytes/s=8712142
+register/branch instructions=1000000 us=170002 instructions/s=5882283
+alu instructions=1000000 us=280002 instructions/s=3571403
+pmfc: read COM6 for 25 s: 3396 bytes.
+pmfc: OK
