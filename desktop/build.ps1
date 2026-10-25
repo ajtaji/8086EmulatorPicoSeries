@@ -4,9 +4,13 @@
 # The core (cpu86_core.pbi) is generated from the same handlers as the Pico core.
 param(
     [string]$Compiler = 'C:\Program Files\PureBasic\Compilers\pbcompilerc.exe',
-    [string]$Engine = 'C:/Users/ajtaj/Desktop/Neon-Arcade-Dispay-Engine/'
+    # Neon Arcade Display Engine (github.com/ajtaji/Neon-Arcade-Dispay-Engine): the NEON_ENGINE
+    # environment variable, else a clone beside this repository
+    [string]$Engine = $(if ($env:NEON_ENGINE) { $env:NEON_ENGINE } else { (Join-Path $PSScriptRoot '..\..\Neon-Arcade-Dispay-Engine') })
 )
 $ErrorActionPreference = 'Stop'
+$Engine = ($Engine -replace '\\', '/').TrimEnd('/') + '/'
+if (-not (Test-Path ($Engine + 'GlUI.pbi'))) { throw "Neon Arcade Display Engine not found at $Engine - set NEON_ENGINE or pass -Engine" }
 $here = $PSScriptRoot
 & py -3 (Join-Path $here '..\tools\gen_cpu.py')
 if ($LASTEXITCODE -ne 0) { throw 'tools/gen_cpu.py failed' }

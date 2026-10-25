@@ -1,40 +1,40 @@
 ﻿lease taken 11:24:42
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.pico2w  ->  RP2350
+pmfc: <repo>\Diagnostics\vectors.pico2w  ->  RP2350
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
 pmfc: 49818 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors.uf2.asm
 > RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 367256 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2350|90640|4194304
 CYCLES_TOTAL_RP2350|59332|straight-line, not-taken branches
 REGMAP_RP2350|5678|197|71|342|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2350|1328|frame-slot loads taken from a register
-pmfc: t2-vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90640 bytes into 355 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
+pmfc: t2-vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90640 bytes into 355 blocks -> <repo>\Diagnostics\build\t2-vectors.uf2
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors.uf2
 pmfc: OK
 image ends at 0x10016300
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    D813011B71866DBB634411FDA7D03EDEF39A14CFA5671FA2EE8114A80F97EB85 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    D813011B71866DBB634411FDA7D03EDEF39A14CFA5671FA2EE8114A80F97EB85 <home>\Desktop\Github\8086Emulato...
 
 
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.pico2w  ->  RP2350
+pmfc: <repo>\Diagnostics\vectors.pico2w  ->  RP2350
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
 pmfc: 49818 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors.uf2.asm
 > RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 367256 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2350|90640|4194304
 CYCLES_TOTAL_RP2350|59332|straight-line, not-taken branches
 REGMAP_RP2350|5678|197|71|342|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2350|1328|frame-slot loads taken from a register
-pmfc: t2-vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90640 bytes into 355 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
+pmfc: t2-vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90640 bytes into 355 blocks -> <repo>\Diagnostics\build\t2-vectors.uf2
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors.uf2
 pmfc: uploading t2-vectors.uf2 (RP2350) through COM6
 > [NATIVE UPLOADER] A BOOTSEL drive is already present at H:\. It is not the board on COM6 (that board is running a program, so it has no boot drive yet) and is left alone; the program goes only to the drive that appears after COM6 is reset.
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
 > [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
-> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial <board-serial>.
 > [NATIVE UPLOADER] Found BOOTSEL drive at I:\
 > [NATIVE UPLOADER] Writing image: 65536 of 181760 bytes (36%)
 > [NATIVE UPLOADER] Writing image: 131072 of 181760 bytes (72%)
@@ -211,41 +211,41 @@ TOTAL pass=322000 fail=0
 vectors PASS
 host: 161 files, 322000 tests, 34483291 bytes in 179.8 s
 vectors exit 0
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors-pure.pico2w  ->  RP2350
+pmfc: <repo>\Diagnostics\vectors-pure.pico2w  ->  RP2350
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
 pmfc: 58197 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-pure.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors-pure.uf2.asm
 > RP2350 ASSEMBLER: 84720 bytes of code run from SRAM at $20000000-$20014AEF, copied from flash at boot; 359532 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2350|98364|4194304
 CYCLES_TOTAL_RP2350|64548|straight-line, not-taken branches
 REGMAP_RP2350|6410|203|87|342|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2350|1406|frame-slot loads taken from a register
-pmfc: t2-vectors-pure.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 98364 bytes into 385 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-pure.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-pure.uf2
+pmfc: t2-vectors-pure.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 98364 bytes into 385 blocks -> <repo>\Diagnostics\build\t2-vectors-pure.uf2
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors-pure.uf2
 pmfc: OK
 image ends at 0x10018100
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    9AE636C6AA5258D85E0799CE349DE0015B4E606BD9A11F260F4D9629FE851B54 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    9AE636C6AA5258D85E0799CE349DE0015B4E606BD9A11F260F4D9629FE851B54 <home>\Desktop\Github\8086Emulato...
 
 
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors-pure.pico2w  ->  RP2350
+pmfc: <repo>\Diagnostics\vectors-pure.pico2w  ->  RP2350
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
 pmfc: 58197 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-pure.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors-pure.uf2.asm
 > RP2350 ASSEMBLER: 84720 bytes of code run from SRAM at $20000000-$20014AEF, copied from flash at boot; 359532 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2350|98364|4194304
 CYCLES_TOTAL_RP2350|64548|straight-line, not-taken branches
 REGMAP_RP2350|6410|203|87|342|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2350|1406|frame-slot loads taken from a register
-pmfc: t2-vectors-pure.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 98364 bytes into 385 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-pure.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-pure.uf2
+pmfc: t2-vectors-pure.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 98364 bytes into 385 blocks -> <repo>\Diagnostics\build\t2-vectors-pure.uf2
+pmfc: wrote <repo>\Diagnostics\build\t2-vectors-pure.uf2
 pmfc: uploading t2-vectors-pure.uf2 (RP2350) through COM6
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
 > [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
-> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial <board-serial>.
 > [NATIVE UPLOADER] Found BOOTSEL drive at I:\
 > [NATIVE UPLOADER] Writing image: 65536 of 197120 bytes (33%)
 > [NATIVE UPLOADER] Writing image: 131072 of 197120 bytes (66%)
@@ -584,10 +584,10 @@ TOTAL pass=32300 fail=0
 vectors PASS
 host: 323 files, 32300 tests, 3197267 bytes in 42.9 s
 vectors exit 0
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.pico2w  ->  RP2350
+pmfc: <repo>\src\demo.pico2w  ->  RP2350
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
 pmfc: 49442 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\t2-demo.uf2.asm
 > RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 13476 bytes of SRAM left free, stacks and reserved windows excluded.
 NOTE: 'global_guest' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
 NOTE: 'global_guest' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
@@ -597,20 +597,20 @@ ROM_TOTAL_RP2350|90340|4194304
 CYCLES_TOTAL_RP2350|58702|straight-line, not-taken branches
 REGMAP_RP2350|5665|192|75|350|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2350|1316|frame-slot loads taken from a register
-pmfc: t2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90340 bytes into 353 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
+pmfc: t2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90340 bytes into 353 blocks -> <repo>\Diagnostics\build\t2-demo.uf2
+pmfc: wrote <repo>\Diagnostics\build\t2-demo.uf2
 pmfc: OK
 image ends at 0x10016100
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    1CD899091CF0BF7CA6488F66BCAAF1C9F7F9406801A404E9AFE5C5698C041AF3 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    1CD899091CF0BF7CA6488F66BCAAF1C9F7F9406801A404E9AFE5C5698C041AF3 <home>\Desktop\Github\8086Emulato...
 
 
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.pico2w  ->  RP2350
+pmfc: <repo>\src\demo.pico2w  ->  RP2350
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
 pmfc: 49442 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\t2-demo.uf2.asm
 > RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 13476 bytes of SRAM left free, stacks and reserved windows excluded.
 NOTE: 'global_guest' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
 NOTE: 'global_guest' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
@@ -620,13 +620,13 @@ ROM_TOTAL_RP2350|90340|4194304
 CYCLES_TOTAL_RP2350|58702|straight-line, not-taken branches
 REGMAP_RP2350|5665|192|75|350|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2350|1316|frame-slot loads taken from a register
-pmfc: t2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90340 bytes into 353 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
+pmfc: t2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90340 bytes into 353 blocks -> <repo>\Diagnostics\build\t2-demo.uf2
+pmfc: wrote <repo>\Diagnostics\build\t2-demo.uf2
 pmfc: uploading t2-demo.uf2 (RP2350) through COM6
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
 > [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
-> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial <board-serial>.
 > [NATIVE UPLOADER] Found BOOTSEL drive at I:\
 > [NATIVE UPLOADER] Writing image: 65536 of 180736 bytes (36%)
 > [NATIVE UPLOADER] Writing image: 131072 of 180736 bytes (72%)

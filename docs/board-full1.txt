@@ -1,36 +1,36 @@
 lease held: z80-core 2026-10-23T18:31:59 expected-until 18:41:38 (11 upload+capture jobs) - waiting
 lease held: cg-8051 2026-10-23T18:37:05-05:00 4 upload+capture jobs, about 325 s - waiting
 lease taken 18:40:46
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.picow  ->  RP2040
+pmfc: <repo>\Diagnostics\vectors.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
 pmfc: 53814 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\vectors.uf2.asm
 > RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89192 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2040|104112|2097152
 CYCLES_TOTAL_RP2040|64444|straight-line, not-taken branches
 REGMAP_RP2040|6152|200|87|327|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2040|1409|frame-slot loads taken from a register
-pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
+pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> <repo>\Diagnostics\build\vectors.uf2
+pmfc: wrote <repo>\Diagnostics\build\vectors.uf2
 pmfc: OK
 image ends at 0x10019700
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    BC1257F383097B10C94E3B49865BDC45C22001EDF06EF965DD93FE7DFF8269D1 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    BC1257F383097B10C94E3B49865BDC45C22001EDF06EF965DD93FE7DFF8269D1 <home>\Desktop\Github\8086Emulato...
 
 
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.picow  ->  RP2040
+pmfc: <repo>\Diagnostics\vectors.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
 pmfc: 53814 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\vectors.uf2.asm
 > RP2040 ASSEMBLER: 88864 bytes of code run from SRAM at $20000000-$20015B1F, copied from flash at boot; 89192 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2040|104112|2097152
 CYCLES_TOTAL_RP2040|64444|straight-line, not-taken branches
 REGMAP_RP2040|6152|200|87|327|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2040|1409|frame-slot loads taken from a register
-pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\vectors.uf2
+pmfc: vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104112 bytes into 407 blocks -> <repo>\Diagnostics\build\vectors.uf2
+pmfc: wrote <repo>\Diagnostics\build\vectors.uf2
 pmfc: uploading vectors.uf2 (RP2040) through COM7
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
@@ -212,36 +212,36 @@ TOTAL pass=324000 fail=0
 vectors PASS
 host: 162 files, 324000 tests, 29183652 bytes in 131.6 s
 vectors exit 0
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api-timed.picow  ->  RP2040
+pmfc: <repo>\Diagnostics\api-timed.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
 pmfc: 59340 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api-timed.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\api-timed.uf2.asm
 > RP2040 ASSEMBLER: 93376 bytes of code run from SRAM at $20000000-$20016CBF, copied from flash at boot; 87496 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2040|112452|2097152
 CYCLES_TOTAL_RP2040|68761|straight-line, not-taken branches
 REGMAP_RP2040|6577|297|88|456|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2040|1406|frame-slot loads taken from a register
-pmfc: api-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 112452 bytes into 440 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api-timed.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api-timed.uf2
+pmfc: api-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 112452 bytes into 440 blocks -> <repo>\Diagnostics\build\api-timed.uf2
+pmfc: wrote <repo>\Diagnostics\build\api-timed.uf2
 pmfc: OK
 image ends at 0x1001B800
 
 Algorithm Hash                                                             Path                                        
 --------- ----                                                             ----                                        
-SHA256    2BB3737F62644CD9A9F2935AB26D69FDE38B08CF4DCC6CAFD297BE2F97B198C8 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+SHA256    2BB3737F62644CD9A9F2935AB26D69FDE38B08CF4DCC6CAFD297BE2F97B198C8 <home>\Desktop\Github\8086Emulato...
 
 
-pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api-timed.picow  ->  RP2040
+pmfc: <repo>\Diagnostics\api-timed.picow  ->  RP2040
 pmfc: pin aliases from Boards/Raspberry_Pi_Pico_W.board
 pmfc: 59340 lines of assembly
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api-timed.uf2.asm
+pmfc: wrote <repo>\Diagnostics\build\api-timed.uf2.asm
 > RP2040 ASSEMBLER: 93376 bytes of code run from SRAM at $20000000-$20016CBF, copied from flash at boot; 87496 bytes of SRAM left free, stacks and reserved windows excluded.
 ROM_TOTAL_RP2040|112452|2097152
 CYCLES_TOTAL_RP2040|68761|straight-line, not-taken branches
 REGMAP_RP2040|6577|297|88|456|materialisations seen|already in dest|already in another reg|nearby constant
 SLOTMAP_RP2040|1406|frame-slot loads taken from a register
-pmfc: api-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 112452 bytes into 440 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api-timed.uf2
-pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\api-timed.uf2
+pmfc: api-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 112452 bytes into 440 blocks -> <repo>\Diagnostics\build\api-timed.uf2
+pmfc: wrote <repo>\Diagnostics\build\api-timed.uf2
 pmfc: uploading api-timed.uf2 (RP2040) through COM7
 > [NATIVE UPLOADER] Sending BOOTSEL reset command to COM7 (the 1200-baud touch)...
 > [NATIVE UPLOADER] COM7 left the bus after the 1200-baud touch (0.1 s): the board is going to its boot loader.

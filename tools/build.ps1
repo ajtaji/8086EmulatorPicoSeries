@@ -2,7 +2,8 @@
 # The image must end below flash offset $50000, where the bench Pico W keeps
 # its NES ROM store: the build is checked BEFORE anything is uploaded.
 param(
-    [string]$Compiler = 'C:\Users\ajtaj\Desktop\Github\PureBasicCode\OpenGl Work\ArduinoBasic\PureMetalForge.exe',
+    # PureMetal Forge: the PUREMETALFORGE environment variable, else PureMetalForge.exe on the PATH
+    [string]$Compiler = $(if ($env:PUREMETALFORGE) { $env:PUREMETALFORGE } else { 'PureMetalForge.exe' }),
     [string]$Source = 'src/demo.picow',
     [string]$Output = 'firmware/8086-picow.uf2',
     [string]$Port = '',
