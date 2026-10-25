@@ -1,0 +1,78 @@
+
+PC frames=61 clocks/s=4858543 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=61 late-us=11726 busy-us=701681 core1-draw-us=634516 panel-wait-us=185141
+
+PC frames=121 clocks/s=4778867 CS:IP=0050:09BB mode=09 colour=00 PIT0=19886 IMR=FE panel frames=121 late-us=11693 busy-us=692880 core1-draw-us=626272 panel-wait-us=168862
+
+PC frames=181 clocks/s=4778885 CS:IP=0050:06E4 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=181 late-us=11687 busy-us=692905 core1-draw-us=626394 panel-wait-us=169399
+
+PC frames=241 clocks/s=4778874 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=241 late-us=11704 busy-us=692755 core1-draw-us=626223 panel-wait-us=168736
+
+PC frames=301 clocks/s=4778892 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=301 late-us=11605 busy-us=692653 core1-draw-us=626378 panel-wait-us=169186
+
+PC frames=361 clocks/s=4778867 CS:IP=0050:09BE mode=09 colour=00 PIT0=19886 IMR=FE panel frames=361 late-us=11677 busy-us=692675 core1-draw-us=626243 panel-wait-us=169629
+
+PC frames=421 clocks/s=4778895 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=421 late-us=11697 busy-us=692750 core1-draw-us=626353 panel-wait-us=169709
+
+PC frames=481 clocks/s=4778868 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=481 late-us=11695 busy-us=692999 core1-draw-us=626316 panel-wait-us=168848
+
+PC frames=541 clocks/s=4778880 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=541 late-us=11699 busy-us=692840 core1-draw-us=626302 panel-wait-us=169839
+
+PC frames=601 clocks/s=4778885 CS:IP=0050:10C7 mode=08 colour=00 PIT0=19886 IMR=FE panel frames=601 late-us=11553 busy-us=692772 core1-draw-us=626258 panel-wait-us=169350
+
+PC frames=661 clocks/s=4778898 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=661 late-us=10739 busy-us=658295 core1-draw-us=423614 panel-wait-us=234952
+
+PC frames=721 clocks/s=4778864 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=721 late-us=11125 busy-us=659471 core1-draw-us=429566 panel-wait-us=234341
+
+PC frames=781 clocks/s=4778879 CS:IP=0050:0F5D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=781 late-us=11260 busy-us=659076 core1-draw-us=426931 panel-wait-us=233815
+
+PC frames=841 clocks/s=4778880 CS:IP=0050:0F78 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=841 late-us=11257 busy-us=658601 core1-draw-us=421821 panel-wait-us=234265
+
+PC frames=901 clocks/s=4778955 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=901 late-us=10892 busy-us=658392 core1-draw-us=424457 panel-wait-us=234136
+
+PC frames=961 clocks/s=4778807 CS:IP=0050:0F30 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=961 late-us=11268 busy-us=659067 core1-draw-us=429395 panel-wait-us=235911
+
+PC frames=1021 clocks/s=4778874 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1021 late-us=11270 busy-us=659071 core1-draw-us=429680 panel-wait-us=233608
+
+PC frames=1081 clocks/s=4778978 CS:IP=0050:0EB3 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1081 late-us=11291 busy-us=658837 core1-draw-us=424430 panel-wait-us=234004
+
+PC frames=1141 clocks/s=4778785 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1141 late-us=11272 busy-us=659011 core1-draw-us=422269 panel-wait-us=234285
+
+PC frames=1201 clocks/s=4778879 CS:IP=0050:0DDF mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1201 late-us=10751 busy-us=658416 core1-draw-us=426447 panel-wait-us=235155
+
+PC frames=1261 clocks/s=4778873 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1261 late-us=11282 busy-us=659249 core1-draw-us=429566 panel-wait-us=234456
+
+PC frames=1321 clocks/s=4778885 CS:IP=0050:0EFC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1321 late-us=11287 busy-us=658553 core1-draw-us=426377 panel-wait-us=234074
+
+PC frames=1381 clocks/s=4778877 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1381 late-us=11281 busy-us=658635 core1-draw-us=423911 panel-wait-us=233681
+
+PC frames=1441 clocks/s=4778925 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1441 late-us=10747 busy-us=658138 core1-draw-us=425130 panel-wait-us=234384
+
+PC frames=1501 clocks/s=4778837 CS:IP=0050:0F85 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1501 late-us=11339 busy-us=659144 core1-draw-us=428707 panel-wait-us=235047
+
+PC frames=1561 clocks/s=4778890 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1561 late-us=11324 busy-us=658765 core1-draw-us=425549 panel-wait-us=234140
+
+PC frames=1621 clocks/s=4778870 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1621 late-us=11289 busy-us=658532 core1-draw-us=423973 panel-wait-us=233895
+
+PC frames=1681 clocks/s=4778878 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1681 late-us=11309 busy-us=659109 core1-draw-us=426033 panel-wait-us=233788
+
+PC frames=1741 clocks/s=4778974 CS:IP=0050:1468 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1741 late-us=10940 busy-us=658744 core1-draw-us=429516 panel-wait-us=234948
+
+PC frames=1801 clocks/s=4778786 CS:IP=0050:0F5A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1801 late-us=11325 busy-us=659107 core1-draw-us=427714 panel-wait-us=235807
+
+PC frames=1861 clocks/s=4778887 CS:IP=0050:0F33 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1861 late-us=11282 busy-us=659012 core1-draw-us=421974 panel-wait-us=234061
+
+PC frames=1921 clocks/s=4778871 CS:IP=0050:0F3E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1921 late-us=11326 busy-us=659718 core1-draw-us=424115 panel-wait-us=234092
+
+PC frames=1981 clocks/s=4778880 CS:IP=0050:0F7D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1981 late-us=11291 busy-us=658980 core1-draw-us=428640 panel-wait-us=234716
+
+PC frames=2041 clocks/s=4779011 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=2041 late-us=10752 busy-us=658750 core1-draw-us=429314 panel-wait-us=234869
+
+PC frames=2101 clocks/s=4778755 CS:IP=0050:05C6 mode=0A colour=01 PIT0=19886 IMR=FE panel frames=2101 late-us=10562 busy-us=657527 core1-draw-us=425628 panel-wait-us=236551
+
+PC frames=2161 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2161 late-us=11514 busy-us=675577 core1-draw-us=498891 panel-wait-us=191665
+
+PC frames=2221 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2221 late-us=11659 busy-us=686213 core1-draw-us=498193 panel-wait-us=154611
+
+PC frames=2281 clocks/s=4778884 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2281 late-us=11664 busy-us=686481 core1-draw-us=498139 panel-wait-us=153631
+
+PC frames=2341 clocks/s=4778874 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2341 late-us=11663 busy-us=686205 core1-draw-us=498172 panel-wait-us=154312

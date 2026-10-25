@@ -585,44 +585,53 @@ Macro NextOp(c)
     If Left <= 0
       Goto Done
     EndIf
-    CompilerIf #CPU_ASM_TAIL = 1
-      ASM Uses PIP, PEnd
+  CompilerElse
+    Left = Left - 1
+    If Left = 0
+      Goto Done
+    EndIf
+  CompilerEndIf
+  If PIP >= PEnd
+    Goto Resync
+  EndIf
+  Goto Dispatch(PeekA(PIP))
+EndMacro
+Macro NextOpK(c)
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses Left, PIP, PEnd
+        subs r6, r6, #c
+        ble __ul_cpu86run_done
         cmp r4, r11
         bhs __ul_cpu86run_resync
         ldrb r0, [r4]
-        lsls r0, r0, #2
         ldr r1, =global_dispatch
-        ldr r1, [r1, r0]
-        bx r1
+        ldr pc, [r1, r0, lsl #2]
       EndASM
-    CompilerElse
-      If PIP >= PEnd
-        Goto Resync
-      EndIf
-      Goto Dispatch(PeekA(PIP))
     CompilerEndIf
-  CompilerElse
-    CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 0
       ASM Uses Left, PIP, PEnd
-        subs r6, #1
+        subs r6, r6, #1
         beq __ul_cpu86run_done
         cmp r4, r11
         bhs __ul_cpu86run_resync
         ldrb r0, [r4]
-        lsls r0, r0, #2
         ldr r1, =global_dispatch
-        ldr r1, [r1, r0]
-        bx r1
+        ldr pc, [r1, r0, lsl #2]
+      EndASM
+    CompilerEndIf
+  CompilerElse
+    NextOp(c)
+  CompilerEndIf
+EndMacro
+Macro ChargeK(c)
+  CompilerIf #CPU_TIMING = 1
+    CompilerIf #CPU_ASM_TAIL = 1
+      ASM Uses Left
+        sub r6, r6, #c
       EndASM
     CompilerElse
-      Left = Left - 1
-      If Left = 0
-        Goto Done
-      EndIf
-      If PIP >= PEnd
-        Goto Resync
-      EndIf
-      Goto Dispatch(PeekA(PIP))
+      Left = Left - (c)
     CompilerEndIf
   CompilerEndIf
 EndMacro
@@ -966,168 +975,168 @@ Ea00:
   PIP = PIP + 2
   sb = SegD
   ea = sb + eo
-  Charge(7)
+  ChargeK(7)
   Goto EaRet
 Ea01:
   eo = (R(3) + R(7)) & $FFFF
   PIP = PIP + 2
   sb = SegD
   ea = sb + eo
-  Charge(8)
+  ChargeK(8)
   Goto EaRet
 Ea02:
   eo = (R(5) + R(6)) & $FFFF
   PIP = PIP + 2
   sb = SegS
   ea = sb + eo
-  Charge(8)
+  ChargeK(8)
   Goto EaRet
 Ea03:
   eo = (R(5) + R(7)) & $FFFF
   PIP = PIP + 2
   sb = SegS
   ea = sb + eo
-  Charge(7)
+  ChargeK(7)
   Goto EaRet
 Ea04:
   eo = R(6)
   PIP = PIP + 2
   sb = SegD
   ea = sb + eo
-  Charge(5)
+  ChargeK(5)
   Goto EaRet
 Ea05:
   eo = R(7)
   PIP = PIP + 2
   sb = SegD
   ea = sb + eo
-  Charge(5)
+  ChargeK(5)
   Goto EaRet
 Ea06:
   eo = PeekA(PIP + 2) | (PeekA(PIP + 3) << 8)
   PIP = PIP + 4
   sb = SegD
   ea = sb + eo
-  Charge(6)
+  ChargeK(6)
   Goto EaRet
 Ea07:
   eo = R(3)
   PIP = PIP + 2
   sb = SegD
   ea = sb + eo
-  Charge(5)
+  ChargeK(5)
   Goto EaRet
 Ea10:
   eo = ((R(3) + R(6)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
   ea = sb + eo
-  Charge(11)
+  ChargeK(11)
   Goto EaRet
 Ea11:
   eo = ((R(3) + R(7)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
   ea = sb + eo
-  Charge(12)
+  ChargeK(12)
   Goto EaRet
 Ea12:
   eo = ((R(5) + R(6)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegS
   ea = sb + eo
-  Charge(12)
+  ChargeK(12)
   Goto EaRet
 Ea13:
   eo = ((R(5) + R(7)) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegS
   ea = sb + eo
-  Charge(11)
+  ChargeK(11)
   Goto EaRet
 Ea14:
   eo = (R(6) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Ea15:
   eo = (R(7) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Ea16:
   eo = (R(5) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegS
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Ea17:
   eo = (R(3) + PeekB(PIP + 2)) & $FFFF
   PIP = PIP + 3
   sb = SegD
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Ea20:
   eo = ((R(3) + R(6)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
   ea = sb + eo
-  Charge(11)
+  ChargeK(11)
   Goto EaRet
 Ea21:
   eo = ((R(3) + R(7)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
   ea = sb + eo
-  Charge(12)
+  ChargeK(12)
   Goto EaRet
 Ea22:
   eo = ((R(5) + R(6)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegS
   ea = sb + eo
-  Charge(12)
+  ChargeK(12)
   Goto EaRet
 Ea23:
   eo = ((R(5) + R(7)) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegS
   ea = sb + eo
-  Charge(11)
+  ChargeK(11)
   Goto EaRet
 Ea24:
   eo = (R(6) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Ea25:
   eo = (R(7) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Ea26:
   eo = (R(5) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegS
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Ea27:
   eo = (R(3) + (PeekA(PIP + 2) | (PeekA(PIP + 3) << 8))) & $FFFF
   PIP = PIP + 4
   sb = SegD
   ea = sb + eo
-  Charge(9)
+  ChargeK(9)
   Goto EaRet
 Op00:
   m = PeekA(PIP + 1)
@@ -1144,7 +1153,7 @@ Op00:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op00M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -1164,13 +1173,59 @@ Op00M:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op01:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op01M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -1180,7 +1235,8 @@ Op01:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op01M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -1207,7 +1263,7 @@ Op01M:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op02:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1223,7 +1279,7 @@ Op02:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op02M:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -1238,13 +1294,59 @@ Op02M:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(9)
+  NextOpK(9)
 Op03:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op03M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -1254,7 +1356,8 @@ Op03:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op03M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -1272,7 +1375,7 @@ Op03M:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(9)
+  NextOpK(9)
 Op04:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -1283,7 +1386,7 @@ Op04:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
-  NextOp(4)
+  NextOpK(4)
 Op05:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -1294,7 +1397,7 @@ Op05:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
-  NextOp(4)
+  NextOpK(4)
 Op08:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1310,7 +1413,7 @@ Op08:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op08M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -1330,13 +1433,55 @@ Op08M:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op09:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op09M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        orr r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        orr r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -1346,7 +1491,8 @@ Op09:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op09M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -1373,7 +1519,7 @@ Op09M:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op0A:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1389,7 +1535,7 @@ Op0A:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op0AM:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -1404,13 +1550,55 @@ Op0AM:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(9)
+  NextOpK(9)
 Op0B:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op0BM
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        orr r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        orr r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -1420,7 +1608,8 @@ Op0B:
   FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op0BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -1438,7 +1627,7 @@ Op0BM:
   FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(9)
+  NextOpK(9)
 Op0C:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -1449,7 +1638,7 @@ Op0C:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
-  NextOp(4)
+  NextOpK(4)
 Op0D:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -1460,7 +1649,7 @@ Op0D:
   FA = vr
   FZS = (vr << 16) >> 16
   R(0) = vr
-  NextOp(4)
+  NextOpK(4)
 Op10:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1476,7 +1665,7 @@ Op10:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op10M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -1496,13 +1685,61 @@ Op10M:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op11:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op11M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        add r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        add r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -1512,7 +1749,8 @@ Op11:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op11M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -1539,7 +1777,7 @@ Op11M:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op12:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1555,7 +1793,7 @@ Op12:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op12M:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -1570,13 +1808,61 @@ Op12M:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(9)
+  NextOpK(9)
 Op13:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op13M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        add r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        adds r2, r0, r1
+        add r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r2
+        eor r12, r1, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -1586,7 +1872,8 @@ Op13:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op13M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -1604,7 +1891,7 @@ Op13M:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(9)
+  NextOpK(9)
 Op14:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -1615,7 +1902,7 @@ Op14:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
-  NextOp(4)
+  NextOpK(4)
 Op15:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -1626,7 +1913,7 @@ Op15:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
-  NextOp(4)
+  NextOpK(4)
 Op18:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1642,7 +1929,7 @@ Op18:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op18M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -1662,13 +1949,61 @@ Op18M:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op19:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op19M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        sub r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        sub r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -1678,7 +2013,8 @@ Op19:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op19M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -1705,7 +2041,7 @@ Op19M:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op1A:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1721,7 +2057,7 @@ Op1A:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op1AM:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -1736,13 +2072,61 @@ Op1AM:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(9)
+  NextOpK(9)
 Op1B:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op1BM
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        sub r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        sub r2, r2, r9, lsr #31
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -1752,7 +2136,8 @@ Op1B:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op1BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -1770,7 +2155,7 @@ Op1BM:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(9)
+  NextOpK(9)
 Op1C:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -1781,7 +2166,7 @@ Op1C:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
-  NextOp(4)
+  NextOpK(4)
 Op1D:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -1792,7 +2177,7 @@ Op1D:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
-  NextOp(4)
+  NextOpK(4)
 Op20:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1808,7 +2193,7 @@ Op20:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op20M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -1828,13 +2213,55 @@ Op20M:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op21:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op21M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        and r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        and r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -1844,7 +2271,8 @@ Op21:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op21M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -1871,7 +2299,7 @@ Op21M:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op22:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1887,7 +2315,7 @@ Op22:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op22M:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -1902,13 +2330,55 @@ Op22M:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(9)
+  NextOpK(9)
 Op23:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op23M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        and r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        and r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -1918,7 +2388,8 @@ Op23:
   FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op23M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -1936,7 +2407,7 @@ Op23M:
   FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(9)
+  NextOpK(9)
 Op24:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -1947,7 +2418,7 @@ Op24:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
-  NextOp(4)
+  NextOpK(4)
 Op25:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -1958,7 +2429,7 @@ Op25:
   FA = vr
   FZS = (vr << 16) >> 16
   R(0) = vr
-  NextOp(4)
+  NextOpK(4)
 Op28:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -1974,7 +2445,7 @@ Op28:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op28M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -1994,13 +2465,59 @@ Op28M:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op29:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op29M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -2010,7 +2527,8 @@ Op29:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op29M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -2037,7 +2555,7 @@ Op29M:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op2A:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -2053,7 +2571,7 @@ Op2A:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op2AM:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -2068,13 +2586,59 @@ Op2AM:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(9)
+  NextOpK(9)
 Op2B:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op2BM
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -2084,7 +2648,8 @@ Op2B:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op2BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -2102,7 +2667,7 @@ Op2BM:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(9)
+  NextOpK(9)
 Op2C:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -2113,7 +2678,7 @@ Op2C:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
-  NextOp(4)
+  NextOpK(4)
 Op2D:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -2124,7 +2689,7 @@ Op2D:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(0) = vr
-  NextOp(4)
+  NextOpK(4)
 Op30:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -2140,7 +2705,7 @@ Op30:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op30M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -2160,13 +2725,55 @@ Op30M:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op31:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op31M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        eor r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        eor r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -2176,7 +2783,8 @@ Op31:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op31M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -2203,7 +2811,7 @@ Op31M:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Op32:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -2219,7 +2827,7 @@ Op32:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 Op32M:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -2234,13 +2842,55 @@ Op32M:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O((m >> 3) & 7), vr)
-  NextOp(9)
+  NextOpK(9)
 Op33:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op33M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        eor r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        eor r2, r0, r1
+        strh r2, [r3, r12, lsl #1]
+        movs r3, #0
+        mov r9, r3
+        mov r10, r3
+        mov r3, r2
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -2250,7 +2900,8 @@ Op33:
   FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op33M:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -2268,7 +2919,7 @@ Op33M:
   FA = vr
   FZS = (vr << 16) >> 16
   R((m >> 3) & 7) = vr
-  NextOp(9)
+  NextOpK(9)
 Op34:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -2279,7 +2930,7 @@ Op34:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + 0, vr)
-  NextOp(4)
+  NextOpK(4)
 Op35:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -2290,7 +2941,7 @@ Op35:
   FA = vr
   FZS = (vr << 16) >> 16
   R(0) = vr
-  NextOp(4)
+  NextOpK(4)
 Op38:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -2305,7 +2956,7 @@ Op38:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(3)
+  NextOpK(3)
 Op38M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -2319,13 +2970,57 @@ Op38M:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(9)
+  NextOpK(9)
 Op39:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op39M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   vb = R((m >> 3) & 7)
@@ -2334,7 +3029,8 @@ Op39:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op39M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -2351,7 +3047,7 @@ Op39M:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(9)
+  NextOpK(9)
 Op3A:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -2366,7 +3062,7 @@ Op3A:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(3)
+  NextOpK(3)
 Op3AM:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageR(ea >> 12)
@@ -2380,13 +3076,57 @@ Op3AM:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(9)
+  NextOpK(9)
 Op3B:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op3BM
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, FO
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        subs r2, r0, r1
+        lsl r9, r2, #15
+        eor r3, r0, r1
+        eor r12, r0, r2
+        and r3, r3, r12
+        lsl r10, r3, #16
+        eor r3, r0, r1
+        ldr r12, =global_fa
+        str r3, [r12]
+        sxth r8, r2
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   vb = R(m & 7)
@@ -2395,7 +3135,8 @@ Op3B:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(3)
+  CompilerEndIf
+  NextOpK(3)
 Op3BM:
   va = R((m >> 3) & 7)
   t = PageR(ea >> 12)
@@ -2412,7 +3153,7 @@ Op3BM:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(9)
+  NextOpK(9)
 Op3C:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -2422,7 +3163,7 @@ Op3C:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(4)
+  NextOpK(4)
 Op3D:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -2432,7 +3173,7 @@ Op3D:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(4)
+  NextOpK(4)
 Op06:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
@@ -2448,7 +3189,7 @@ Op06:
   Else
     Cpu86Wr16(SegB(2), eo, SegV(0))
   EndIf
-  NextOp(10)
+  NextOpK(10)
 Op07:
   PIP = PIP + 1
   eo = R(4)
@@ -2465,7 +3206,7 @@ Op07:
   R(4) = eo + 2
   SegV(0) = va
   SegB(0) = va << 4
-  NextOp(8)
+  NextOpK(8)
 Op0E:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
@@ -2481,7 +3222,7 @@ Op0E:
   Else
     Cpu86Wr16(SegB(2), eo, SegV(1))
   EndIf
-  NextOp(10)
+  NextOpK(10)
 Op0F:
   PIP = PIP + 1
   eo = R(4)
@@ -2502,7 +3243,7 @@ Op0F:
   PBase = 0
   PIP = x
   PEnd = 0
-  NextOp(8)
+  NextOpK(8)
 Op16:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
@@ -2518,7 +3259,7 @@ Op16:
   Else
     Cpu86Wr16(SegB(2), eo, SegV(2))
   EndIf
-  NextOp(10)
+  NextOpK(10)
 Op17:
   PIP = PIP + 1
   eo = R(4)
@@ -2538,7 +3279,7 @@ Op17:
   SegS = SegB(2)
   EvPend = EvPend | 8
   PEnd = 0
-  NextOp(8)
+  NextOpK(8)
 Op1E:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
@@ -2554,7 +3295,7 @@ Op1E:
   Else
     Cpu86Wr16(SegB(2), eo, SegV(3))
   EndIf
-  NextOp(10)
+  NextOpK(10)
 Op1F:
   PIP = PIP + 1
   eo = R(4)
@@ -2572,11 +3313,11 @@ Op1F:
   SegV(3) = va
   SegB(3) = va << 4
   SegD = SegB(3)
-  NextOp(8)
+  NextOpK(8)
 Op26:
   SegD = SegB(0)
   SegS = SegB(0)
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
@@ -2584,7 +3325,7 @@ Op26:
 Op2E:
   SegD = SegB(1)
   SegS = SegB(1)
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
@@ -2592,7 +3333,7 @@ Op2E:
 Op36:
   SegD = SegB(2)
   SegS = SegB(2)
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
@@ -2600,7 +3341,7 @@ Op36:
 Op3E:
   SegD = SegB(3)
   SegS = SegB(3)
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
@@ -2638,7 +3379,7 @@ Op27:
   FZS = (vr << 24) >> 24
   FA = FA ! vr
   PIP = PIP + 1
-  NextOp(4)
+  NextOpK(4)
 Op2F:
   va = PeekA(@R(0) + 0)
   x = (FC >> 31) & 1
@@ -2682,7 +3423,7 @@ Op2F:
   FZS = (vr << 24) >> 24
   FA = FA ! vr
   PIP = PIP + 1
-  NextOp(4)
+  NextOpK(4)
 Op37:
   va = PeekA(@R(0) + 0)
   If ((va & 15) > 9) Or ((FA ! FZS) & $10)
@@ -2710,7 +3451,7 @@ Op37:
   EndIf
   FA = FA ! vr
   PIP = PIP + 1
-  NextOp(4)
+  NextOpK(4)
 Op3F:
   va = PeekA(@R(0) + 0)
   y = ((FA ! FZS) >> 4) & 1
@@ -2745,8 +3486,38 @@ Op3F:
   EndIf
   FA = FA ! vr
   PIP = PIP + 1
-  NextOp(4)
+  NextOpK(4)
 Op40:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #0]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #0]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #0]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #0]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(0)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -2754,8 +3525,39 @@ Op40:
   FZS = (vr << 16) >> 16
   R(0) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op48:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #0]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #0]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #0]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #0]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(0)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -2763,8 +3565,61 @@ Op48:
   FZS = (vr << 16) >> 16
   R(0) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op50:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op50s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op50s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #0]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op50s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op50s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #0]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op50S:
   PIP = PIP + 1
   va = R(0)
   eo = (R(4) - 2) & $FFFF
@@ -2780,8 +3635,58 @@ Op50:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op58:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op58s
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op58s
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #0]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op58s
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op58s
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #0]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op58S:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -2796,8 +3701,38 @@ Op58:
   EndIf
   R(4) = eo + 2
   R(0) = va
-  NextOp(8)
+  NextOpK(8)
 Op41:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #2]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #2]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(1)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -2805,8 +3740,39 @@ Op41:
   FZS = (vr << 16) >> 16
   R(1) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op49:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #2]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #2]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(1)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -2814,8 +3780,61 @@ Op49:
   FZS = (vr << 16) >> 16
   R(1) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op51:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op51s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op51s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #2]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op51s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op51s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #2]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op51S:
   PIP = PIP + 1
   va = R(1)
   eo = (R(4) - 2) & $FFFF
@@ -2831,8 +3850,58 @@ Op51:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op59:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op59s
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op59s
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op59s
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op59s
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op59S:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -2847,8 +3916,38 @@ Op59:
   EndIf
   R(4) = eo + 2
   R(1) = va
-  NextOp(8)
+  NextOpK(8)
 Op42:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #4]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #4]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #4]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #4]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(2)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -2856,8 +3955,39 @@ Op42:
   FZS = (vr << 16) >> 16
   R(2) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op4A:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #4]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #4]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #4]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #4]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(2)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -2865,8 +3995,61 @@ Op4A:
   FZS = (vr << 16) >> 16
   R(2) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op52:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op52s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op52s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #4]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op52s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op52s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #4]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op52S:
   PIP = PIP + 1
   va = R(2)
   eo = (R(4) - 2) & $FFFF
@@ -2882,8 +4065,58 @@ Op52:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op5A:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5as
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5as
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #4]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5as
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5as
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #4]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op5AS:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -2898,8 +4131,38 @@ Op5A:
   EndIf
   R(4) = eo + 2
   R(2) = va
-  NextOp(8)
+  NextOpK(8)
 Op43:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #6]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #6]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #6]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #6]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(3)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -2907,8 +4170,39 @@ Op43:
   FZS = (vr << 16) >> 16
   R(3) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op4B:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #6]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #6]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #6]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #6]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(3)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -2916,8 +4210,61 @@ Op4B:
   FZS = (vr << 16) >> 16
   R(3) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op53:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op53s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op53s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #6]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op53s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op53s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #6]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op53S:
   PIP = PIP + 1
   va = R(3)
   eo = (R(4) - 2) & $FFFF
@@ -2933,8 +4280,58 @@ Op53:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op5B:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5bs
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5bs
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #6]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5bs
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5bs
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #6]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op5BS:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -2949,8 +4346,38 @@ Op5B:
   EndIf
   R(4) = eo + 2
   R(3) = va
-  NextOp(8)
+  NextOpK(8)
 Op44:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #8]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #8]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #8]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #8]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(4)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -2958,8 +4385,39 @@ Op44:
   FZS = (vr << 16) >> 16
   R(4) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op4C:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #8]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #8]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #8]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #8]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(4)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -2967,8 +4425,59 @@ Op4C:
   FZS = (vr << 16) >> 16
   R(4) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op54:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op54s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op54s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        strh r0, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op54s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op54s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        strh r0, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op54S:
   PIP = PIP + 1
   eo = (R(4) - 2) & $FFFF
   R(4) = eo
@@ -2983,8 +4492,58 @@ Op54:
   Else
     Cpu86Wr16(SegB(2), eo, eo)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op5C:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5cs
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5cs
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #8]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5cs
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5cs
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #8]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op5CS:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -2999,8 +4558,38 @@ Op5C:
   EndIf
   R(4) = eo + 2
   R(4) = va
-  NextOp(8)
+  NextOpK(8)
 Op45:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #10]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #10]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #10]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #10]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(5)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -3008,8 +4597,39 @@ Op45:
   FZS = (vr << 16) >> 16
   R(5) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op4D:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #10]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #10]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #10]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #10]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(5)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -3017,8 +4637,61 @@ Op4D:
   FZS = (vr << 16) >> 16
   R(5) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op55:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op55s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op55s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #10]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op55s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op55s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #10]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op55S:
   PIP = PIP + 1
   va = R(5)
   eo = (R(4) - 2) & $FFFF
@@ -3034,8 +4707,58 @@ Op55:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op5D:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5ds
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5ds
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #10]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5ds
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5ds
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #10]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op5DS:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -3050,8 +4773,38 @@ Op5D:
   EndIf
   R(4) = eo + 2
   R(5) = va
-  NextOp(8)
+  NextOpK(8)
 Op46:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #12]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #12]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #12]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #12]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(6)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -3059,8 +4812,39 @@ Op46:
   FZS = (vr << 16) >> 16
   R(6) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op4E:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #12]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #12]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #12]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #12]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(6)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -3068,8 +4852,61 @@ Op4E:
   FZS = (vr << 16) >> 16
   R(6) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op56:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op56s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op56s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #12]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op56s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op56s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #12]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op56S:
   PIP = PIP + 1
   va = R(6)
   eo = (R(4) - 2) & $FFFF
@@ -3085,8 +4922,58 @@ Op56:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op5E:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5es
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5es
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #12]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5es
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5es
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #12]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op5ES:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -3101,8 +4988,38 @@ Op5E:
   EndIf
   R(4) = eo + 2
   R(6) = va
-  NextOp(8)
+  NextOpK(8)
 Op47:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #14]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #14]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #14]
+        adds r1, r0, #1
+        bic r3, r1, r0
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #14]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(7)
   vr = va + 1
   FO = (vr & ~va) << 16
@@ -3110,8 +5027,39 @@ Op47:
   FZS = (vr << 16) >> 16
   R(7) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op4F:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #14]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #14]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO
+        ldr r2, =global_r
+        ldrh r0, [r2, #14]
+        subs r1, r0, #1
+        bic r3, r0, r1
+        lsl r10, r3, #16
+        ldr r3, =global_fa
+        str r0, [r3]
+        sxth r8, r1
+        strh r1, [r2, #14]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  CompilerElse
   va = R(7)
   vr = va - 1
   FO = (va & ~vr) << 16
@@ -3119,8 +5067,61 @@ Op4F:
   FZS = (vr << 16) >> 16
   R(7) = vr
   PIP = PIP + 1
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op57:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op57s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op57s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #14]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        subs r0, r0, #2
+        uxth r0, r0
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op57s
+        lsr r12, r1, #12
+        ldr r2, =global_pagew
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op57s
+        add r2, r2, r1
+        strh r0, [r3, #8]
+        ldrh r1, [r3, #14]
+        strh r1, [r2]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(11)
+  CompilerEndIf
+Op57S:
   PIP = PIP + 1
   va = R(7)
   eo = (R(4) - 2) & $FFFF
@@ -3136,8 +5137,58 @@ Op57:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 Op5F:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5fs
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5fs
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #14]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldr r3, =global_r
+        ldrh r0, [r3, #8]
+        ldr r1, =global_segb
+        ldr r1, [r1, #8]
+        add r1, r1, r0
+        mvn r2, r1
+        lsls r2, r2, #28
+        beq __ul_cpu86run_op5fs
+        lsr r12, r1, #12
+        ldr r2, =global_pager
+        ldr r2, [r2, r12, lsl #2]
+        cmp r2, #0
+        beq __ul_cpu86run_op5fs
+        add r2, r2, r1
+        ldrh r1, [r2]
+        adds r0, r0, #2
+        strh r0, [r3, #8]
+        strh r1, [r3, #14]
+        adds r4, r4, #1
+      EndASM
+    CompilerEndIf
+  NextOpK(8)
+  CompilerEndIf
+Op5FS:
   PIP = PIP + 1
   eo = R(4)
   ea = SegB(2) + eo
@@ -3152,359 +5203,1895 @@ Op5F:
   EndIf
   R(4) = eo + 2
   R(7) = va
-  NextOp(8)
+  NextOpK(8)
 Op70:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FO, PEnd
+        cmp r10, #0
+        bge t2j70nt
+        t2j70tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j70in
+        movs r0, #0
+        mov r11, r0
+        t2j70in:
+        sub r6, r6, #12
+        b t2j70end
+        t2j70nt:
+        adds r4, r4, #2
+        t2j70end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FO, PEnd
+        cmp r10, #0
+        bge t2j70nt
+        t2j70tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j70in
+        movs r0, #0
+        mov r11, r0
+        t2j70in:
+        b t2j70end
+        t2j70nt:
+        adds r4, r4, #2
+        t2j70end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FO < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op60:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FO, PEnd
+        cmp r10, #0
+        bge t2j60nt
+        t2j60tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j60in
+        movs r0, #0
+        mov r11, r0
+        t2j60in:
+        sub r6, r6, #12
+        b t2j60end
+        t2j60nt:
+        adds r4, r4, #2
+        t2j60end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FO, PEnd
+        cmp r10, #0
+        bge t2j60nt
+        t2j60tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j60in
+        movs r0, #0
+        mov r11, r0
+        t2j60in:
+        b t2j60end
+        t2j60nt:
+        adds r4, r4, #2
+        t2j60end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FO < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op71:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FO, PEnd
+        cmp r10, #0
+        blt t2j71nt
+        t2j71tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j71in
+        movs r0, #0
+        mov r11, r0
+        t2j71in:
+        sub r6, r6, #12
+        b t2j71end
+        t2j71nt:
+        adds r4, r4, #2
+        t2j71end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FO, PEnd
+        cmp r10, #0
+        blt t2j71nt
+        t2j71tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j71in
+        movs r0, #0
+        mov r11, r0
+        t2j71in:
+        b t2j71end
+        t2j71nt:
+        adds r4, r4, #2
+        t2j71end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FO >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op61:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FO, PEnd
+        cmp r10, #0
+        blt t2j61nt
+        t2j61tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j61in
+        movs r0, #0
+        mov r11, r0
+        t2j61in:
+        sub r6, r6, #12
+        b t2j61end
+        t2j61nt:
+        adds r4, r4, #2
+        t2j61end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FO, PEnd
+        cmp r10, #0
+        blt t2j61nt
+        t2j61tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j61in
+        movs r0, #0
+        mov r11, r0
+        t2j61in:
+        b t2j61end
+        t2j61nt:
+        adds r4, r4, #2
+        t2j61end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FO >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op72:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FC, PEnd
+        cmp r9, #0
+        bge t2j72nt
+        t2j72tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j72in
+        movs r0, #0
+        mov r11, r0
+        t2j72in:
+        sub r6, r6, #12
+        b t2j72end
+        t2j72nt:
+        adds r4, r4, #2
+        t2j72end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FC, PEnd
+        cmp r9, #0
+        bge t2j72nt
+        t2j72tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j72in
+        movs r0, #0
+        mov r11, r0
+        t2j72in:
+        b t2j72end
+        t2j72nt:
+        adds r4, r4, #2
+        t2j72end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FC < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op62:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FC, PEnd
+        cmp r9, #0
+        bge t2j62nt
+        t2j62tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j62in
+        movs r0, #0
+        mov r11, r0
+        t2j62in:
+        sub r6, r6, #12
+        b t2j62end
+        t2j62nt:
+        adds r4, r4, #2
+        t2j62end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FC, PEnd
+        cmp r9, #0
+        bge t2j62nt
+        t2j62tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j62in
+        movs r0, #0
+        mov r11, r0
+        t2j62in:
+        b t2j62end
+        t2j62nt:
+        adds r4, r4, #2
+        t2j62end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FC < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op73:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FC, PEnd
+        cmp r9, #0
+        blt t2j73nt
+        t2j73tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j73in
+        movs r0, #0
+        mov r11, r0
+        t2j73in:
+        sub r6, r6, #12
+        b t2j73end
+        t2j73nt:
+        adds r4, r4, #2
+        t2j73end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FC, PEnd
+        cmp r9, #0
+        blt t2j73nt
+        t2j73tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j73in
+        movs r0, #0
+        mov r11, r0
+        t2j73in:
+        b t2j73end
+        t2j73nt:
+        adds r4, r4, #2
+        t2j73end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FC >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op63:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FC, PEnd
+        cmp r9, #0
+        blt t2j63nt
+        t2j63tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j63in
+        movs r0, #0
+        mov r11, r0
+        t2j63in:
+        sub r6, r6, #12
+        b t2j63end
+        t2j63nt:
+        adds r4, r4, #2
+        t2j63end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FC, PEnd
+        cmp r9, #0
+        blt t2j63nt
+        t2j63tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j63in
+        movs r0, #0
+        mov r11, r0
+        t2j63in:
+        b t2j63end
+        t2j63nt:
+        adds r4, r4, #2
+        t2j63end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FC >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op74:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        lsls r0, r8, #15
+        bne t2j74nt
+        t2j74tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j74in
+        movs r0, #0
+        mov r11, r0
+        t2j74in:
+        sub r6, r6, #12
+        b t2j74end
+        t2j74nt:
+        adds r4, r4, #2
+        t2j74end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        lsls r0, r8, #15
+        bne t2j74nt
+        t2j74tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j74in
+        movs r0, #0
+        mov r11, r0
+        t2j74in:
+        b t2j74end
+        t2j74nt:
+        adds r4, r4, #2
+        t2j74end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS << 15) = 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op64:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        lsls r0, r8, #15
+        bne t2j64nt
+        t2j64tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j64in
+        movs r0, #0
+        mov r11, r0
+        t2j64in:
+        sub r6, r6, #12
+        b t2j64end
+        t2j64nt:
+        adds r4, r4, #2
+        t2j64end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        lsls r0, r8, #15
+        bne t2j64nt
+        t2j64tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j64in
+        movs r0, #0
+        mov r11, r0
+        t2j64in:
+        b t2j64end
+        t2j64nt:
+        adds r4, r4, #2
+        t2j64end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS << 15) = 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op75:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        lsls r0, r8, #15
+        beq t2j75nt
+        t2j75tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j75in
+        movs r0, #0
+        mov r11, r0
+        t2j75in:
+        sub r6, r6, #12
+        b t2j75end
+        t2j75nt:
+        adds r4, r4, #2
+        t2j75end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        lsls r0, r8, #15
+        beq t2j75nt
+        t2j75tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j75in
+        movs r0, #0
+        mov r11, r0
+        t2j75in:
+        b t2j75end
+        t2j75nt:
+        adds r4, r4, #2
+        t2j75end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS << 15) <> 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op65:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        lsls r0, r8, #15
+        beq t2j65nt
+        t2j65tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j65in
+        movs r0, #0
+        mov r11, r0
+        t2j65in:
+        sub r6, r6, #12
+        b t2j65end
+        t2j65nt:
+        adds r4, r4, #2
+        t2j65end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        lsls r0, r8, #15
+        beq t2j65nt
+        t2j65tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j65in
+        movs r0, #0
+        mov r11, r0
+        t2j65in:
+        b t2j65end
+        t2j65nt:
+        adds r4, r4, #2
+        t2j65end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS << 15) <> 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op76:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j76tk
+        lsls r0, r8, #15
+        bne t2j76nt
+        t2j76tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j76in
+        movs r0, #0
+        mov r11, r0
+        t2j76in:
+        sub r6, r6, #12
+        b t2j76end
+        t2j76nt:
+        adds r4, r4, #2
+        t2j76end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j76tk
+        lsls r0, r8, #15
+        bne t2j76nt
+        t2j76tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j76in
+        movs r0, #0
+        mov r11, r0
+        t2j76in:
+        b t2j76end
+        t2j76nt:
+        adds r4, r4, #2
+        t2j76end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FC < 0) Or ((FZS << 15) = 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op66:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j66tk
+        lsls r0, r8, #15
+        bne t2j66nt
+        t2j66tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j66in
+        movs r0, #0
+        mov r11, r0
+        t2j66in:
+        sub r6, r6, #12
+        b t2j66end
+        t2j66nt:
+        adds r4, r4, #2
+        t2j66end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j66tk
+        lsls r0, r8, #15
+        bne t2j66nt
+        t2j66tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j66in
+        movs r0, #0
+        mov r11, r0
+        t2j66in:
+        b t2j66end
+        t2j66nt:
+        adds r4, r4, #2
+        t2j66end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FC < 0) Or ((FZS << 15) = 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op77:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j77nt
+        lsls r0, r8, #15
+        beq t2j77nt
+        t2j77tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j77in
+        movs r0, #0
+        mov r11, r0
+        t2j77in:
+        sub r6, r6, #12
+        b t2j77end
+        t2j77nt:
+        adds r4, r4, #2
+        t2j77end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j77nt
+        lsls r0, r8, #15
+        beq t2j77nt
+        t2j77tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j77in
+        movs r0, #0
+        mov r11, r0
+        t2j77in:
+        b t2j77end
+        t2j77nt:
+        adds r4, r4, #2
+        t2j77end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FC >= 0) And ((FZS << 15) <> 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op67:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j67nt
+        lsls r0, r8, #15
+        beq t2j67nt
+        t2j67tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j67in
+        movs r0, #0
+        mov r11, r0
+        t2j67in:
+        sub r6, r6, #12
+        b t2j67end
+        t2j67nt:
+        adds r4, r4, #2
+        t2j67end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FC, PEnd
+        cmp r9, #0
+        blt t2j67nt
+        lsls r0, r8, #15
+        beq t2j67nt
+        t2j67tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j67in
+        movs r0, #0
+        mov r11, r0
+        t2j67in:
+        b t2j67end
+        t2j67nt:
+        adds r4, r4, #2
+        t2j67end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FC >= 0) And ((FZS << 15) <> 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op78:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        cmp r8, #0
+        bge t2j78nt
+        t2j78tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j78in
+        movs r0, #0
+        mov r11, r0
+        t2j78in:
+        sub r6, r6, #12
+        b t2j78end
+        t2j78nt:
+        adds r4, r4, #2
+        t2j78end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        cmp r8, #0
+        bge t2j78nt
+        t2j78tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j78in
+        movs r0, #0
+        mov r11, r0
+        t2j78in:
+        b t2j78end
+        t2j78nt:
+        adds r4, r4, #2
+        t2j78end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FZS < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op68:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        cmp r8, #0
+        bge t2j68nt
+        t2j68tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j68in
+        movs r0, #0
+        mov r11, r0
+        t2j68in:
+        sub r6, r6, #12
+        b t2j68end
+        t2j68nt:
+        adds r4, r4, #2
+        t2j68end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        cmp r8, #0
+        bge t2j68nt
+        t2j68tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j68in
+        movs r0, #0
+        mov r11, r0
+        t2j68in:
+        b t2j68end
+        t2j68nt:
+        adds r4, r4, #2
+        t2j68end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FZS < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op79:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        cmp r8, #0
+        blt t2j79nt
+        t2j79tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j79in
+        movs r0, #0
+        mov r11, r0
+        t2j79in:
+        sub r6, r6, #12
+        b t2j79end
+        t2j79nt:
+        adds r4, r4, #2
+        t2j79end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        cmp r8, #0
+        blt t2j79nt
+        t2j79tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j79in
+        movs r0, #0
+        mov r11, r0
+        t2j79in:
+        b t2j79end
+        t2j79nt:
+        adds r4, r4, #2
+        t2j79end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FZS >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op69:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        cmp r8, #0
+        blt t2j69nt
+        t2j69tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j69in
+        movs r0, #0
+        mov r11, r0
+        t2j69in:
+        sub r6, r6, #12
+        b t2j69end
+        t2j69nt:
+        adds r4, r4, #2
+        t2j69end:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        cmp r8, #0
+        blt t2j69nt
+        t2j69tk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j69in
+        movs r0, #0
+        mov r11, r0
+        t2j69in:
+        b t2j69end
+        t2j69nt:
+        adds r4, r4, #2
+        t2j69end:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If FZS >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op7A:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        beq t2j7ant
+        t2j7atk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7ain
+        movs r0, #0
+        mov r11, r0
+        t2j7ain:
+        sub r6, r6, #12
+        b t2j7aend
+        t2j7ant:
+        adds r4, r4, #2
+        t2j7aend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        beq t2j7ant
+        t2j7atk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7ain
+        movs r0, #0
+        mov r11, r0
+        t2j7ain:
+        b t2j7aend
+        t2j7ant:
+        adds r4, r4, #2
+        t2j7aend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If Par((FZS ! (FZS >> 17)) & 255) <> 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op6A:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        beq t2j6ant
+        t2j6atk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6ain
+        movs r0, #0
+        mov r11, r0
+        t2j6ain:
+        sub r6, r6, #12
+        b t2j6aend
+        t2j6ant:
+        adds r4, r4, #2
+        t2j6aend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        beq t2j6ant
+        t2j6atk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6ain
+        movs r0, #0
+        mov r11, r0
+        t2j6ain:
+        b t2j6aend
+        t2j6ant:
+        adds r4, r4, #2
+        t2j6aend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If Par((FZS ! (FZS >> 17)) & 255) <> 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op7B:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        bne t2j7bnt
+        t2j7btk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7bin
+        movs r0, #0
+        mov r11, r0
+        t2j7bin:
+        sub r6, r6, #12
+        b t2j7bend
+        t2j7bnt:
+        adds r4, r4, #2
+        t2j7bend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        bne t2j7bnt
+        t2j7btk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7bin
+        movs r0, #0
+        mov r11, r0
+        t2j7bin:
+        b t2j7bend
+        t2j7bnt:
+        adds r4, r4, #2
+        t2j7bend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If Par((FZS ! (FZS >> 17)) & 255) = 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op6B:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        bne t2j6bnt
+        t2j6btk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6bin
+        movs r0, #0
+        mov r11, r0
+        t2j6bin:
+        sub r6, r6, #12
+        b t2j6bend
+        t2j6bnt:
+        adds r4, r4, #2
+        t2j6bend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, PEnd
+        eor r0, r8, r8, lsr #17
+        uxtb r0, r0
+        ldr r1, =global_par
+        ldrb r0, [r1, r0]
+        cmp r0, #0
+        bne t2j6bnt
+        t2j6btk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6bin
+        movs r0, #0
+        mov r11, r0
+        t2j6bin:
+        b t2j6bend
+        t2j6bnt:
+        adds r4, r4, #2
+        t2j6bend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If Par((FZS ! (FZS >> 17)) & 255) = 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op7C:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bpl t2j7cnt
+        t2j7ctk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7cin
+        movs r0, #0
+        mov r11, r0
+        t2j7cin:
+        sub r6, r6, #12
+        b t2j7cend
+        t2j7cnt:
+        adds r4, r4, #2
+        t2j7cend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bpl t2j7cnt
+        t2j7ctk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7cin
+        movs r0, #0
+        mov r11, r0
+        t2j7cin:
+        b t2j7cend
+        t2j7cnt:
+        adds r4, r4, #2
+        t2j7cend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS ! FO) < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op6C:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bpl t2j6cnt
+        t2j6ctk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6cin
+        movs r0, #0
+        mov r11, r0
+        t2j6cin:
+        sub r6, r6, #12
+        b t2j6cend
+        t2j6cnt:
+        adds r4, r4, #2
+        t2j6cend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bpl t2j6cnt
+        t2j6ctk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6cin
+        movs r0, #0
+        mov r11, r0
+        t2j6cin:
+        b t2j6cend
+        t2j6cnt:
+        adds r4, r4, #2
+        t2j6cend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS ! FO) < 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op7D:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j7dnt
+        t2j7dtk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7din
+        movs r0, #0
+        mov r11, r0
+        t2j7din:
+        sub r6, r6, #12
+        b t2j7dend
+        t2j7dnt:
+        adds r4, r4, #2
+        t2j7dend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j7dnt
+        t2j7dtk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7din
+        movs r0, #0
+        mov r11, r0
+        t2j7din:
+        b t2j7dend
+        t2j7dnt:
+        adds r4, r4, #2
+        t2j7dend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS ! FO) >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op6D:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j6dnt
+        t2j6dtk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6din
+        movs r0, #0
+        mov r11, r0
+        t2j6din:
+        sub r6, r6, #12
+        b t2j6dend
+        t2j6dnt:
+        adds r4, r4, #2
+        t2j6dend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j6dnt
+        t2j6dtk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6din
+        movs r0, #0
+        mov r11, r0
+        t2j6din:
+        b t2j6dend
+        t2j6dnt:
+        adds r4, r4, #2
+        t2j6dend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If (FZS ! FO) >= 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op7E:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j7etk
+        lsls r0, r8, #15
+        bne t2j7ent
+        t2j7etk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7ein
+        movs r0, #0
+        mov r11, r0
+        t2j7ein:
+        sub r6, r6, #12
+        b t2j7eend
+        t2j7ent:
+        adds r4, r4, #2
+        t2j7eend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j7etk
+        lsls r0, r8, #15
+        bne t2j7ent
+        t2j7etk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7ein
+        movs r0, #0
+        mov r11, r0
+        t2j7ein:
+        b t2j7eend
+        t2j7ent:
+        adds r4, r4, #2
+        t2j7eend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If ((FZS ! FO) < 0) Or ((FZS << 15) = 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op6E:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j6etk
+        lsls r0, r8, #15
+        bne t2j6ent
+        t2j6etk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6ein
+        movs r0, #0
+        mov r11, r0
+        t2j6ein:
+        sub r6, r6, #12
+        b t2j6eend
+        t2j6ent:
+        adds r4, r4, #2
+        t2j6eend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j6etk
+        lsls r0, r8, #15
+        bne t2j6ent
+        t2j6etk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6ein
+        movs r0, #0
+        mov r11, r0
+        t2j6ein:
+        b t2j6eend
+        t2j6ent:
+        adds r4, r4, #2
+        t2j6eend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If ((FZS ! FO) < 0) Or ((FZS << 15) = 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op7F:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j7fnt
+        lsls r0, r8, #15
+        beq t2j7fnt
+        t2j7ftk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7fin
+        movs r0, #0
+        mov r11, r0
+        t2j7fin:
+        sub r6, r6, #12
+        b t2j7fend
+        t2j7fnt:
+        adds r4, r4, #2
+        t2j7fend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j7fnt
+        lsls r0, r8, #15
+        beq t2j7fnt
+        t2j7ftk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j7fin
+        movs r0, #0
+        mov r11, r0
+        t2j7fin:
+        b t2j7fend
+        t2j7fnt:
+        adds r4, r4, #2
+        t2j7fend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If ((FZS ! FO) >= 0) And ((FZS << 15) <> 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op6F:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP, Left, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j6fnt
+        lsls r0, r8, #15
+        beq t2j6fnt
+        t2j6ftk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6fin
+        movs r0, #0
+        mov r11, r0
+        t2j6fin:
+        sub r6, r6, #12
+        b t2j6fend
+        t2j6fnt:
+        adds r4, r4, #2
+        t2j6fend:
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP, FZS, FO, PEnd
+        eors r0, r8, r10
+        bmi t2j6fnt
+        lsls r0, r8, #15
+        beq t2j6fnt
+        t2j6ftk:
+        ldrsb r0, [r4, #1]
+        adds r4, r4, #2
+        add r4, r4, r0
+        ldr r1, =global_pstart
+        ldr r1, [r1]
+        cmp r4, r1
+        bge t2j6fin
+        movs r0, #0
+        mov r11, r0
+        t2j6fin:
+        b t2j6fend
+        t2j6fnt:
+        adds r4, r4, #2
+        t2j6fend:
+      EndASM
+    CompilerEndIf
+  CompilerElse
   If ((FZS ! FO) >= 0) And ((FZS << 15) <> 0)
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 Op80:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -3523,7 +7110,7 @@ G80R0:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G80M0:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3544,7 +7131,7 @@ G80M0:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G80R1:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -3555,7 +7142,7 @@ G80R1:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G80M1:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3576,7 +7163,7 @@ G80M1:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G80R2:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -3587,7 +7174,7 @@ G80R2:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G80M2:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3608,7 +7195,7 @@ G80M2:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G80R3:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -3619,7 +7206,7 @@ G80R3:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G80M3:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3640,7 +7227,7 @@ G80M3:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G80R4:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -3651,7 +7238,7 @@ G80R4:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G80M4:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3672,7 +7259,7 @@ G80M4:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G80R5:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -3683,7 +7270,7 @@ G80R5:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G80M5:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3704,7 +7291,7 @@ G80M5:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G80R6:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -3715,7 +7302,7 @@ G80R6:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G80M6:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3736,7 +7323,7 @@ G80M6:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G80R7:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -3746,7 +7333,7 @@ G80R7:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(4)
+  NextOpK(4)
 G80M7:
   t = PageR(ea >> 12)
   If t <> 0
@@ -3761,7 +7348,7 @@ G80M7:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(10)
+  NextOpK(10)
 Op81:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -3780,7 +7367,7 @@ G81R0:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G81M0:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -3808,7 +7395,7 @@ G81M0:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G81R1:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -3819,7 +7406,7 @@ G81R1:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G81M1:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -3847,7 +7434,7 @@ G81M1:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G81R2:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -3858,7 +7445,7 @@ G81R2:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G81M2:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -3886,7 +7473,7 @@ G81M2:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G81R3:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -3897,7 +7484,7 @@ G81R3:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G81M3:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -3925,7 +7512,7 @@ G81M3:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G81R4:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -3936,7 +7523,7 @@ G81R4:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G81M4:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -3964,7 +7551,7 @@ G81M4:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G81R5:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -3975,7 +7562,7 @@ G81R5:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G81M5:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4003,7 +7590,7 @@ G81M5:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G81R6:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -4014,7 +7601,7 @@ G81R6:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G81M6:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4042,7 +7629,7 @@ G81M6:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G81R7:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -4052,7 +7639,7 @@ G81R7:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(4)
+  NextOpK(4)
 G81M7:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4070,7 +7657,7 @@ G81M7:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(10)
+  NextOpK(10)
 Op82:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4089,7 +7676,7 @@ G82R0:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G82M0:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4110,7 +7697,7 @@ G82M0:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G82R1:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -4121,7 +7708,7 @@ G82R1:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G82M1:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4142,7 +7729,7 @@ G82M1:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G82R2:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -4153,7 +7740,7 @@ G82R2:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G82M2:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4174,7 +7761,7 @@ G82M2:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G82R3:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -4185,7 +7772,7 @@ G82R3:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G82M3:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4206,7 +7793,7 @@ G82M3:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G82R4:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -4217,7 +7804,7 @@ G82R4:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G82M4:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4238,7 +7825,7 @@ G82M4:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G82R5:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -4249,7 +7836,7 @@ G82R5:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G82M5:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4270,7 +7857,7 @@ G82M5:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G82R6:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -4281,7 +7868,7 @@ G82R6:
   FA = vr
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(4)
+  NextOpK(4)
 G82M6:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4302,7 +7889,7 @@ G82M6:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G82R7:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -4312,7 +7899,7 @@ G82R7:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(4)
+  NextOpK(4)
 G82M7:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4327,7 +7914,7 @@ G82M7:
   FO = ((va ! vb) & (va ! vr)) << 24
   FA = va ! vb
   FZS = (vr << 24) >> 24
-  NextOp(10)
+  NextOpK(10)
 Op83:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4346,7 +7933,7 @@ G83R0:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G83M0:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4374,7 +7961,7 @@ G83M0:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G83R1:
   va = R(m & 7)
   vb = PeekB(PIP) & $FFFF
@@ -4385,7 +7972,7 @@ G83R1:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G83M1:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4413,7 +8000,7 @@ G83M1:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G83R2:
   va = R(m & 7)
   vb = PeekB(PIP) & $FFFF
@@ -4424,7 +8011,7 @@ G83R2:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G83M2:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4452,7 +8039,7 @@ G83M2:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G83R3:
   va = R(m & 7)
   vb = PeekB(PIP) & $FFFF
@@ -4463,7 +8050,7 @@ G83R3:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G83M3:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4491,7 +8078,7 @@ G83M3:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G83R4:
   va = R(m & 7)
   vb = PeekB(PIP) & $FFFF
@@ -4502,7 +8089,7 @@ G83R4:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G83M4:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4530,7 +8117,7 @@ G83M4:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G83R5:
   va = R(m & 7)
   vb = PeekB(PIP) & $FFFF
@@ -4541,7 +8128,7 @@ G83R5:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G83M5:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4569,7 +8156,7 @@ G83M5:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G83R6:
   va = R(m & 7)
   vb = PeekB(PIP) & $FFFF
@@ -4580,7 +8167,7 @@ G83R6:
   FA = vr
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(4)
+  NextOpK(4)
 G83M6:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4608,7 +8195,7 @@ G83M6:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 G83R7:
   va = R(m & 7)
   vb = PeekB(PIP) & $FFFF
@@ -4618,7 +8205,7 @@ G83R7:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(4)
+  NextOpK(4)
 G83M7:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4636,7 +8223,7 @@ G83M7:
   FO = ((va ! vb) & (va ! vr)) << 16
   FA = va ! vb
   FZS = (vr << 16) >> 16
-  NextOp(10)
+  NextOpK(10)
 Op84:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4651,7 +8238,7 @@ Op84:
   FO = 0
   FA = vr
   FZS = (vr << 24) >> 24
-  NextOp(3)
+  NextOpK(3)
 Op84M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4665,7 +8252,7 @@ Op84M:
   FO = 0
   FA = vr
   FZS = (vr << 24) >> 24
-  NextOp(9)
+  NextOpK(9)
 Op85:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4680,7 +8267,7 @@ Op85:
   FO = 0
   FA = vr
   FZS = (vr << 16) >> 16
-  NextOp(3)
+  NextOpK(3)
 Op85M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4697,7 +8284,7 @@ Op85M:
   FO = 0
   FA = vr
   FZS = (vr << 16) >> 16
-  NextOp(9)
+  NextOpK(9)
 Op86:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4709,7 +8296,7 @@ Op86:
   vb = PeekA(@R(0) + R8O((m >> 3) & 7))
   PokeA(@R(0) + R8O(m & 7), vb)
   PokeA(@R(0) + R8O((m >> 3) & 7), va)
-  NextOp(4)
+  NextOpK(4)
 Op86M:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4725,7 +8312,7 @@ Op86M:
     Cpu86Wr8(ea, vb)
   EndIf
   PokeA(@R(0) + R8O((m >> 3) & 7), va)
-  NextOp(17)
+  NextOpK(17)
 Op87:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4737,7 +8324,7 @@ Op87:
   vb = R((m >> 3) & 7)
   R(m & 7) = vb
   R((m >> 3) & 7) = va
-  NextOp(4)
+  NextOpK(4)
 Op87M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4760,7 +8347,7 @@ Op87M:
     Cpu86Wr16(sb, eo, vb)
   EndIf
   R((m >> 3) & 7) = va
-  NextOp(17)
+  NextOpK(17)
 Op88:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4770,7 +8357,7 @@ Op88:
   PIP = PIP + 2
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   PokeA(@R(0) + R8O(m & 7), va)
-  NextOp(2)
+  NextOpK(2)
 Op88M:
   va = PeekA(@R(0) + R8O((m >> 3) & 7))
   t = PageW(ea >> 12)
@@ -4779,17 +8366,44 @@ Op88M:
   Else
     Cpu86Wr8(ea, va)
   EndIf
-  NextOp(9)
+  NextOpK(9)
 Op89:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op89M
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        strh r1, [r3, r12, lsl #1]
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        and r12, r0, #7
+        ubfx r2, r0, #3, #3
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        strh r1, [r3, r12, lsl #1]
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R((m >> 3) & 7)
   R(m & 7) = va
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op89M:
   va = R((m >> 3) & 7)
   t = PageW(ea >> 12)
@@ -4802,7 +8416,7 @@ Op89M:
   Else
     Cpu86Wr16(sb, eo, va)
   EndIf
-  NextOp(9)
+  NextOpK(9)
 Op8A:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4812,7 +8426,7 @@ Op8A:
   PIP = PIP + 2
   va = PeekA(@R(0) + R8O(m & 7))
   PokeA(@R(0) + R8O((m >> 3) & 7), va)
-  NextOp(2)
+  NextOpK(2)
 Op8AM:
   t = PageR(ea >> 12)
   If t <> 0
@@ -4821,17 +8435,44 @@ Op8AM:
     va = Cpu86Rd8(ea)
   EndIf
   PokeA(@R(0) + R8O((m >> 3) & 7), va)
-  NextOp(8)
+  NextOpK(8)
 Op8B:
   m = PeekA(PIP + 1)
   If m < $C0
     EaRet = ?Op8BM
     Goto EaTab(m)
   EndIf
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        strh r1, [r3, r12, lsl #1]
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrb r0, [r4, #1]
+        ldr r3, =global_r
+        ubfx r12, r0, #3, #3
+        and r2, r0, #7
+        ldrh r0, [r3, r12, lsl #1]
+        ldrh r1, [r3, r2, lsl #1]
+        strh r1, [r3, r12, lsl #1]
+        adds r4, r4, #2
+      EndASM
+    CompilerEndIf
+  CompilerElse
   PIP = PIP + 2
   va = R(m & 7)
   R((m >> 3) & 7) = va
-  NextOp(2)
+  CompilerEndIf
+  NextOpK(2)
 Op8BM:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4843,7 +8484,7 @@ Op8BM:
     va = Cpu86Rd16(sb, eo)
   EndIf
   R((m >> 3) & 7) = va
-  NextOp(8)
+  NextOpK(8)
 Op8C:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4853,7 +8494,7 @@ Op8C:
   PIP = PIP + 2
   va = SegV((m >> 3) & 3)
   R(m & 7) = va
-  NextOp(2)
+  NextOpK(2)
 Op8CM:
   va = SegV((m >> 3) & 3)
   t = PageW(ea >> 12)
@@ -4866,7 +8507,7 @@ Op8CM:
   Else
     Cpu86Wr16(sb, eo, va)
   EndIf
-  NextOp(9)
+  NextOpK(9)
 Op8D:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4876,10 +8517,10 @@ Op8D:
   PIP = PIP + 2
   va = R(m & 7)
   R((m >> 3) & 7) = va
-  NextOp(2)
+  NextOpK(2)
 Op8DM:
   R((m >> 3) & 7) = eo
-  NextOp(2)
+  NextOpK(2)
 Op8E:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4907,7 +8548,7 @@ Op8E:
     SegB(x) = va << 4
     SegD = SegB(3)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 Op8EM:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -4937,7 +8578,7 @@ Op8EM:
     SegB(x) = va << 4
     SegD = SegB(3)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 Op8F:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -4958,7 +8599,7 @@ Op8F:
   EndIf
   R(4) = eo + 2
   R(m & 7) = va
-  NextOp(8)
+  NextOpK(8)
 Op8FM:
   x = ea
   y = eo
@@ -4988,56 +8629,56 @@ Op8FM:
   Else
     Cpu86Wr16(sb, eo, va)
   EndIf
-  NextOp(17)
+  NextOpK(17)
 Op90:
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op91:
   va = R(1)
   R(1) = R(0)
   R(0) = va
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op92:
   va = R(2)
   R(2) = R(0)
   R(0) = va
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op93:
   va = R(3)
   R(3) = R(0)
   R(0) = va
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op94:
   va = R(4)
   R(4) = R(0)
   R(0) = va
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op95:
   va = R(5)
   R(5) = R(0)
   R(0) = va
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op96:
   va = R(6)
   R(6) = R(0)
   R(0) = va
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op97:
   va = R(7)
   R(7) = R(0)
   R(0) = va
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op98:
   R(0) = PeekB(@R(0))
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 Op99:
   If R(0) & $8000
     R(2) = $FFFF
@@ -5045,7 +8686,7 @@ Op99:
     R(2) = 0
   EndIf
   PIP = PIP + 1
-  NextOp(5)
+  NextOpK(5)
 Op9A:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   y = PeekA(PIP + 3) | (PeekA(PIP + 4) << 8)
@@ -5083,10 +8724,10 @@ Op9A:
   PBase = 0
   PIP = x
   PEnd = 0
-  NextOp(28)
+  NextOpK(28)
 Op9B:
   PIP = PIP + 1
-  NextOp(3)
+  NextOpK(3)
 Op9C:
   PIP = PIP + 1
   va = Cpu86Flags()
@@ -5103,7 +8744,7 @@ Op9C:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(10)
+  NextOpK(10)
 Op9D:
   PIP = PIP + 1
   eo = R(4)
@@ -5119,15 +8760,15 @@ Op9D:
   EndIf
   R(4) = eo + 2
   Cpu86SetFlags(va)
-  NextOp(8)
+  NextOpK(8)
 Op9E:
   Cpu86SetFlags((Cpu86Flags() & $FF00) | PeekA(@R(0) + 1))
   PIP = PIP + 1
-  NextOp(4)
+  NextOpK(4)
 Op9F:
   PokeA(@R(0) + 1, Cpu86Flags())
   PIP = PIP + 1
-  NextOp(4)
+  NextOpK(4)
 OpA0:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
@@ -5140,7 +8781,7 @@ OpA0:
     va = Cpu86Rd8(ea)
   EndIf
   PokeA(@R(0) + 0, va)
-  NextOp(10)
+  NextOpK(10)
 OpA1:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
@@ -5156,7 +8797,7 @@ OpA1:
     va = Cpu86Rd16(sb, eo)
   EndIf
   R(0) = va
-  NextOp(10)
+  NextOpK(10)
 OpA2:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
@@ -5169,7 +8810,7 @@ OpA2:
   Else
     Cpu86Wr8(ea, va)
   EndIf
-  NextOp(10)
+  NextOpK(10)
 OpA3:
   eo = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   sb = SegD
@@ -5186,7 +8827,7 @@ OpA3:
   Else
     Cpu86Wr16(sb, eo, va)
   EndIf
-  NextOp(10)
+  NextOpK(10)
 OpA4:
   PIP = PIP + 1
   If Rep = 0
@@ -5239,7 +8880,7 @@ OpA4:
         R(6) = R(6) + 1
         R(7) = R(7) + 1
         cnt = cnt - 1
-  Charge(17)
+  ChargeK(17)
       Else
         vr = vr + y
         ea = vr + (va << 0)
@@ -5294,7 +8935,7 @@ OpA4:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(17)
+  ChargeK(17)
   CompilerIf #CPU_TIMING = 1
     If Cpu86RepYield
       If cnt <> 0
@@ -5306,7 +8947,7 @@ OpA4:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(18)
+  NextOpK(18)
 OpA5:
   PIP = PIP + 1
   If Rep = 0
@@ -5359,7 +9000,7 @@ OpA5:
         R(6) = R(6) + 2
         R(7) = R(7) + 2
         cnt = cnt - 1
-  Charge(17)
+  ChargeK(17)
       Else
         vr = vr + y
         ea = vr + (va << 1)
@@ -5423,7 +9064,7 @@ OpA5:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(17)
+  ChargeK(17)
   CompilerIf #CPU_TIMING = 1
     If Cpu86RepYield
       If cnt <> 0
@@ -5435,7 +9076,7 @@ OpA5:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(18)
+  NextOpK(18)
 OpA6:
   PIP = PIP + 1
   If Rep = 0
@@ -5474,7 +9115,7 @@ OpA6:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(22)
+  ChargeK(22)
   If Rep = 2
     If (FZS << 15) <> 0
       Break
@@ -5495,7 +9136,7 @@ OpA6:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(22)
+  NextOpK(22)
 OpA7:
   PIP = PIP + 1
   If Rep = 0
@@ -5540,7 +9181,7 @@ OpA7:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(22)
+  ChargeK(22)
   If Rep = 2
     If (FZS << 15) <> 0
       Break
@@ -5561,7 +9202,7 @@ OpA7:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(22)
+  NextOpK(22)
 OpAA:
   PIP = PIP + 1
   If Rep = 0
@@ -5599,7 +9240,7 @@ OpAA:
         Cpu86Wr8(SegB(0) + R(7), PeekA(@R(0)))
         R(7) = R(7) + 1
         cnt = cnt - 1
-  Charge(10)
+  ChargeK(10)
       Else
         vr = vr + y
         ea = vr + (va << 0)
@@ -5643,7 +9284,7 @@ OpAA:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(10)
+  ChargeK(10)
   CompilerIf #CPU_TIMING = 1
     If Cpu86RepYield
       If cnt <> 0
@@ -5655,7 +9296,7 @@ OpAA:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(11)
+  NextOpK(11)
 OpAB:
   PIP = PIP + 1
   If Rep = 0
@@ -5693,7 +9334,7 @@ OpAB:
         Cpu86Wr16(SegB(0), R(7), R(0))
         R(7) = R(7) + 2
         cnt = cnt - 1
-  Charge(10)
+  ChargeK(10)
       Else
         vr = vr + y
         ea = vr + (va << 1)
@@ -5742,7 +9383,7 @@ OpAB:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(10)
+  ChargeK(10)
   CompilerIf #CPU_TIMING = 1
     If Cpu86RepYield
       If cnt <> 0
@@ -5754,7 +9395,7 @@ OpAB:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(11)
+  NextOpK(11)
 OpAC:
   PIP = PIP + 1
   If Rep = 0
@@ -5779,7 +9420,7 @@ OpAC:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(13)
+  ChargeK(13)
   CompilerIf #CPU_TIMING = 1
     If Cpu86RepYield
       If cnt <> 0
@@ -5791,7 +9432,7 @@ OpAC:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(12)
+  NextOpK(12)
 OpAD:
   PIP = PIP + 1
   If Rep = 0
@@ -5819,7 +9460,7 @@ OpAD:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(13)
+  ChargeK(13)
   CompilerIf #CPU_TIMING = 1
     If Cpu86RepYield
       If cnt <> 0
@@ -5831,7 +9472,7 @@ OpAD:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(12)
+  NextOpK(12)
 OpAE:
   PIP = PIP + 1
   If Rep = 0
@@ -5861,7 +9502,7 @@ OpAE:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(15)
+  ChargeK(15)
   If Rep = 2
     If (FZS << 15) <> 0
       Break
@@ -5882,7 +9523,7 @@ OpAE:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(15)
+  NextOpK(15)
 OpAF:
   PIP = PIP + 1
   If Rep = 0
@@ -5915,7 +9556,7 @@ OpAF:
   EndIf
   R(1) = R(1) - 1
   cnt = R(1)
-  Charge(15)
+  ChargeK(15)
   If Rep = 2
     If (FZS << 15) <> 0
       Break
@@ -5936,7 +9577,7 @@ OpAF:
     EndIf
   CompilerEndIf
   Wend
-  NextOp(15)
+  NextOpK(15)
 OpA8:
   va = PeekA(@R(0) + 0)
   vb = PeekA(PIP + 1)
@@ -5946,7 +9587,7 @@ OpA8:
   FO = 0
   FA = vr
   FZS = (vr << 24) >> 24
-  NextOp(4)
+  NextOpK(4)
 OpA9:
   va = R(0)
   vb = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
@@ -5956,71 +9597,223 @@ OpA9:
   FO = 0
   FA = vr
   FZS = (vr << 16) >> 16
-  NextOp(4)
+  NextOpK(4)
 OpB0:
   PokeA(@R(0) + 0, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB1:
   PokeA(@R(0) + 2, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB2:
   PokeA(@R(0) + 4, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB3:
   PokeA(@R(0) + 6, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB4:
   PokeA(@R(0) + 1, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB5:
   PokeA(@R(0) + 3, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB6:
   PokeA(@R(0) + 5, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB7:
   PokeA(@R(0) + 7, PeekA(PIP + 1))
   PIP = PIP + 2
-  NextOp(4)
+  NextOpK(4)
 OpB8:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #0]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #0]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(0) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpB9:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #2]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #2]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(1) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpBA:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #4]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #4]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(2) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpBB:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #6]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #6]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(3) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpBC:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #8]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #8]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(4) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpBD:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #10]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #10]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(5) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpBE:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #12]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #12]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(6) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpBF:
+  CompilerIf #CPU_ASM_TAIL = 1
+    CompilerIf #CPU_TIMING = 1
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #14]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+    CompilerIf #CPU_TIMING = 0
+      ASM Uses PIP
+        ldrh r0, [r4, #1]
+        ldr r1, =global_r
+        strh r0, [r1, #14]
+        adds r4, r4, #3
+      EndASM
+    CompilerEndIf
+  CompilerElse
   R(7) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
-  NextOp(4)
+  CompilerEndIf
+  NextOpK(4)
 OpC2:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
@@ -6040,7 +9833,7 @@ OpC2:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(12)
+  NextOpK(12)
 OpC0:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
@@ -6060,7 +9853,7 @@ OpC0:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(12)
+  NextOpK(12)
 OpC3:
   eo = R(4)
   ea = SegB(2) + eo
@@ -6078,7 +9871,7 @@ OpC3:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(8)
+  NextOpK(8)
 OpC1:
   eo = R(4)
   ea = SegB(2) + eo
@@ -6096,7 +9889,7 @@ OpC1:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(8)
+  NextOpK(8)
 OpCA:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
@@ -6129,7 +9922,7 @@ OpCA:
   PBase = 0
   PIP = y
   PEnd = 0
-  NextOp(17)
+  NextOpK(17)
 OpC8:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   eo = R(4)
@@ -6162,7 +9955,7 @@ OpC8:
   PBase = 0
   PIP = y
   PEnd = 0
-  NextOp(17)
+  NextOpK(17)
 OpCB:
   eo = R(4)
   ea = SegB(2) + eo
@@ -6193,7 +9986,7 @@ OpCB:
   PBase = 0
   PIP = y
   PEnd = 0
-  NextOp(18)
+  NextOpK(18)
 OpC9:
   eo = R(4)
   ea = SegB(2) + eo
@@ -6224,7 +10017,7 @@ OpC9:
   PBase = 0
   PIP = y
   PEnd = 0
-  NextOp(18)
+  NextOpK(18)
 OpC4:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -6234,7 +10027,7 @@ OpC4:
   PIP = PIP + 2
   va = R(m & 7)
   R((m >> 3) & 7) = va
-  NextOp(2)
+  NextOpK(2)
 OpC4M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -6259,7 +10052,7 @@ OpC4M:
   R((m >> 3) & 7) = va
   SegV(0) = vb
   SegB(0) = vb << 4
-  NextOp(16)
+  NextOpK(16)
 OpC5:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -6269,7 +10062,7 @@ OpC5:
   PIP = PIP + 2
   va = R(m & 7)
   R((m >> 3) & 7) = va
-  NextOp(2)
+  NextOpK(2)
 OpC5M:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -6295,7 +10088,7 @@ OpC5M:
   SegV(3) = vb
   SegB(3) = vb << 4
   SegD = SegB(3)
-  NextOp(16)
+  NextOpK(16)
 OpC6:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -6306,7 +10099,7 @@ OpC6:
   va = PeekA(PIP)
   PIP = PIP + 1
   PokeA(@R(0) + R8O(m & 7), va)
-  NextOp(4)
+  NextOpK(4)
 OpC6M:
   va = PeekA(PIP)
   PIP = PIP + 1
@@ -6316,7 +10109,7 @@ OpC6M:
   Else
     Cpu86Wr8(ea, va)
   EndIf
-  NextOp(10)
+  NextOpK(10)
 OpC7:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -6327,7 +10120,7 @@ OpC7:
   va = PeekA(PIP) | (PeekA(PIP + 1) << 8)
   PIP = PIP + 2
   R(m & 7) = va
-  NextOp(4)
+  NextOpK(4)
 OpC7M:
   va = PeekA(PIP) | (PeekA(PIP + 1) << 8)
   PIP = PIP + 2
@@ -6341,23 +10134,23 @@ OpC7M:
   Else
     Cpu86Wr16(sb, eo, va)
   EndIf
-  NextOp(10)
+  NextOpK(10)
 OpCC:
   PIP = PIP + 1
   Cpu86Interrupt(3)
-  NextOp(52)
+  NextOpK(52)
 OpCD:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
   Cpu86Interrupt(x)
-  NextOp(51)
+  NextOpK(51)
 OpCE:
   PIP = PIP + 1
   If FO < 0
     Cpu86Interrupt(4)
-  Charge(49)
+  ChargeK(49)
   EndIf
-  NextOp(4)
+  NextOpK(4)
 OpCF:
   eo = R(4)
   ea = SegB(2) + eo
@@ -6401,7 +10194,7 @@ OpCF:
   PBase = 0
   PIP = y
   PEnd = 0
-  NextOp(24)
+  NextOpK(24)
 OpD0:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -6422,7 +10215,7 @@ GD0R0:
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M0:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6445,7 +10238,7 @@ GD0M0:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD0R1:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = 1
@@ -6458,7 +10251,7 @@ GD0R1:
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M1:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6481,7 +10274,7 @@ GD0M1:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD0R2:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = 1
@@ -6496,7 +10289,7 @@ GD0R2:
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M2:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6521,7 +10314,7 @@ GD0M2:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD0R3:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = 1
@@ -6536,7 +10329,7 @@ GD0R3:
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M3:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6561,7 +10354,7 @@ GD0M3:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD0R4:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = 1
@@ -6578,7 +10371,7 @@ GD0R4:
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M4:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6605,7 +10398,7 @@ GD0M4:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD0R5:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = 1
@@ -6622,7 +10415,7 @@ GD0R5:
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M5:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6649,7 +10442,7 @@ GD0M5:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD0R6:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = 1
@@ -6661,7 +10454,7 @@ GD0R6:
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M6:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6683,7 +10476,7 @@ GD0M6:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD0R7:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = 1
@@ -6700,7 +10493,7 @@ GD0R7:
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD0M7:
   t = PageR(ea >> 12)
   If t <> 0
@@ -6727,7 +10520,7 @@ GD0M7:
     Cpu86Wr8(ea, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 OpD1:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -6748,7 +10541,7 @@ GD1R0:
     FO = FO & $80000000
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M0:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -6778,7 +10571,7 @@ GD1M0:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD1R1:
   va = R(m & 7)
   cnt = 1
@@ -6791,7 +10584,7 @@ GD1R1:
     FO = FO & $80000000
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M1:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -6821,7 +10614,7 @@ GD1M1:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD1R2:
   va = R(m & 7)
   cnt = 1
@@ -6836,7 +10629,7 @@ GD1R2:
     FO = FO & $80000000
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M2:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -6868,7 +10661,7 @@ GD1M2:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD1R3:
   va = R(m & 7)
   cnt = 1
@@ -6883,7 +10676,7 @@ GD1R3:
     FO = FO & $80000000
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M3:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -6915,7 +10708,7 @@ GD1M3:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD1R4:
   va = R(m & 7)
   cnt = 1
@@ -6932,7 +10725,7 @@ GD1R4:
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M4:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -6966,7 +10759,7 @@ GD1M4:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD1R5:
   va = R(m & 7)
   cnt = 1
@@ -6983,7 +10776,7 @@ GD1R5:
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M5:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7017,7 +10810,7 @@ GD1M5:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD1R6:
   va = R(m & 7)
   cnt = 1
@@ -7029,7 +10822,7 @@ GD1R6:
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M6:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7058,7 +10851,7 @@ GD1M6:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GD1R7:
   va = R(m & 7)
   cnt = 1
@@ -7075,7 +10868,7 @@ GD1R7:
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
   EndIf
-  NextOp(2)
+  NextOpK(2)
 GD1M7:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7109,7 +10902,7 @@ GD1M7:
     Cpu86Wr16(sb, eo, vr)
   EndIf
   EndIf
-  NextOp(15)
+  NextOpK(15)
 OpD2:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7129,9 +10922,9 @@ GD2R0:
     FC = FC & $80000000
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M0:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7153,9 +10946,9 @@ GD2M0:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD2R1:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = PeekA(@R(0) + 2)
@@ -7167,9 +10960,9 @@ GD2R1:
     FC = FC & $80000000
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M1:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7191,9 +10984,9 @@ GD2M1:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD2R2:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = PeekA(@R(0) + 2)
@@ -7207,9 +11000,9 @@ GD2R2:
     FC = FC & $80000000
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M2:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7233,9 +11026,9 @@ GD2M2:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD2R3:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = PeekA(@R(0) + 2)
@@ -7249,9 +11042,9 @@ GD2R3:
     FC = FC & $80000000
     FO = FO & $80000000
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M3:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7275,9 +11068,9 @@ GD2M3:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD2R4:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = PeekA(@R(0) + 2)
@@ -7293,9 +11086,9 @@ GD2R4:
     FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M4:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7321,9 +11114,9 @@ GD2M4:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD2R5:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = PeekA(@R(0) + 2)
@@ -7339,9 +11132,9 @@ GD2R5:
     FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M5:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7367,9 +11160,9 @@ GD2M5:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD2R6:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = PeekA(@R(0) + 2)
@@ -7380,9 +11173,9 @@ GD2R6:
     FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M6:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7403,9 +11196,9 @@ GD2M6:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD2R7:
   va = PeekA(@R(0) + R8O(m & 7))
   cnt = PeekA(@R(0) + 2)
@@ -7421,9 +11214,9 @@ GD2R7:
     FA = vr
     FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD2M7:
   t = PageR(ea >> 12)
   If t <> 0
@@ -7449,9 +11242,9 @@ GD2M7:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 OpD3:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7471,9 +11264,9 @@ GD3R0:
     FC = FC & $80000000
     FO = FO & $80000000
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M0:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7502,9 +11295,9 @@ GD3M0:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD3R1:
   va = R(m & 7)
   cnt = PeekA(@R(0) + 2)
@@ -7516,9 +11309,9 @@ GD3R1:
     FC = FC & $80000000
     FO = FO & $80000000
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M1:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7547,9 +11340,9 @@ GD3M1:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD3R2:
   va = R(m & 7)
   cnt = PeekA(@R(0) + 2)
@@ -7563,9 +11356,9 @@ GD3R2:
     FC = FC & $80000000
     FO = FO & $80000000
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M2:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7596,9 +11389,9 @@ GD3M2:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD3R3:
   va = R(m & 7)
   cnt = PeekA(@R(0) + 2)
@@ -7612,9 +11405,9 @@ GD3R3:
     FC = FC & $80000000
     FO = FO & $80000000
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M3:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7645,9 +11438,9 @@ GD3M3:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD3R4:
   va = R(m & 7)
   cnt = PeekA(@R(0) + 2)
@@ -7663,9 +11456,9 @@ GD3R4:
     FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M4:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7698,9 +11491,9 @@ GD3M4:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD3R5:
   va = R(m & 7)
   cnt = PeekA(@R(0) + 2)
@@ -7716,9 +11509,9 @@ GD3R5:
     FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M5:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7751,9 +11544,9 @@ GD3M5:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD3R6:
   va = R(m & 7)
   cnt = PeekA(@R(0) + 2)
@@ -7764,9 +11557,9 @@ GD3R6:
     FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M6:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7794,9 +11587,9 @@ GD3M6:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 GD3R7:
   va = R(m & 7)
   cnt = PeekA(@R(0) + 2)
@@ -7812,9 +11605,9 @@ GD3R7:
     FA = vr
     FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(8)
+  NextOpK(8)
 GD3M7:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -7847,9 +11640,9 @@ GD3M7:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  Charge(4)
+  ChargeK(4)
   EndIf
-  NextOp(20)
+  NextOpK(20)
 OpD4:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
@@ -7866,7 +11659,7 @@ OpD4:
     FO = 0
     FA = vr
   EndIf
-  NextOp(83)
+  NextOpK(83)
 OpD5:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
@@ -7878,7 +11671,7 @@ OpD5:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   R(0) = vr & 255
-  NextOp(60)
+  NextOpK(60)
 OpD6:
   If FC < 0
     PokeA(@R(0), 255)
@@ -7886,7 +11679,7 @@ OpD6:
     PokeA(@R(0), 0)
   EndIf
   PIP = PIP + 1
-  NextOp(4)
+  NextOpK(4)
 OpD7:
   eo = (R(3) + PeekA(@R(0))) & $FFFF
   ea = SegD + eo
@@ -7898,7 +11691,7 @@ OpD7:
   EndIf
   PokeA(@R(0), va)
   PIP = PIP + 1
-  NextOp(11)
+  NextOpK(11)
 OpD8:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7906,9 +11699,9 @@ OpD8:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpD8M:
-  NextOp(8)
+  NextOpK(8)
 OpD9:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7916,9 +11709,9 @@ OpD9:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpD9M:
-  NextOp(8)
+  NextOpK(8)
 OpDA:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7926,9 +11719,9 @@ OpDA:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpDAM:
-  NextOp(8)
+  NextOpK(8)
 OpDB:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7936,9 +11729,9 @@ OpDB:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpDBM:
-  NextOp(8)
+  NextOpK(8)
 OpDC:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7946,9 +11739,9 @@ OpDC:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpDCM:
-  NextOp(8)
+  NextOpK(8)
 OpDD:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7956,9 +11749,9 @@ OpDD:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpDDM:
-  NextOp(8)
+  NextOpK(8)
 OpDE:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7966,9 +11759,9 @@ OpDE:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpDEM:
-  NextOp(8)
+  NextOpK(8)
 OpDF:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -7976,9 +11769,9 @@ OpDF:
     Goto EaTab(m)
   EndIf
   PIP = PIP + 2
-  NextOp(2)
+  NextOpK(2)
 OpDFM:
-  NextOp(8)
+  NextOpK(8)
 OpE0:
   R(1) = R(1) - 1
   If (R(1) <> 0) And ((FZS << 15) <> 0)
@@ -7986,11 +11779,11 @@ OpE0:
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(5)
+  NextOpK(5)
 OpE1:
   R(1) = R(1) - 1
   If (R(1) <> 0) And ((FZS << 15) = 0)
@@ -7998,11 +11791,11 @@ OpE1:
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(5)
+  NextOpK(5)
 OpE2:
   R(1) = R(1) - 1
   If R(1) <> 0
@@ -8010,58 +11803,58 @@ OpE2:
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(5)
+  NextOpK(5)
 OpE3:
   If R(1) = 0
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  Charge(12)
+  ChargeK(12)
   Else
     PIP = PIP + 2
   EndIf
-  NextOp(5)
+  NextOpK(5)
 OpE4:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
   PokeA(@R(0), Cpu86PortIn(x, 0))
-  NextOp(10)
+  NextOpK(10)
 OpE5:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
   R(0) = Cpu86PortIn(x, 1)
-  NextOp(10)
+  NextOpK(10)
 OpE6:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
   Cpu86PortOut(x, PeekA(@R(0)), 0)
-  NextOp(10)
+  NextOpK(10)
 OpE7:
   x = PeekA(PIP + 1)
   PIP = PIP + 2
   Cpu86PortOut(x, R(0), 1)
-  NextOp(10)
+  NextOpK(10)
 OpEC:
   PIP = PIP + 1
   PokeA(@R(0), Cpu86PortIn(R(2), 0))
-  NextOp(8)
+  NextOpK(8)
 OpED:
   PIP = PIP + 1
   R(0) = Cpu86PortIn(R(2), 1)
-  NextOp(8)
+  NextOpK(8)
 OpEE:
   PIP = PIP + 1
   Cpu86PortOut(R(2), PeekA(@R(0)), 0)
-  NextOp(8)
+  NextOpK(8)
 OpEF:
   PIP = PIP + 1
   Cpu86PortOut(R(2), R(0), 1)
-  NextOp(8)
+  NextOpK(8)
 OpE8:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
@@ -8083,7 +11876,7 @@ OpE8:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(19)
+  NextOpK(19)
 OpE9:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   PIP = PIP + 3
@@ -8092,7 +11885,7 @@ OpE9:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(15)
+  NextOpK(15)
 OpEA:
   x = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)
   y = PeekA(PIP + 3) | (PeekA(PIP + 4) << 8)
@@ -8101,35 +11894,35 @@ OpEA:
   PBase = 0
   PIP = x
   PEnd = 0
-  NextOp(15)
+  NextOpK(15)
 OpEB:
   PIP = PIP + 2 + PeekB(PIP + 1)
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(15)
+  NextOpK(15)
 OpF0:
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
   Goto PrefixNext
 OpF1:
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
   Goto PrefixNext
 OpF2:
   Rep = 1
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
   Goto PrefixNext
 OpF3:
   Rep = 2
-  Charge(2)
+  ChargeK(2)
   CompilerIf #CPU_TIMING = 1
     NPre = NPre + 1
   CompilerEndIf
@@ -8138,11 +11931,11 @@ OpF4:
   PIP = PIP + 1
   Halted = 1
   PEnd = 0
-  NextOp(2)
+  NextOpK(2)
 OpF5:
   FC = FC ! $80000000
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 OpF6:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -8160,7 +11953,7 @@ GF6R0:
   FO = 0
   FA = vr
   FZS = (vr << 24) >> 24
-  NextOp(5)
+  NextOpK(5)
 GF6M0:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8175,7 +11968,7 @@ GF6M0:
   FO = 0
   FA = vr
   FZS = (vr << 24) >> 24
-  NextOp(11)
+  NextOpK(11)
 GF6R1:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = PeekA(PIP)
@@ -8185,7 +11978,7 @@ GF6R1:
   FO = 0
   FA = vr
   FZS = (vr << 24) >> 24
-  NextOp(5)
+  NextOpK(5)
 GF6M1:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8200,12 +11993,12 @@ GF6M1:
   FO = 0
   FA = vr
   FZS = (vr << 24) >> 24
-  NextOp(11)
+  NextOpK(11)
 GF6R2:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = ~va
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GF6M2:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8220,7 +12013,7 @@ GF6M2:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 GF6R3:
   va = PeekA(@R(0) + R8O(m & 7))
   vb = va
@@ -8231,7 +12024,7 @@ GF6R3:
   FA = va ! vb
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GF6M3:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8252,7 +12045,7 @@ GF6M3:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 GF6R4:
   vb = PeekA(@R(0) + R8O(m & 7))
   vr = PeekA(@R(0)) * vb
@@ -8270,7 +12063,7 @@ GF6R4:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(74)
+  NextOpK(74)
 GF6M4:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8293,7 +12086,7 @@ GF6M4:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(80)
+  NextOpK(80)
 GF6R5:
   vb = PeekA(@R(0) + R8O(m & 7))
   vr = PeekB(@R(0)) * ((vb << 24) >> 24)
@@ -8311,7 +12104,7 @@ GF6R5:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(89)
+  NextOpK(89)
 GF6M5:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8334,7 +12127,7 @@ GF6M5:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(95)
+  NextOpK(95)
 GF6R6:
   vb = PeekA(@R(0) + R8O(m & 7))
   va = R(0)
@@ -8343,7 +12136,7 @@ GF6R6:
   Else
     R(0) = (va / vb) | ((va % vb) << 8)
   EndIf
-  NextOp(85)
+  NextOpK(85)
 GF6M6:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8357,7 +12150,7 @@ GF6M6:
   Else
     R(0) = (va / vb) | ((va % vb) << 8)
   EndIf
-  NextOp(91)
+  NextOpK(91)
 GF6R7:
   vb = PeekA(@R(0) + R8O(m & 7))
   va = PeekW(@R(0))                       ; AX read signed
@@ -8392,7 +12185,7 @@ GF6R7:
       R(0) = (vr & 255) | ((vb & 255) << 8)
     EndIf
   EndIf
-  NextOp(107)
+  NextOpK(107)
 GF6M7:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8432,7 +12225,7 @@ GF6M7:
       R(0) = (vr & 255) | ((vb & 255) << 8)
     EndIf
   EndIf
-  NextOp(113)
+  NextOpK(113)
 OpF7:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -8450,7 +12243,7 @@ GF7R0:
   FO = 0
   FA = vr
   FZS = (vr << 16) >> 16
-  NextOp(5)
+  NextOpK(5)
 GF7M0:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8468,7 +12261,7 @@ GF7M0:
   FO = 0
   FA = vr
   FZS = (vr << 16) >> 16
-  NextOp(11)
+  NextOpK(11)
 GF7R1:
   va = R(m & 7)
   vb = PeekA(PIP) | (PeekA(PIP + 1) << 8)
@@ -8478,7 +12271,7 @@ GF7R1:
   FO = 0
   FA = vr
   FZS = (vr << 16) >> 16
-  NextOp(5)
+  NextOpK(5)
 GF7M1:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8496,12 +12289,12 @@ GF7M1:
   FO = 0
   FA = vr
   FZS = (vr << 16) >> 16
-  NextOp(11)
+  NextOpK(11)
 GF7R2:
   va = R(m & 7)
   vr = ~va
   R(m & 7) = vr
-  NextOp(3)
+  NextOpK(3)
 GF7M2:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8523,7 +12316,7 @@ GF7M2:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 GF7R3:
   va = R(m & 7)
   vb = va
@@ -8534,7 +12327,7 @@ GF7R3:
   FA = va ! vb
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(3)
+  NextOpK(3)
 GF7M3:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8562,7 +12355,7 @@ GF7M3:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 GF7R4:
   vb = R(m & 7)
   vr = R(0) * vb
@@ -8581,7 +12374,7 @@ GF7R4:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(128)
+  NextOpK(128)
 GF7M4:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8608,7 +12401,7 @@ GF7M4:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(134)
+  NextOpK(134)
 GF7R5:
   vb = R(m & 7)
   vr = PeekW(@R(0)) * ((vb << 16) >> 16)      ; PeekW: AX read signed
@@ -8627,7 +12420,7 @@ GF7R5:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(141)
+  NextOpK(141)
 GF7M5:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8654,7 +12447,7 @@ GF7M5:
     FO = 0
   EndIf
   FA = FZS
-  NextOp(147)
+  NextOpK(147)
 GF7R6:
   vb = R(m & 7)
   If R(2) >= vb
@@ -8669,7 +12462,7 @@ GF7R6:
     R(0) = (y << 8) | cnt
     R(2) = x
   EndIf
-  NextOp(153)
+  NextOpK(153)
 GF7M6:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8692,7 +12485,7 @@ GF7M6:
     R(0) = (y << 8) | cnt
     R(2) = x
   EndIf
-  NextOp(159)
+  NextOpK(159)
 GF7R7:
   vb = R(m & 7)
   va = (R(2) << 16) | R(0)
@@ -8728,7 +12521,7 @@ GF7R7:
       R(2) = vb
     EndIf
   EndIf
-  NextOp(175)
+  NextOpK(175)
 GF7M7:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -8772,19 +12565,19 @@ GF7M7:
       R(2) = vb
     EndIf
   EndIf
-  NextOp(181)
+  NextOpK(181)
 OpF8:
   FC = 0
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 OpF9:
   FC = $80000000
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 OpFA:
   FlagsHi = FlagsHi & ~$200
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 OpFB:
   If (FlagsHi & $200) = 0
     FlagsHi = FlagsHi | $200
@@ -8792,19 +12585,19 @@ OpFB:
     PEnd = 0
   EndIf
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 OpFC:
   FlagsHi = FlagsHi & ~$400
   DirStep = 1
   DirStep2 = 2
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 OpFD:
   FlagsHi = FlagsHi | $400
   DirStep = -1
   DirStep2 = -2
   PIP = PIP + 1
-  NextOp(2)
+  NextOpK(2)
 OpFE:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -8820,7 +12613,7 @@ GFER0:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM0:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8838,7 +12631,7 @@ GFEM0:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFER1:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
@@ -8846,7 +12639,7 @@ GFER1:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM1:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8864,7 +12657,7 @@ GFEM1:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFER2:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va + 1
@@ -8872,7 +12665,7 @@ GFER2:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM2:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8890,7 +12683,7 @@ GFEM2:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFER3:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
@@ -8898,7 +12691,7 @@ GFER3:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM3:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8916,7 +12709,7 @@ GFEM3:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFER4:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va + 1
@@ -8924,7 +12717,7 @@ GFER4:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM4:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8942,7 +12735,7 @@ GFEM4:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFER5:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
@@ -8950,7 +12743,7 @@ GFER5:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM5:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8968,7 +12761,7 @@ GFEM5:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFER6:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va + 1
@@ -8976,7 +12769,7 @@ GFER6:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM6:
   t = PageR(ea >> 12)
   If t <> 0
@@ -8994,7 +12787,7 @@ GFEM6:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFER7:
   va = PeekA(@R(0) + R8O(m & 7))
   vr = va - 1
@@ -9002,7 +12795,7 @@ GFER7:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 24) >> 24
   PokeA(@R(0) + R8O(m & 7), vr)
-  NextOp(3)
+  NextOpK(3)
 GFEM7:
   t = PageR(ea >> 12)
   If t <> 0
@@ -9020,7 +12813,7 @@ GFEM7:
   Else
     Cpu86Wr8(ea, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 OpFF:
   m = PeekA(PIP + 1)
   If m < $C0
@@ -9036,7 +12829,7 @@ GFFR0:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(2)
+  NextOpK(2)
 GFFM0:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9061,7 +12854,7 @@ GFFM0:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFFR1:
   va = R(m & 7)
   vr = va - 1
@@ -9069,7 +12862,7 @@ GFFR1:
   FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)
   FZS = (vr << 16) >> 16
   R(m & 7) = vr
-  NextOp(2)
+  NextOpK(2)
 GFFM1:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9094,7 +12887,7 @@ GFFM1:
   Else
     Cpu86Wr16(sb, eo, vr)
   EndIf
-  NextOp(15)
+  NextOpK(15)
 GFFR2:
   vb = R(m & 7)
   va = ((PIP - PBase) & $FFFF)
@@ -9115,7 +12908,7 @@ GFFR2:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(16)
+  NextOpK(16)
 GFFM2:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9144,7 +12937,7 @@ GFFM2:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(21)
+  NextOpK(21)
 GFFR3:
   vb = R(m & 7)
   va = ((PIP - PBase) & $FFFF)
@@ -9165,7 +12958,7 @@ GFFR3:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(16)
+  NextOpK(16)
 GFFM3:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9220,14 +13013,14 @@ GFFM3:
   PBase = 0
   PIP = y
   PEnd = 0
-  NextOp(37)
+  NextOpK(37)
 GFFR4:
   vb = R(m & 7)
   PIP = PBase + vb
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(11)
+  NextOpK(11)
 GFFM4:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9242,14 +13035,14 @@ GFFM4:
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(18)
+  NextOpK(18)
 GFFR5:
   vb = R(m & 7)
   PIP = PBase + vb
   If PIP < PStart
     PEnd = 0
   EndIf
-  NextOp(11)
+  NextOpK(11)
 GFFM5:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9276,7 +13069,7 @@ GFFM5:
   PBase = 0
   PIP = y
   PEnd = 0
-  NextOp(24)
+  NextOpK(24)
 GFFR6:
   If (m & 7) = 4
     va = (R(4) - 2) & $FFFF
@@ -9296,7 +13089,7 @@ GFFR6:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 GFFM6:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9320,7 +13113,7 @@ GFFM6:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 GFFR7:
   If (m & 7) = 4
     va = (R(4) - 2) & $FFFF
@@ -9340,7 +13133,7 @@ GFFR7:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(11)
+  NextOpK(11)
 GFFM7:
   t = PageR(ea >> 12)
   If (~ea << 28) = 0              ; xxxF: maybe a page or segment end
@@ -9364,7 +13157,7 @@ GFFM7:
   Else
     Cpu86Wr16(SegB(2), eo, va)
   EndIf
-  NextOp(16)
+  NextOpK(16)
 Done:
   ProcedureReturn Budget - Left
 EndProcedure

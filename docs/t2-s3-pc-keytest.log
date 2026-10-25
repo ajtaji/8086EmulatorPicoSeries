@@ -1,0 +1,24 @@
+
+PC frames=61 clocks/s=4858528 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=61 late-us=12966 busy-us=783417 core1-draw-us=591240 panel-wait-us=664278
+
+PC frames=121 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=121 late-us=12923 busy-us=770398 core1-draw-us=582693 panel-wait-us=653346
+1E 9E 30 B0 2C AC 
+PC frames=181 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=181 late-us=12933 busy-us=770471 core1-draw-us=582701 panel-wait-us=653250
+
+PC frames=241 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=241 late-us=12920 busy-us=770393 core1-draw-us=582616 panel-wait-us=653527
+
+PC frames=301 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=301 late-us=12934 busy-us=770397 core1-draw-us=582597 panel-wait-us=653505
+
+PC frames=361 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=361 late-us=12919 busy-us=770401 core1-draw-us=582745 panel-wait-us=653344
+
+PC frames=421 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=421 late-us=12918 busy-us=770393 core1-draw-us=582559 panel-wait-us=653517
+
+PC frames=481 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=481 late-us=12932 busy-us=770370 core1-draw-us=582561 panel-wait-us=653505
+
+PC frames=541 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=541 late-us=12916 busy-us=770379 core1-draw-us=582497 panel-wait-us=653518
+
+PC frames=601 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=601 late-us=12916 busy-us=770407 core1-draw-us=582508 panel-wait-us=653487
+
+PC frames=661 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=661 late-us=12916 busy-us=770395 core1-draw-us=582587 panel-wait-us=653475
+
+PC frames=721 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=721 late-us=12917 busy-us=770387 core1-draw-us=582641 panel-wait-us=653410

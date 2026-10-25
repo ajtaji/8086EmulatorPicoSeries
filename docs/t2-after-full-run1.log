@@ -1,0 +1,105 @@
+﻿lease taken 10:12:59
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 49818 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2.asm
+> RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 367256 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|90640|4194304
+CYCLES_TOTAL_RP2350|59332|straight-line, not-taken branches
+REGMAP_RP2350|5678|197|71|342|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1328|frame-slot loads taken from a register
+pmfc: t2-vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90640 bytes into 355 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
+pmfc: OK
+image ends at 0x10016300
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    D813011B71866DBB634411FDA7D03EDEF39A14CFA5671FA2EE8114A80F97EB85 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 49818 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2.asm
+> RP2350 ASSEMBLER: 76996 bytes of code run from SRAM at $20000000-$20012CC3, copied from flash at boot; 367256 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|90640|4194304
+CYCLES_TOTAL_RP2350|59332|straight-line, not-taken branches
+REGMAP_RP2350|5678|197|71|342|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1328|frame-slot loads taken from a register
+pmfc: t2-vectors.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 90640 bytes into 355 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors.uf2
+pmfc: uploading t2-vectors.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 181760 bytes (36%)
+> [NATIVE UPLOADER] Writing image: 131072 of 181760 bytes (72%)
+> [NATIVE UPLOADER] Writing image: 181760 of 181760 bytes (100%)
+> [NATIVE UPLOADER] Writing image: 181760 of 181760 bytes (100%)
+> [NATIVE UPLOADER] Wrote t2-vectors.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+8086 vectors clk_sys kHz=150000 timing=0 asm-tail=1
+READY
+G 00 pass=2000 fail=0 tests=2000 us=901346
+G 01 pass=2000 fail=0 tests=2000 us=924670
+G 02 pass=2000 fail=0 tests=2000 us=880551
+G 03 pass=2000 fail=0 tests=2000 us=906867
+G 04 pass=2000 fail=0 tests=2000 us=617779
+G 05 pass=2000 fail=0 tests=2000 us=618104
+G 06 pass=2000 fail=0 tests=2000 us=1016060
+G 07 pass=2000 fail=0 tests=2000 us=1000106
+G 08 pass=2000 fail=0 tests=2000 us=885751
+G 09 pass=2000 fail=0 tests=2000 us=915738
+G 0A pass=2000 fail=0 tests=2000 us=889463
+G 0B pass=2000 fail=0 tests=2000 us=914543
+G 0C pass=2000 fail=0 tests=2000 us=618676
+G 0D pass=2000 fail=0 tests=2000 us=618165
+G 0E pass=2000 fail=0 tests=2000 us=1015817
+G 10 pass=2000 fail=0 tests=2000 us=894679
+G 11 pass=2000 fail=0 tests=2000 us=923068
+G 12 pass=2000 fail=0 tests=2000 us=889195
+G 13 pass=2000 fail=0 tests=2000 us=913789
+G 14 pass=2000 fail=0 tests=2000 us=624284
+G 15 pass=2000 fail=0 tests=2000 us=625689
+G 16 pass=2000 fail=0 tests=2000 us=1014708
+G 17 pass=2000 fail=0 tests=2000 us=999170
+G 18 pass=2000 fail=0 tests=2000 us=890199
+G 19 pass=2000 fail=0 tests=2000 us=922780
+G 1A pass=2000 fail=0 tests=2000 us=887781
+G 1B pass=2000 fail=0 tests=2000 us=909166
+G 1C pass=2000 fail=0 tests=2000 us=624495
+G 1D pass=2000 fail=0 tests=2000 us=625508
+G 1E pass=2000 fail=0 tests=2000 us=1014798
+G 1F pass=2000 fail=0 tests=2000 us=997338
+G 20 pass=2000 fail=0 tests=2000 us=892044
+G 21 pass=2000 fail=0 tests=2000 us=910462
+G 22 pass=2000 fail=0 tests=2000 us=895480
+G 23 pass=2000 fail=0 tests=2000 us=898280
+G 24 pass=2000 fail=0 tests=2000 us=620476
+G 25 pass=2000 fail=0 tests=2000 us=620312
+G 27 pass=2000 fail=0 tests=2000 us=626505
+G 28 pass=2000 fail=0 tests=2000 us=897489
+G 29 pass=2000 fail=0 tests=2000 us=914630
+G 2A pass=2000 fail=0 tests=2000 us=884139
+G 2B pass=2000 fail=0 tests=2000 us=904006
+G 2C pass=2000 fail=0 tests=2000 us=626114
+G 2D pass=2000 fail=0 tests=2000 us=624058
+G 2F pass=2000 fail=0 tests=2000 us=626259
+G 30 pass=2000 fail=0 tests=2000 us=898671
+G 31 pass=2000 fail=0 tests=2000 us=923195
+G 32 pass=2000 fail=0 tests=2000 us=886122
+G 33 pass=2000 fail=0 tests=2000 us=901080
+G 34 pass=2000 fail=0 tests=2000 us=619382
+G 35 pass=2000 fail=0 tests=2000 us=617834
+G 37 pass=2000 fail=0 tests=2000 us=616830
+G 38 pass=2000 fail=0 tests=2000 us=890275
+G 39 pass=2000 fail=0 tests=2000 us=912807
+G 3A pass=2000 fail=0 tests=2000 us=888618
+G 3B pass=2000 fail=0 tests=2000 us=906852
+JOB FAILED: vectors Diagnostics/vectors.pico2w Diagnostics/build/t2-vectors.uf2 --per-file 2000 --part 1/2 --log docs/t2-after-full-1.log - Exception in thread Thread-2 (sender):
+lease released 10:14:06

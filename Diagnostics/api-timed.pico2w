@@ -1,0 +1,12 @@
+; 8086 API, interrupt and memory-map checks for the Pico 2 W (RP2350). See api_body.pmi.
+#CLOCK_KHZ = 150000
+#CPU_TIMING = 1
+#CPU_ASM_TAIL = 1
+XIncludeFile "RP2350/Lib/clocks.pico2"
+XIncludeFile "RP2350/Lib/timer.pico2"
+XIncludeFile "RP2350/Lib/uart.pico2"
+XIncludeFile "RP2350/Lib/usb_serial.pico2"
+XIncludeFile "RP2350/Lib/safety.pico2"
+XIncludeFile "../src/cpu86.pico2"
+XIncludeFile "../src/io.pmi"
+XIncludeFile "api_body.pmi"

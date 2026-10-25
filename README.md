@@ -145,7 +145,7 @@ PureMetal Forge (the IDE application, used headless) compiles and uploads:
 
 Ready images: `firmware/8086-picow.uf2` (run on the Pico W; SHA-256
 `3c0597b3ab08cb76174993ec98507b7b7bcf0b97cc41eb8e6adb480970b43452`) and
-`firmware/8086-pico2w.uf2` (built, not run here; `09e75cf17f9597e8caac60fbf59049b5d773cd3bde7d1c2da223a1e5886b2f26`).
+`firmware/8086-pico2w.uf2` (run on the bench Pico 2 W, Thumb-2 core; `1cd899091cf0bf7ca6488f66bcaaf1c9f7f9406801a404e9afe5c5698c041af3`).
 Copy one to the board's BOOTSEL drive and open its USB serial port within 30 s:
 it prints the smoke test and then the speed of each mix, once a second.
 
@@ -199,9 +199,11 @@ batch; on another bench run `tools/build.ps1 ... -Port <port>` and
 `tools/vectors.py --port <port>`. About 64 MB go over USB serial at roughly
 200 KB/s, about 5 minutes.
 
-The Pico 2 W builds (`src/demo.pico2w`, `Diagnostics/vectors.pico2w`,
-`Diagnostics/api.pico2w`) compile from the same generator with the same
-register reservation; they have not been run on a Pico 2 W in this work.
+The Pico 2 W builds (`src/demo.pico2w`, `Diagnostics/vectors*.pico2w`,
+`Diagnostics/api*.pico2w`) come from the same generator with the same register
+reservation, plus the Thumb-2 hot paths below. On the bench Pico 2 W (COM6,
+2026-10-25): SingleStepTests 646,000 of 646,000, 32,300 of 32,300 clock-counted
+and plain-tail, API 78 of 78 and 77 of 77 (`docs/t2-after-*.log`).
 
 ## Speed
 
@@ -232,6 +234,45 @@ second. What made the difference, measured one change at a time:
 Reserving a seventh register for AF is refused by the compiler (the RP2040
 allocator needs one of r5/r6 for its spill pool), and r12 cannot hold state
 because the flash/SRAM call veneers write it.
+
+### Pico 2 W: Thumb-2 hot paths (2026-10-25)
+
+The RP2350's Cortex-M33 runs Thumb-2, and the compiler (main `883c4ae12`) assembles all of it, so
+the Pico 2 core (`src/cpu86.pico2`, made by `tools/gen_cpu.py`) has hand-written Thumb-2 where it
+measured faster. The RP2040 core is byte-for-byte the same as before (it stays Thumb-1):
+
+- the dispatch tail: the budget charged and tested in the asm (`subs r6, r6, #c` / `ble`), then one
+  `ldr pc, [r1, r0, lsl #2]` through the table (was: four PureMetal statements, then `lsls`, `ldr`, `bx`);
+  a constant extra charge (a taken jump's 12 clocks) is one `sub`;
+- Jcc (70-7F and the 60-6F aliases): the condition tested on the reserved flag registers, the
+  displacement with `ldrsb`;
+- INC / DEC r16, MOV r16, imm16;
+- the register forms (mod = 3) of the word ALU instructions (ADD OR ADC SBB AND SUB XOR CMP, both
+  directions) and of MOV r16, r16: `ubfx` and scaled `ldrh` / `strh` for the operands, the flag words
+  with `bic` / `eor` / `sxth`, ADC / SBB adding the stored carry with `r9, lsr #31`;
+- PUSH / POP r16: SS:SP on a RAM page between host pointers; anything else (a word at xxxF, a ROM,
+  hook or unmapped page) branches, before anything is changed, to the PureMetal code.
+
+Each has its PureMetal body beside it for the plain-tail build (`#CPU_ASM_TAIL = 0`). Pico 2 W
+(COM6), 150 MHz, instruction budget, 1,000,000 instructions per sample:
+
+| Mix | before (compiled tail) | after | |
+|---|---:|---:|---:|
+| register / branch | 3.70 M instr/s | **5.88 M** | +59% |
+| ALU | 2.20 M | **3.57 M** | +62% |
+| memory | 1.65 M | 1.71 M | +4% |
+| call / stack | 2.23 M | **3.31 M** | +48% |
+| `REP MOVSW`, 8 KB blocks | 8.97 MB/s | 8.71 MB/s | -3% (compiled code, not changed here: the new compiler's) |
+| `sieve.com` | 57.0 ms | 47.5 ms | |
+
+The tail alone (first step) gave 2-5%; the handlers gave the rest. Checked on the Pico 2 W after the
+change: SingleStepTests **646,000 of 646,000** (the whole corpus, first time on this chip), 32,300 of
+32,300 clock-counted and 32,300 of 32,300 plain-tail, API 78 of 78 and 77 of 77, sum and sieve
+(`docs/t2-*.log`). The Pico W, rebuilt with the same compiler: 4.60 / 2.41 / 1.83 / 2.47 M
+instructions/s and 9.47 MB/s as before, its tests passing (`docs/w-883c-*.log`).
+
+Three assembler gaps met on the way were filed and fixed in the compiler: `ldr pc, [Rn, Rm, lsl #2]`
+(forum 1413), macro parameters inside ASM (1414), scaled `ldrh` / `strh` (1418).
 
 ## The PC machine on the Pico W
 
@@ -288,6 +329,22 @@ text whose attribute changes in nearly every cell (modes.com fills the screen wi
 random bytes): 0.93x, since the pixel pairs are then rebuilt for each character.
 Before core 1 drew the lines, core 0 did, and the demo's title ran at 0.80x. The
 image is built with 3,580 bytes of SRAM to spare.
+**Both cores, 60 frames a second** (the PC is a US machine: NTSC timing, 262 lines at 59.92 Hz,
+and the panel shows every frame - its frame count follows the PC's). Core 0 runs the 8086 and the
+devices; core 1 draws each line and drives the panel. Per second of real time, from the status line
+(`busy-us` minus `panel-wait-us` is core 0's own work; the wait is core 0 held back by core 1's ring
+because it runs each frame faster than real time):
+
+| Program (mode) | Pico W: core 0 work / waiting / core 1 drawing | Pico 2 W (Thumb-2): core 0 work / waiting / core 1 drawing |
+|---|---:|---:|
+| keytest (80 x 25, CPU halted) | 11% / 48% / 59% | 12% / 65% / 58% |
+| demo title (80 x 25, raster bars) | 52% / 17% / 63% | 49% / 36% / 62% |
+| demo plasma (40 x 25) | 42% / 23% / 43% | 39% / 44% / 44% |
+| demo copper (320 x 200) | 53% / 15% / 50% | 50% / 36% / 51% |
+
+(`docs/w-883c-pc-*.log`, `docs/t2-after-pc-*.log`; before the Thumb-2 handlers the Pico 2 W's core 0
+did 54% / 43% / 55% of work in the three demo parts.)
+
 **On the Pico 2 W** (RP2350 at 150 MHz; `src/pc.pico2w`, `Diagnostics/pc-*.pico2w`):
 the same machine, 352 KB of guest RAM (256 KB + 96 KB), core 1 started through
 `RP2350/Lib/multicore_smp.pico2`; `src/pico_video.pmi` tells the chips apart by

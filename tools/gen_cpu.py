@@ -23,6 +23,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 import os
+import re
 VARIANT = os.environ.get('CPU86_VARIANT', '')
 IW = 32          # host integer width: 32 on the Picos, 64 on the PC (set by generate)
 DESKTOP = False  # PureBasic on the PC: labels-as-values through the C back end
@@ -55,7 +56,106 @@ def wr_reg8_const(i, v):
 # Cycle accounting: Charge(c) only exists when #CPU_TIMING = 1.
 def charge(c):
     if c:
+        if T2 and str(c).isdigit():
+            e(f'  ChargeK({c})')                # RP2350: one Thumb-2 sub on Left
+            return
         e(f'  Charge({c})')
+
+T2_REGS = (('r4', 'PIP'), ('r6', 'Left'), ('r8', 'FZS'), ('r9', 'FC'), ('r10', 'FO'), ('r11', 'PEnd'))
+
+def t2_uses(lines):
+    """The reserved Globals a block names, in the order of ReserveRegister: the
+    compiler refuses an unlisted one (PM1126) and a listed one no line names (PM1130)."""
+    text = ' '.join(lines)
+    return ', '.join(g for r, g in T2_REGS if re.search(r'\b' + r + r'\b', text))
+
+def t2_asm(timed, untimed=None):
+    """RP2350 hand-written Thumb-2 body: `timed` for #CPU_TIMING = 1, `untimed` for 0
+    (the same lines when None). Emitted inside the handler's CompilerIf #CPU_ASM_TAIL = 1."""
+    if untimed is None:
+        untimed = timed
+    for flag, lines in (('1', timed), ('0', untimed)):
+        e('    CompilerIf #CPU_TIMING = ' + flag)
+        e('      ASM Uses ' + t2_uses(lines))
+        for ln in lines:
+            e('        ' + ln)
+        e('      EndASM')
+        e('    CompilerEndIf')
+
+def t2_begin():
+    e('  CompilerIf #CPU_ASM_TAIL = 1')
+
+def t2_else():
+    e('  CompilerElse')
+
+def t2_end():
+    e('  CompilerEndIf')
+
+def t2_rr16(dst_is_e):
+    """Word register operands from the ModR/M byte at [r4, #1]: r3 = &R(0),
+    r12 = the destination's index, r0 = the destination's value (va), r1 = the
+    source's (vb). dst_is_e: E (r/m) is the destination (forms 01, 89), else G."""
+    lines = ['ldrb r0, [r4, #1]', 'ldr r3, =global_r']
+    if dst_is_e:
+        lines += ['and r12, r0, #7', 'ubfx r2, r0, #3, #3']
+    else:
+        lines += ['ubfx r12, r0, #3, #3', 'and r2, r0, #7']
+    lines += ['ldrh r0, [r3, r12, lsl #1]', 'ldrh r1, [r3, r2, lsl #1]']
+    return lines
+
+def t2_alu16(name, dst_is_e):
+    """vr (r2) = va <op> vb with the core's flag words: FC (r9) and FO (r10) hold
+    their flag in bit 31, FA = a ^ b (or the result), FZS (r8) = the result
+    sign-extended. The result is written to the destination unless CMP."""
+    lines = t2_rr16(dst_is_e)
+    if name == 'ADD':
+        lines += ['adds r2, r0, r1']
+    elif name == 'ADC':
+        lines += ['adds r2, r0, r1', 'add r2, r2, r9, lsr #31']
+    elif name in ('SUB', 'CMP'):
+        lines += ['subs r2, r0, r1']
+    elif name == 'SBB':
+        lines += ['subs r2, r0, r1', 'sub r2, r2, r9, lsr #31']
+    elif name == 'AND':
+        lines += ['and r2, r0, r1']
+    elif name == 'OR':
+        lines += ['orr r2, r0, r1']
+    elif name == 'XOR':
+        lines += ['eor r2, r0, r1']
+    if name != 'CMP':
+        lines += ['strh r2, [r3, r12, lsl #1]']
+    if name in ('ADD', 'ADC', 'SUB', 'CMP', 'SBB'):
+        lines += ['lsl r9, r2, #15']
+        if name in ('ADD', 'ADC'):
+            lines += ['eor r3, r0, r2', 'eor r12, r1, r2']       # (a ^ r) & (b ^ r)
+        else:
+            lines += ['eor r3, r0, r1', 'eor r12, r0, r2']       # (a ^ b) & (a ^ r)
+        lines += ['and r3, r3, r12', 'lsl r10, r3, #16', 'eor r3, r0, r1']
+    else:
+        lines += ['movs r3, #0', 'mov r9, r3', 'mov r10, r3', 'mov r3, r2']
+    lines += ['ldr r12, =global_fa', 'str r3, [r12]', 'sxth r8, r2', 'adds r4, r4, #2']
+    return lines
+
+def t2_stack(r, push, slow):
+    """PUSH r16 / POP r16 on a RAM page: SS:SP word access between host pointers.
+    Anything else (a word at xxxF, a ROM, hook or unmapped page) branches to the
+    label `slow` before anything is changed, where the PureMetal code does it all."""
+    lines = ['ldr r3, =global_r', 'ldrh r0, [r3, #8]']                # r0 = SP
+    if push:
+        lines += ['subs r0, r0, #2', 'uxth r0, r0']                    # eo
+    lines += ['ldr r1, =global_segb', 'ldr r1, [r1, #8]', 'add r1, r1, r0',   # ea = SegB(SS) + eo
+              'mvn r2, r1', 'lsls r2, r2, #28', 'beq ' + slow,         # xxxF
+              'lsr r12, r1, #12',
+              'ldr r2, =' + ('global_pagew' if push else 'global_pager'),
+              'ldr r2, [r2, r12, lsl #2]', 'cmp r2, #0', 'beq ' + slow,
+              'add r2, r2, r1']
+    if push:
+        lines += ['strh r0, [r3, #8]']                                  # SP = eo
+        lines += ['strh r0, [r2]'] if r == SP else ['ldrh r1, [r3, #' + str(2 * r) + ']', 'strh r1, [r2]']
+    else:
+        lines += ['ldrh r1, [r2]', 'adds r0, r0, #2', 'strh r0, [r3, #8]',     # SP = eo + 2
+                  'strh r1, [r3, #' + str(2 * r) + ']']                  # then the register (POP SP: the value)
+    return lines + ['adds r4, r4, #1']
 
 def count_prefix():
     """A prefix counts itself, so a REP that yields can go back to its first prefix."""
@@ -82,7 +182,12 @@ def rep_yield(set_cx):
     e('    EndIf')
     e('  CompilerEndIf')
 
+T2 = False
+
 def tail(cyc):
+    if T2 and str(cyc).isdigit():
+        e(f'  NextOpK({cyc})')                  # RP2350: the Thumb-2 tail, the count in its asm
+        return
     if not DESKTOP:
         e(f'  NextOp({cyc})')
         return
@@ -305,15 +410,22 @@ def imm(w, dst, signext=False):
 HANDLERS = {}     # opcode -> label
 SUBLABELS = []    # (table name, size)
 
-def modrm_handler(label, body, rcyc, mcyc):
-    """Opcode with a ModR/M byte. body(kind) emits the work, then the tail is added."""
+def modrm_handler(label, body, rcyc, mcyc, t2r=None):
+    """Opcode with a ModR/M byte. body(kind) emits the work, then the tail is added.
+    t2r: on the RP2350, Thumb-2 lines for the register path (mod = 3), PIP included."""
     e(f'{label}:')
     e(f'  m = PeekA(PIP + 1)')
     e(f'  If m < $C0')
     ea_call(f'?{label}M', '&&' + lab(label + 'M'))
     e(f'  EndIf')
+    if T2 and t2r:
+        t2_begin()
+        t2_asm(t2r)
+        t2_else()
     e(f'  PIP = PIP + 2')
     body('r')
+    if T2 and t2r:
+        t2_end()
     tail(rcyc)
     e(f'{label}M:')
     body('m')
@@ -342,10 +454,11 @@ def group_handler(label, table, bodies, rcyc, mcyc):
 
 # ---------------------------------------------------------------- the generator
 def generate(target):
-    global IW, DESKTOP
+    global IW, DESKTOP, T2
     OUT.clear()
     SUBLABELS.clear()
     rp2350 = target == 'rp2350'
+    T2 = rp2350
     DESKTOP = target == 'desktop'
     IW = 64 if DESKTOP else 32
     e('; Generated by tools/gen_cpu.py. Edit the generator, then regenerate.')
@@ -781,6 +894,9 @@ def emit_run(rp2350):
     emit_run_body()
 
 def emit_pm_tail_macro(rp2350):
+    if rp2350:
+        emit_t2_tail_macro()
+        return
     e('Macro NextOp(c)')
     e('  CompilerIf #CPU_TIMING = 1')
     e('    Left = Left - (c)')
@@ -844,6 +960,63 @@ def emit_pm_tail_macro(rp2350):
     e('        Goto Resync')
     e('      EndIf')
     e('      Goto Dispatch(PeekA(PIP))')
+    e('    CompilerEndIf')
+    e('  CompilerEndIf')
+    e('EndMacro')
+
+def emit_t2_tail_macro():
+    """RP2350 (Cortex-M33): the dispatch tail in Thumb-2. NextOpK(c), c a constant:
+    the budget charged and tested in the asm (subs/ble, or subs/beq counting
+    instructions), then one ldr pc through the 256-entry table. ChargeK(c): one sub
+    on Left. NextOp(c) is the PureMetal tail, for the plain-tail build and for a
+    count that is not a constant. The RP2040 keeps its Thumb-1 tail."""
+    e('Macro NextOp(c)')
+    e('  CompilerIf #CPU_TIMING = 1')
+    e('    Left = Left - (c)')
+    e('    If Left <= 0')
+    e('      Goto Done')
+    e('    EndIf')
+    e('  CompilerElse')
+    e('    Left = Left - 1')
+    e('    If Left = 0')
+    e('      Goto Done')
+    e('    EndIf')
+    e('  CompilerEndIf')
+    e('  If PIP >= PEnd')
+    e('    Goto Resync')
+    e('  EndIf')
+    e('  Goto Dispatch(PeekA(PIP))')
+    e('EndMacro')
+    e('Macro NextOpK(c)')
+    e('  CompilerIf #CPU_ASM_TAIL = 1')
+    for timed in (True, False):
+        e('    CompilerIf #CPU_TIMING = ' + ('1' if timed else '0'))
+        e('      ASM Uses Left, PIP, PEnd')
+        if timed:
+            e('        subs r6, r6, #c')
+            e('        ble __ul_cpu86run_done')
+        else:
+            e('        subs r6, r6, #1')
+            e('        beq __ul_cpu86run_done')
+        e('        cmp r4, r11')
+        e('        bhs __ul_cpu86run_resync')
+        e('        ldrb r0, [r4]')
+        e('        ldr r1, =global_dispatch')
+        e('        ldr pc, [r1, r0, lsl #2]')
+        e('      EndASM')
+        e('    CompilerEndIf')
+    e('  CompilerElse')
+    e('    NextOp(c)')
+    e('  CompilerEndIf')
+    e('EndMacro')
+    e('Macro ChargeK(c)')
+    e('  CompilerIf #CPU_TIMING = 1')
+    e('    CompilerIf #CPU_ASM_TAIL = 1')
+    e('      ASM Uses Left')
+    e('        sub r6, r6, #c')
+    e('      EndASM')
+    e('    CompilerElse')
+    e('      Left = Left - (c)')
     e('    CompilerEndIf')
     e('  CompilerEndIf')
     e('EndMacro')
@@ -971,7 +1144,7 @@ def emit_handlers():
                         e_write(kind, w, 'vr')
                 defined.add(n)
                 rc, mc = (3, 16 if name != 'CMP' else 9)
-                modrm_handler(f'Op{n:02X}', body, rc, mc)
+                modrm_handler(f'Op{n:02X}', body, rc, mc, t2_alu16(name, True) if w else None)
             elif form in (2, 3):          # G, E
                 def body(kind, name=name, w=w):
                     g_read(w, 'va')
@@ -979,7 +1152,7 @@ def emit_handlers():
                     if alu(name, w):
                         g_write(w, 'vr')
                 defined.add(n)
-                modrm_handler(f'Op{n:02X}', body, 3, 9)
+                modrm_handler(f'Op{n:02X}', body, 3, 9, t2_alu16(name, False) if w else None)
             elif form == 4:               # AL, ib
                 op(n)
                 e(f'  va = {rd_reg8_const(0)}')
@@ -1019,25 +1192,43 @@ def emit_handlers():
 
     # ---- INC/DEC/PUSH/POP r16
     for r in range(8):
-        op(0x40 + r)
-        e(f'  va = R({r})')
-        e('  vr = va + 1')
-        e(f'  FO = (vr & ~va) << {T(15)}')
-        e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
-        set_zs(1, 'vr')
-        e(f'  R({r}) = vr')
-        e('  PIP = PIP + 1')
-        tail(2)
-        op(0x48 + r)
-        e(f'  va = R({r})')
-        e('  vr = va - 1')
-        e(f'  FO = (va & ~vr) << {T(15)}')
-        e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
-        set_zs(1, 'vr')
-        e(f'  R({r}) = vr')
-        e('  PIP = PIP + 1')
-        tail(2)
+        for opc, inc in ((0x40 + r, True), (0x48 + r, False)):
+            op(opc)
+            if T2:
+                # Thumb-2: va in r0, vr in r1; FO = the overflow word, FZS = vr sign-extended
+                t2_begin()
+                t2_asm(['ldr r2, =global_r',
+                        f'ldrh r0, [r2, #{2 * r}]',
+                        ('adds r1, r0, #1' if inc else 'subs r1, r0, #1'),
+                        ('bic r3, r1, r0' if inc else 'bic r3, r0, r1'),
+                        'lsl r10, r3, #16',
+                        'ldr r3, =global_fa',
+                        'str r0, [r3]',
+                        'sxth r8, r1',
+                        f'strh r1, [r2, #{2 * r}]',
+                        'adds r4, r4, #1'])
+                t2_else()
+            e(f'  va = R({r})')
+            if inc:
+                e('  vr = va + 1')
+                e(f'  FO = (vr & ~va) << {T(15)}')
+            else:
+                e('  vr = va - 1')
+                e(f'  FO = (va & ~vr) << {T(15)}')
+            e('  FA = va                 ; AF = bit 4 of FA ^ result (the 1 adds nothing there)')
+            set_zs(1, 'vr')
+            e(f'  R({r}) = vr')
+            e('  PIP = PIP + 1')
+            if T2:
+                t2_end()
+            tail(2)
         op(0x50 + r)
+        if T2:
+            t2_begin()
+            t2_asm(t2_stack(r, True, f'__ul_cpu86run_op{0x50 + r:02x}s'))
+            tail(11)
+            t2_end()
+            e(f'Op{0x50 + r:02X}S:')
         e('  PIP = PIP + 1')
         if r == SP:
             e('  eo = (R(4) - 2) & $FFFF')
@@ -1049,6 +1240,12 @@ def emit_handlers():
             push16('va')
         tail(11)
         op(0x58 + r)
+        if T2:
+            t2_begin()
+            t2_asm(t2_stack(r, False, f'__ul_cpu86run_op{0x58 + r:02x}s'))
+            tail(8)
+            t2_end()
+            e(f'Op{0x58 + r:02X}S:')
         e('  PIP = PIP + 1')
         pop16('va')
         e(f'  R({r}) = va')
@@ -1064,15 +1261,50 @@ def emit_handlers():
         '(FZS ! FO) < 0', '(FZS ! FO) >= 0',
         f'((FZS ! FO) < 0) Or ((FZS << {ZT()}) = 0)', f'((FZS ! FO) >= 0) And ((FZS << {ZT()}) <> 0)',
     ]
+    # Thumb-2: each condition as a test of the reserved flag registers that falls to
+    # the label nt when the jump is not taken (FZS r8, FC r9, FO r10).
+    t2_tests = [
+        ['cmp r10, #0', 'bge {nt}'], ['cmp r10, #0', 'blt {nt}'],
+        ['cmp r9, #0', 'bge {nt}'], ['cmp r9, #0', 'blt {nt}'],
+        ['lsls r0, r8, #15', 'bne {nt}'], ['lsls r0, r8, #15', 'beq {nt}'],
+        ['cmp r9, #0', 'blt {tk}', 'lsls r0, r8, #15', 'bne {nt}'],
+        ['cmp r9, #0', 'blt {nt}', 'lsls r0, r8, #15', 'beq {nt}'],
+        ['cmp r8, #0', 'bge {nt}'], ['cmp r8, #0', 'blt {nt}'],
+        ['eor r0, r8, r8, lsr #17', 'uxtb r0, r0', 'ldr r1, =global_par', 'ldrb r0, [r1, r0]', 'cmp r0, #0', 'beq {nt}'],
+        ['eor r0, r8, r8, lsr #17', 'uxtb r0, r0', 'ldr r1, =global_par', 'ldrb r0, [r1, r0]', 'cmp r0, #0', 'bne {nt}'],
+        ['eors r0, r8, r10', 'bpl {nt}'], ['eors r0, r8, r10', 'bmi {nt}'],
+        ['eors r0, r8, r10', 'bmi {tk}', 'lsls r0, r8, #15', 'bne {nt}'],
+        ['eors r0, r8, r10', 'bmi {nt}', 'lsls r0, r8, #15', 'beq {nt}'],
+    ]
     for k in range(16):
         for base in (0x70, 0x60):
             op(base + k)
+            if T2:
+                lab = f't2j{base + k:02x}'
+                test = [s.format(nt=lab + 'nt', tk=lab + 'tk') for s in t2_tests[k]]
+                jump = [lab + 'tk:',
+                        'ldrsb r0, [r4, #1]',
+                        'adds r4, r4, #2',
+                        'add r4, r4, r0',
+                        'ldr r1, =global_pstart',
+                        'ldr r1, [r1]',
+                        'cmp r4, r1',
+                        'bge ' + lab + 'in',
+                        'movs r0, #0',
+                        'mov r11, r0',
+                        lab + 'in:']
+                rest = ['b ' + lab + 'end', lab + 'nt:', 'adds r4, r4, #2', lab + 'end:']
+                t2_begin()
+                t2_asm(test + jump + ['sub r6, r6, #12'] + rest, test + jump + rest)
+                t2_else()
             e(f'  If {conds[k]}')
             jump_rel('PeekB(PIP + 1)', 2)
             charge(12)
             e('  Else')
             e('    PIP = PIP + 2')
             e('  EndIf')
+            if T2:
+                t2_end()
             tail(4)
 
     # ---- group 1: 80 81 82 83
@@ -1110,13 +1342,15 @@ def emit_handlers():
             g_read(w, 'va')
             e_write(kind, w, 'va')
         defined.add(n)
-        modrm_handler(f'Op{n:02X}', body, 2, 9)
+        modrm_handler(f'Op{n:02X}', body, 2, 9,
+                      t2_rr16(True) + ['strh r1, [r3, r12, lsl #1]', 'adds r4, r4, #2'] if w else None)
     for n, w in ((0x8A, 0), (0x8B, 1)):
         def body(kind, w=w):
             e_read(kind, w, 'va')
             g_write(w, 'va')
         defined.add(n)
-        modrm_handler(f'Op{n:02X}', body, 2, 8)
+        modrm_handler(f'Op{n:02X}', body, 2, 8,
+                      t2_rr16(False) + ['strh r1, [r3, r12, lsl #1]', 'adds r4, r4, #2'] if w else None)
     # 8C: MOV Ew, Sw (reg & 3)
     def body8c(kind):
         e('  va = SegV((m >> 3) & 3)')
@@ -1260,8 +1494,14 @@ def emit_handlers():
         tail(4)
     for r in range(8):
         op(0xB8 + r)
+        if T2:
+            t2_begin()
+            t2_asm(['ldrh r0, [r4, #1]', 'ldr r1, =global_r', f'strh r0, [r1, #{2 * r}]', 'adds r4, r4, #3'])
+            t2_else()
         e(f'  R({r}) = PeekA(PIP + 1) | (PeekA(PIP + 2) << 8)')
         e('  PIP = PIP + 3')
+        if T2:
+            t2_end()
         tail(4)
 
     # ---- returns (C0-C3, C8-CB with 8086 aliases)

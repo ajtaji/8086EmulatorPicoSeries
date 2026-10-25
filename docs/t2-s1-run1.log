@@ -1,0 +1,895 @@
+﻿lease taken 07:44:56
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 51013 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2.asm
+> RP2350 ASSEMBLER: 87284 bytes of code run from SRAM at $20000000-$200154F3, copied from flash at boot; 3188 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2350|100628|4194304
+CYCLES_TOTAL_RP2350|60530|straight-line, not-taken branches
+REGMAP_RP2350|5913|198|91|350|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1394|frame-slot loads taken from a register
+pmfc: t2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 100628 bytes into 394 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
+pmfc: OK
+image ends at 0x10018A00
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    339E22BD7A3A13CA5D414E1424F5BD5E4AC5D641FE053F22B47C10E9C5B89DC2 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\src\demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 51013 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2.asm
+> RP2350 ASSEMBLER: 87284 bytes of code run from SRAM at $20000000-$200154F3, copied from flash at boot; 3188 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_guest' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_guest' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_guest' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_guest' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+ROM_TOTAL_RP2350|100628|4194304
+CYCLES_TOTAL_RP2350|60530|straight-line, not-taken branches
+REGMAP_RP2350|5913|198|91|350|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1394|frame-slot loads taken from a register
+pmfc: t2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 100628 bytes into 394 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-demo.uf2
+pmfc: uploading t2-demo.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 201728 bytes (32%)
+> [NATIVE UPLOADER] Writing image: 131072 of 201728 bytes (64%)
+> [NATIVE UPLOADER] Writing image: 196608 of 201728 bytes (97%)
+> [NATIVE UPLOADER] Writing image: 201728 of 201728 bytes (100%)
+> [NATIVE UPLOADER] Wrote t2-demo.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+> [NATIVE UPLOADER] Serial monitor: board found on COM6 (USB vendor ID 2E8A), on the same USB connection it was flashed through.
+pmfc: reading COM6 at 9600 baud for 25 s (the port opened 2 ms after the upload, attempt 1).
+8086 PureMetal clk_sys kHz=150000 guest RAM KB=420 timing=0 asm-tail=1
+sum test AX=5050 CX=0 instructions=203 PASS
+sieve.com printed: primes below 10000: 1229 instructions=120169 us=55440 PASS
+register/branch instructions=1000000 us=256671 instructions/s=3896038
+alu instructions=1000000 us=442861 instructions/s=2258044
+memory instructions=1000000 us=596200 instructions/s=1677289
+call/stack instructions=1000000 us=435004 instructions/s=2298829
+rep movsw bytes=524288 us=58464 bytes/s=8967706
+register/branch instructions=1000000 us=256667 instructions/s=3896098
+alu instructions=1000000 us=442860 instructions/s=2258049
+memory instructions=1000000 us=596198 instructions/s=1677295
+call/stack instructions=1000000 us=435002 instructions/s=2298840
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+register/branch instructions=1000000 us=256668 instructions/s=3896083
+alu instructions=1000000 us=442860 instructions/s=2258049
+memory instructions=1000000 us=596198 instructions/s=1677295
+call/stack instructions=1000000 us=435002 instructions/s=2298840
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+register/branch instructions=1000000 us=256668 instructions/s=3896083
+alu instructions=1000000 us=442859 instructions/s=2258055
+memory instructions=1000000 us=596198 instructions/s=1677295
+call/stack instructions=1000000 us=435002 instructions/s=2298840
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+register/branch instructions=1000000 us=256668 instructions/s=3896083
+alu instructions=1000000 us=442859 instructions/s=2258055
+memory instructions=1000000 us=596199 instructions/s=1677292
+call/stack instructions=1000000 us=435002 instructions/s=2298840
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+register/branch instructions=1000000 us=256668 instructions/s=3896083
+alu instructions=1000000 us=442860 instructions/s=2258049
+memory instructions=1000000 us=596198 instructions/s=1677295
+call/stack instructions=1000000 us=435003 instructions/s=2298834
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+register/branch instructions=1000000 us=256668 instructions/s=3896083
+alu instructions=1000000 us=442859 instructions/s=2258055
+memory instructions=1000000 us=596198 instructions/s=1677295
+call/stack instructions=1000000 us=435002 instructions/s=2298840
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+register/branch instructions=1000000 us=256668 instructions/s=3896083
+alu instructions=1000000 us=442859 instructions/s=2258055
+memory instructions=1000000 us=596198 instructions/s=1677295
+call/stack instructions=1000000 us=435002 instructions/s=2298840
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+register/branch instructions=1000000 us=256667 instructions/s=3896098
+alu instructions=1000000 us=442859 instructions/s=2258055
+memory instructions=1000000 us=596198 instructions/s=1677295
+call/stack instructions=1000000 us=435002 instructions/s=2298840
+rep movsw bytes=524288 us=58462 bytes/s=8968013
+pmfc: read COM6 for 25 s: 2959 bytes.
+pmfc: OK
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 52686 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api.uf2.asm
+> RP2350 ASSEMBLER: 87284 bytes of code run from SRAM at $20000000-$200154F3, copied from flash at boot; 359792 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|104764|4194304
+CYCLES_TOTAL_RP2350|63294|straight-line, not-taken branches
+REGMAP_RP2350|6349|302|86|470|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1403|frame-slot loads taken from a register
+pmfc: t2-api.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104764 bytes into 410 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api.uf2
+pmfc: OK
+image ends at 0x10019A00
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    819C0D51F5BD841BAD8947C6E8B30BAA0E3B35F4C2826A48F6E6E4C86E390089 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 52686 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api.uf2.asm
+> RP2350 ASSEMBLER: 87284 bytes of code run from SRAM at $20000000-$200154F3, copied from flash at boot; 359792 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|104764|4194304
+CYCLES_TOTAL_RP2350|63294|straight-line, not-taken branches
+REGMAP_RP2350|6349|302|86|470|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1403|frame-slot loads taken from a register
+pmfc: t2-api.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 104764 bytes into 410 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api.uf2
+pmfc: uploading t2-api.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 209920 bytes (31%)
+> [NATIVE UPLOADER] Writing image: 131072 of 209920 bytes (62%)
+> [NATIVE UPLOADER] Writing image: 196608 of 209920 bytes (93%)
+> [NATIVE UPLOADER] Writing image: 209920 of 209920 bytes (100%)
+> [NATIVE UPLOADER] Wrote t2-api.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+> [NATIVE UPLOADER] Serial monitor: board found on COM6 (USB vendor ID 2E8A), on the same USB connection it was flashed through.
+pmfc: reading COM6 at 9600 baud for 15 s (the port opened 1 ms after the upload, attempt 1).
+8086 API checks timing=0 asm-tail=1
+API checks=78 failures=0 PASS
+pmfc: read COM6 for 15 s: 68 bytes.
+pmfc: OK
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api-timed.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 53517 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api-timed.uf2.asm
+> RP2350 ASSEMBLER: 88804 bytes of code run from SRAM at $20000000-$20015AE3, copied from flash at boot; 358272 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|106268|4194304
+CYCLES_TOTAL_RP2350|63941|straight-line, not-taken branches
+REGMAP_RP2350|6406|303|87|470|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1407|frame-slot loads taken from a register
+pmfc: t2-api-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 106268 bytes into 416 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api-timed.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api-timed.uf2
+pmfc: OK
+image ends at 0x1001A000
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    6C0C4AA088B1A823FB8F5E6A3567625C32418C10BCFF7B6901192DAFEFEF2AF5 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\api-timed.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 53517 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api-timed.uf2.asm
+> RP2350 ASSEMBLER: 88804 bytes of code run from SRAM at $20000000-$20015AE3, copied from flash at boot; 358272 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|106268|4194304
+CYCLES_TOTAL_RP2350|63941|straight-line, not-taken branches
+REGMAP_RP2350|6406|303|87|470|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1407|frame-slot loads taken from a register
+pmfc: t2-api-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 106268 bytes into 416 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api-timed.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-api-timed.uf2
+pmfc: uploading t2-api-timed.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 212992 bytes (30%)
+> [NATIVE UPLOADER] Writing image: 131072 of 212992 bytes (61%)
+> [NATIVE UPLOADER] Writing image: 196608 of 212992 bytes (92%)
+> [NATIVE UPLOADER] Writing image: 212992 of 212992 bytes (100%)
+> [NATIVE UPLOADER] Wrote t2-api-timed.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+> [NATIVE UPLOADER] Serial monitor: board found on COM6 (USB vendor ID 2E8A), on the same USB connection it was flashed through.
+pmfc: reading COM6 at 9600 baud for 15 s (the port opened 2 ms after the upload, attempt 1).
+8086 API checks timing=1 asm-tail=1
+API checks=77 failures=0 PASS
+pmfc: read COM6 for 15 s: 68 bytes.
+pmfc: OK
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors-timed.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 52230 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-timed.uf2.asm
+> RP2350 ASSEMBLER: 88804 bytes of code run from SRAM at $20000000-$20015AE3, copied from flash at boot; 355448 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|102448|4194304
+CYCLES_TOTAL_RP2350|61829|straight-line, not-taken branches
+REGMAP_RP2350|5984|204|87|342|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1410|frame-slot loads taken from a register
+pmfc: t2-vectors-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 102448 bytes into 401 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-timed.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-timed.uf2
+pmfc: OK
+image ends at 0x10019100
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    7E821326B799F6F0CDF4A76C7636238DC6D5CCDDCB4DA2486A76A52F270921D9 C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\vectors-timed.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 52230 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-timed.uf2.asm
+> RP2350 ASSEMBLER: 88804 bytes of code run from SRAM at $20000000-$20015AE3, copied from flash at boot; 355448 bytes of SRAM left free, stacks and reserved windows excluded.
+ROM_TOTAL_RP2350|102448|4194304
+CYCLES_TOTAL_RP2350|61829|straight-line, not-taken branches
+REGMAP_RP2350|5984|204|87|342|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1410|frame-slot loads taken from a register
+pmfc: t2-vectors-timed.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 102448 bytes into 401 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-timed.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\t2-vectors-timed.uf2
+pmfc: uploading t2-vectors-timed.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 205312 bytes (31%)
+> [NATIVE UPLOADER] Writing image: 131072 of 205312 bytes (63%)
+> [NATIVE UPLOADER] Writing image: 196608 of 205312 bytes (95%)
+> [NATIVE UPLOADER] Writing image: 205312 of 205312 bytes (100%)
+> [NATIVE UPLOADER] Wrote t2-vectors-timed.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+8086 vectors clk_sys kHz=150001 timing=1 asm-tail=1
+READY
+G 00 pass=100 fail=0 tests=100 us=44378
+G 01 pass=100 fail=0 tests=100 us=45875
+G 02 pass=100 fail=0 tests=100 us=44838
+G 03 pass=100 fail=0 tests=100 us=45259
+G 04 pass=100 fail=0 tests=100 us=31038
+G 05 pass=100 fail=0 tests=100 us=31203
+G 06 pass=100 fail=0 tests=100 us=50784
+G 07 pass=100 fail=0 tests=100 us=49856
+G 08 pass=100 fail=0 tests=100 us=44799
+G 09 pass=100 fail=0 tests=100 us=45695
+G 0A pass=100 fail=0 tests=100 us=45239
+G 0B pass=100 fail=0 tests=100 us=46139
+G 0C pass=100 fail=0 tests=100 us=31242
+G 0D pass=100 fail=0 tests=100 us=31356
+G 0E pass=100 fail=0 tests=100 us=50212
+G 10 pass=100 fail=0 tests=100 us=42979
+G 11 pass=100 fail=0 tests=100 us=46441
+G 12 pass=100 fail=0 tests=100 us=45064
+G 13 pass=100 fail=0 tests=100 us=46494
+G 14 pass=100 fail=0 tests=100 us=31018
+G 15 pass=100 fail=0 tests=100 us=31071
+G 16 pass=100 fail=0 tests=100 us=50382
+G 17 pass=100 fail=0 tests=100 us=50056
+G 18 pass=100 fail=0 tests=100 us=43360
+G 19 pass=100 fail=0 tests=100 us=45890
+G 1A pass=100 fail=0 tests=100 us=43513
+G 1B pass=100 fail=0 tests=100 us=45790
+G 1C pass=100 fail=0 tests=100 us=30603
+G 1D pass=100 fail=0 tests=100 us=31079
+G 1E pass=100 fail=0 tests=100 us=51292
+G 1F pass=100 fail=0 tests=100 us=49885
+G 20 pass=100 fail=0 tests=100 us=44121
+G 21 pass=100 fail=0 tests=100 us=44179
+G 22 pass=100 fail=0 tests=100 us=44494
+G 23 pass=100 fail=0 tests=100 us=43576
+G 24 pass=100 fail=0 tests=100 us=31138
+G 25 pass=100 fail=0 tests=100 us=31113
+G 27 pass=100 fail=0 tests=100 us=30734
+G 28 pass=100 fail=0 tests=100 us=45290
+G 29 pass=100 fail=0 tests=100 us=45002
+G 2A pass=100 fail=0 tests=100 us=45095
+G 2B pass=100 fail=0 tests=100 us=44149
+G 2C pass=100 fail=0 tests=100 us=30972
+G 2D pass=100 fail=0 tests=100 us=30959
+G 2F pass=100 fail=0 tests=100 us=30884
+G 30 pass=100 fail=0 tests=100 us=44379
+G 31 pass=100 fail=0 tests=100 us=46950
+G 32 pass=100 fail=0 tests=100 us=43183
+G 33 pass=100 fail=0 tests=100 us=43886
+G 34 pass=100 fail=0 tests=100 us=30655
+G 35 pass=100 fail=0 tests=100 us=30779
+G 37 pass=100 fail=0 tests=100 us=31246
+G 38 pass=100 fail=0 tests=100 us=45032
+G 39 pass=100 fail=0 tests=100 us=45419
+G 3A pass=100 fail=0 tests=100 us=44058
+G 3B pass=100 fail=0 tests=100 us=43650
+G 3C pass=100 fail=0 tests=100 us=30940
+G 3D pass=100 fail=0 tests=100 us=30722
+G 3F pass=100 fail=0 tests=100 us=30975
+G 40 pass=100 fail=0 tests=100 us=30763
+G 41 pass=100 fail=0 tests=100 us=30854
+G 42 pass=100 fail=0 tests=100 us=31303
+G 43 pass=100 fail=0 tests=100 us=31373
+G 44 pass=100 fail=0 tests=100 us=30772
+G 45 pass=100 fail=0 tests=100 us=31295
+G 46 pass=100 fail=0 tests=100 us=30975
+G 47 pass=100 fail=0 tests=100 us=31179
+G 48 pass=100 fail=0 tests=100 us=31454
+G 49 pass=100 fail=0 tests=100 us=31076
+G 4A pass=100 fail=0 tests=100 us=31404
+G 4B pass=100 fail=0 tests=100 us=30866
+G 4C pass=100 fail=0 tests=100 us=30983
+G 4D pass=100 fail=0 tests=100 us=30938
+G 4E pass=100 fail=0 tests=100 us=31463
+G 4F pass=100 fail=0 tests=100 us=30923
+G 50 pass=100 fail=0 tests=100 us=50212
+G 51 pass=100 fail=0 tests=100 us=50706
+G 52 pass=100 fail=0 tests=100 us=50660
+G 53 pass=100 fail=0 tests=100 us=50783
+G 54 pass=100 fail=0 tests=100 us=50883
+G 55 pass=100 fail=0 tests=100 us=50645
+G 56 pass=100 fail=0 tests=100 us=50630
+G 57 pass=100 fail=0 tests=100 us=50730
+G 58 pass=100 fail=0 tests=100 us=49839
+G 59 pass=100 fail=0 tests=100 us=49866
+G 5A pass=100 fail=0 tests=100 us=50021
+G 5B pass=100 fail=0 tests=100 us=49989
+G 5C pass=100 fail=0 tests=100 us=50209
+G 5D pass=100 fail=0 tests=100 us=50395
+G 5E pass=100 fail=0 tests=100 us=49964
+G 5F pass=100 fail=0 tests=100 us=49810
+G 60 pass=100 fail=0 tests=100 us=31408
+G 61 pass=100 fail=0 tests=100 us=30915
+G 62 pass=100 fail=0 tests=100 us=30907
+G 63 pass=100 fail=0 tests=100 us=30679
+G 64 pass=100 fail=0 tests=100 us=31088
+G 65 pass=100 fail=0 tests=100 us=30987
+G 66 pass=100 fail=0 tests=100 us=31050
+G 67 pass=100 fail=0 tests=100 us=30780
+G 68 pass=100 fail=0 tests=100 us=31240
+G 69 pass=100 fail=0 tests=100 us=30939
+G 6A pass=100 fail=0 tests=100 us=31226
+G 6B pass=100 fail=0 tests=100 us=31554
+G 6C pass=100 fail=0 tests=100 us=30678
+G 6D pass=100 fail=0 tests=100 us=31293
+G 6E pass=100 fail=0 tests=100 us=31340
+G 6F pass=100 fail=0 tests=100 us=30776
+G 70 pass=100 fail=0 tests=100 us=30908
+G 71 pass=100 fail=0 tests=100 us=31482
+G 72 pass=100 fail=0 tests=100 us=30505
+G 73 pass=100 fail=0 tests=100 us=30854
+G 74 pass=100 fail=0 tests=100 us=30763
+G 75 pass=100 fail=0 tests=100 us=30540
+G 76 pass=100 fail=0 tests=100 us=31143
+G 77 pass=100 fail=0 tests=100 us=31152
+G 78 pass=100 fail=0 tests=100 us=30972
+G 79 pass=100 fail=0 tests=100 us=30944
+G 7A pass=100 fail=0 tests=100 us=31678
+G 7B pass=100 fail=0 tests=100 us=30756
+G 7C pass=100 fail=0 tests=100 us=30633
+G 7D pass=100 fail=0 tests=100 us=30844
+G 7E pass=100 fail=0 tests=100 us=30712
+G 7F pass=100 fail=0 tests=100 us=30949
+G 80.0 pass=100 fail=0 tests=100 us=46221
+G 80.1 pass=100 fail=0 tests=100 us=44823
+G 80.2 pass=100 fail=0 tests=100 us=45766
+G 80.3 pass=100 fail=0 tests=100 us=45017
+G 80.4 pass=100 fail=0 tests=100 us=44335
+G 80.5 pass=100 fail=0 tests=100 us=43811
+G 80.6 pass=100 fail=0 tests=100 us=44590
+G 80.7 pass=100 fail=0 tests=100 us=43997
+G 81.0 pass=100 fail=0 tests=100 us=45581
+G 81.1 pass=100 fail=0 tests=100 us=46471
+G 81.2 pass=100 fail=0 tests=100 us=45011
+G 81.3 pass=100 fail=0 tests=100 us=45757
+G 81.4 pass=100 fail=0 tests=100 us=46948
+G 81.5 pass=100 fail=0 tests=100 us=44144
+G 81.6 pass=100 fail=0 tests=100 us=45873
+G 81.7 pass=100 fail=0 tests=100 us=46456
+G 82.0 pass=100 fail=0 tests=100 us=42498
+G 82.1 pass=100 fail=0 tests=100 us=44813
+G 82.2 pass=100 fail=0 tests=100 us=45615
+G 82.3 pass=100 fail=0 tests=100 us=42495
+G 82.4 pass=100 fail=0 tests=100 us=44729
+G 82.5 pass=100 fail=0 tests=100 us=45304
+G 82.6 pass=100 fail=0 tests=100 us=44950
+G 82.7 pass=100 fail=0 tests=100 us=44379
+G 83.0 pass=100 fail=0 tests=100 us=44815
+G 83.1 pass=100 fail=0 tests=100 us=46787
+G 83.2 pass=100 fail=0 tests=100 us=45322
+G 83.3 pass=100 fail=0 tests=100 us=45601
+G 83.4 pass=100 fail=0 tests=100 us=45999
+G 83.5 pass=100 fail=0 tests=100 us=44445
+G 83.6 pass=100 fail=0 tests=100 us=45498
+G 83.7 pass=100 fail=0 tests=100 us=46277
+G 84 pass=100 fail=0 tests=100 us=43261
+G 85 pass=100 fail=0 tests=100 us=47432
+G 86 pass=100 fail=0 tests=100 us=45530
+G 87 pass=100 fail=0 tests=100 us=46029
+G 88 pass=100 fail=0 tests=100 us=44552
+G 89 pass=100 fail=0 tests=100 us=46477
+G 8A pass=100 fail=0 tests=100 us=43380
+G 8B pass=100 fail=0 tests=100 us=45131
+G 8C pass=100 fail=0 tests=100 us=44217
+G 8D pass=100 fail=0 tests=100 us=31408
+G 8E pass=100 fail=0 tests=100 us=45535
+G 8F pass=100 fail=0 tests=100 us=64992
+G 90 pass=100 fail=0 tests=100 us=30974
+G 91 pass=100 fail=0 tests=100 us=30795
+G 92 pass=100 fail=0 tests=100 us=31209
+G 93 pass=100 fail=0 tests=100 us=31252
+G 94 pass=100 fail=0 tests=100 us=30762
+G 95 pass=100 fail=0 tests=100 us=30973
+G 96 pass=100 fail=0 tests=100 us=30906
+G 97 pass=100 fail=0 tests=100 us=30808
+G 98 pass=100 fail=0 tests=100 us=30921
+G 99 pass=100 fail=0 tests=100 us=30649
+G 9A pass=100 fail=0 tests=100 us=53549
+G 9C pass=100 fail=0 tests=100 us=51267
+G 9D pass=100 fail=0 tests=100 us=50165
+G 9E pass=100 fail=0 tests=100 us=30951
+G 9F pass=100 fail=0 tests=100 us=30937
+G A0 pass=100 fail=0 tests=100 us=49079
+G A1 pass=100 fail=0 tests=100 us=49951
+G A2 pass=100 fail=0 tests=100 us=48910
+G A3 pass=100 fail=0 tests=100 us=50954
+G A4 pass=100 fail=0 tests=100 us=166089
+G A5 pass=100 fail=0 tests=100 us=288400
+G A6 pass=100 fail=0 tests=100 us=122394
+G A7 pass=100 fail=0 tests=100 us=142148
+G A8 pass=100 fail=0 tests=100 us=30524
+G A9 pass=100 fail=0 tests=100 us=30933
+G AA pass=100 fail=0 tests=100 us=110218
+G AB pass=100 fail=0 tests=100 us=159306
+G AC pass=100 fail=0 tests=100 us=81387
+G AD pass=100 fail=0 tests=100 us=94797
+G AE pass=100 fail=0 tests=100 us=60902
+G AF pass=100 fail=0 tests=100 us=98696
+G B0 pass=100 fail=0 tests=100 us=31006
+G B1 pass=100 fail=0 tests=100 us=30907
+G B2 pass=100 fail=0 tests=100 us=30572
+G B3 pass=100 fail=0 tests=100 us=30919
+G B4 pass=100 fail=0 tests=100 us=31153
+G B5 pass=100 fail=0 tests=100 us=30872
+G B6 pass=100 fail=0 tests=100 us=30806
+G B7 pass=100 fail=0 tests=100 us=30872
+G B8 pass=100 fail=0 tests=100 us=31206
+G B9 pass=100 fail=0 tests=100 us=30805
+G BA pass=100 fail=0 tests=100 us=30964
+G BB pass=100 fail=0 tests=100 us=30720
+G BC pass=100 fail=0 tests=100 us=30990
+G BD pass=100 fail=0 tests=100 us=30931
+G BE pass=100 fail=0 tests=100 us=30888
+G BF pass=100 fail=0 tests=100 us=30905
+G C0 pass=100 fail=0 tests=100 us=50146
+G C1 pass=100 fail=0 tests=100 us=50336
+G C2 pass=100 fail=0 tests=100 us=50316
+G C3 pass=100 fail=0 tests=100 us=50267
+G C4 pass=100 fail=0 tests=100 us=51664
+G C5 pass=100 fail=0 tests=100 us=52735
+G C6 pass=100 fail=0 tests=100 us=44611
+G C7 pass=100 fail=0 tests=100 us=46875
+G C8 pass=100 fail=0 tests=100 us=52567
+G C9 pass=100 fail=0 tests=100 us=52087
+G CA pass=100 fail=0 tests=100 us=52164
+G CB pass=100 fail=0 tests=100 us=51373
+G CC pass=100 fail=0 tests=100 us=79991
+G CD pass=100 fail=0 tests=100 us=79611
+G CE pass=100 fail=0 tests=100 us=57328
+G CF pass=100 fail=0 tests=100 us=54342
+G D0.0 pass=100 fail=0 tests=100 us=43070
+G D0.1 pass=100 fail=0 tests=100 us=44283
+G D0.2 pass=100 fail=0 tests=100 us=45169
+G D0.3 pass=100 fail=0 tests=100 us=42327
+G D0.4 pass=100 fail=0 tests=100 us=45334
+G D0.5 pass=100 fail=0 tests=100 us=44309
+G D0.6 pass=100 fail=0 tests=100 us=44774
+G D0.7 pass=100 fail=0 tests=100 us=45398
+G D1.0 pass=100 fail=0 tests=100 us=45755
+G D1.1 pass=100 fail=0 tests=100 us=45209
+G D1.2 pass=100 fail=0 tests=100 us=45335
+G D1.3 pass=100 fail=0 tests=100 us=46229
+G D1.4 pass=100 fail=0 tests=100 us=46265
+G D1.5 pass=100 fail=0 tests=100 us=45125
+G D1.6 pass=100 fail=0 tests=100 us=45467
+G D1.7 pass=100 fail=0 tests=100 us=44806
+G D2.0 pass=100 fail=0 tests=100 us=45477
+G D2.1 pass=100 fail=0 tests=100 us=45453
+G D2.2 pass=100 fail=0 tests=100 us=43760
+G D2.3 pass=100 fail=0 tests=100 us=44559
+G D2.4 pass=100 fail=0 tests=100 us=44716
+G D2.5 pass=100 fail=0 tests=100 us=44414
+G D2.6 pass=100 fail=0 tests=100 us=44197
+G D2.7 pass=100 fail=0 tests=100 us=45529
+G D3.0 pass=100 fail=0 tests=100 us=45555
+G D3.1 pass=100 fail=0 tests=100 us=45667
+G D3.2 pass=100 fail=0 tests=100 us=46066
+G D3.3 pass=100 fail=0 tests=100 us=45604
+G D3.4 pass=100 fail=0 tests=100 us=45025
+G D3.5 pass=100 fail=0 tests=100 us=46433
+G D3.6 pass=100 fail=0 tests=100 us=47517
+G D3.7 pass=100 fail=0 tests=100 us=47162
+G D4 pass=100 fail=0 tests=100 us=31084
+G D5 pass=100 fail=0 tests=100 us=31017
+G D6 pass=100 fail=0 tests=100 us=30892
+G D7 pass=100 fail=0 tests=100 us=48658
+G D8 pass=100 fail=0 tests=100 us=45061
+G D9 pass=100 fail=0 tests=100 us=45825
+G DA pass=100 fail=0 tests=100 us=43722
+G DB pass=100 fail=0 tests=100 us=45852
+G DC pass=100 fail=0 tests=100 us=46304
+G DD pass=100 fail=0 tests=100 us=46659
+G DE pass=100 fail=0 tests=100 us=45493
+G DF pass=100 fail=0 tests=100 us=45106
+G E0 pass=100 fail=0 tests=100 us=30839
+G E1 pass=100 fail=0 tests=100 us=31125
+G E2 pass=100 fail=0 tests=100 us=30918
+G E3 pass=100 fail=0 tests=100 us=30813
+G E4 pass=100 fail=0 tests=100 us=30883
+G E5 pass=100 fail=0 tests=100 us=30894
+G E6 pass=100 fail=0 tests=100 us=30704
+G E7 pass=100 fail=0 tests=100 us=31032
+G E8 pass=100 fail=0 tests=100 us=51167
+G E9 pass=100 fail=0 tests=100 us=30817
+G EA pass=100 fail=0 tests=100 us=30749
+G EB pass=100 fail=0 tests=100 us=30957
+G EC pass=100 fail=0 tests=100 us=31056
+G ED pass=100 fail=0 tests=100 us=30850
+G EE pass=100 fail=0 tests=100 us=31141
+G EF pass=100 fail=0 tests=100 us=31121
+G F5 pass=100 fail=0 tests=100 us=30992
+G F6.0 pass=100 fail=0 tests=100 us=43258
+G F6.1 pass=100 fail=0 tests=100 us=45087
+G F6.2 pass=100 fail=0 tests=100 us=45669
+G F6.3 pass=100 fail=0 tests=100 us=44738
+G F6.4 pass=100 fail=0 tests=100 us=44439
+G F6.5 pass=100 fail=0 tests=100 us=44211
+G F6.6 pass=100 fail=0 tests=100 us=65511
+G F6.7 pass=100 fail=0 tests=100 us=84034
+G F7.0 pass=100 fail=0 tests=100 us=47138
+G F7.1 pass=100 fail=0 tests=100 us=44794
+G F7.2 pass=100 fail=0 tests=100 us=46148
+G F7.3 pass=100 fail=0 tests=100 us=46214
+G F7.4 pass=100 fail=0 tests=100 us=45414
+G F7.5 pass=100 fail=0 tests=100 us=46004
+G F7.6 pass=100 fail=0 tests=100 us=69072
+G F7.7 pass=100 fail=0 tests=100 us=83213
+G F8 pass=100 fail=0 tests=100 us=31041
+G F9 pass=100 fail=0 tests=100 us=31013
+G FA pass=100 fail=0 tests=100 us=30932
+G FB pass=100 fail=0 tests=100 us=30986
+G FC pass=100 fail=0 tests=100 us=31012
+G FD pass=100 fail=0 tests=100 us=30777
+G FE.0 pass=100 fail=0 tests=100 us=45306
+G FE.1 pass=100 fail=0 tests=100 us=44982
+G FF.0 pass=100 fail=0 tests=100 us=46535
+G FF.1 pass=100 fail=0 tests=100 us=43225
+G FF.2 pass=100 fail=0 tests=100 us=64868
+G FF.3 pass=100 fail=0 tests=100 us=76058
+G FF.4 pass=100 fail=0 tests=100 us=44661
+G FF.5 pass=100 fail=0 tests=100 us=51703
+G FF.6 pass=100 fail=0 tests=100 us=64567
+G FF.7 pass=100 fail=0 tests=100 us=65853
+TOTAL pass=32300 fail=0
+vectors PASS
+host: 323 files, 32300 tests, 3197267 bytes in 46.9 s
+vectors exit 0
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 59416 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2.asm
+> RP2350 ASSEMBLER: 91188 bytes of code run from SRAM at $20000000-$20016433, copied from flash at boot; 39848 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|115900|4194304
+CYCLES_TOTAL_RP2350|69595|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 115900 bytes into 453 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: OK
+image ends at 0x1001C500
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    E9F13297DD4E0FF8BD78F210C8861784BF13165769C56CEE1FFA6983CB9DA84A C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-keytest.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 59416 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2.asm
+> RP2350 ASSEMBLER: 91188 bytes of code run from SRAM at $20000000-$20016433, copied from flash at boot; 39848 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|115900|4194304
+CYCLES_TOTAL_RP2350|69595|straight-line, not-taken branches
+REGMAP_RP2350|7149|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-keytest.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 115900 bytes into 453 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-keytest.uf2
+pmfc: uploading pc2-keytest.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 231936 bytes (28%)
+> [NATIVE UPLOADER] Writing image: 131072 of 231936 bytes (56%)
+> [NATIVE UPLOADER] Writing image: 196608 of 231936 bytes (84%)
+> [NATIVE UPLOADER] Writing image: 231936 of 231936 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc2-keytest.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+
+
+PC frames=61 clocks/s=4858528 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=61 late-us=12972 busy-us=783430 core1-draw-us=594380 panel-wait-us=664441
+
+
+
+PC frames=121 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=121 late-us=12924 busy-us=770433 core1-draw-us=585710 panel-wait-us=653674
+
+1E 9E 30 B0 2C AC 
+
+PC frames=181 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=181 late-us=12940 busy-us=770500 core1-draw-us=585775 panel-wait-us=653409
+
+
+
+PC frames=241 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=241 late-us=12925 busy-us=770388 core1-draw-us=585551 panel-wait-us=653540
+
+
+
+PC frames=301 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=301 late-us=12928 busy-us=770419 core1-draw-us=585735 panel-wait-us=653622
+
+
+
+PC frames=361 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=361 late-us=12925 busy-us=770387 core1-draw-us=585631 panel-wait-us=653633
+
+
+
+PC frames=421 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=421 late-us=12929 busy-us=770413 core1-draw-us=585685 panel-wait-us=653697
+
+
+
+PC frames=481 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=481 late-us=12919 busy-us=770393 core1-draw-us=585504 panel-wait-us=653695
+
+
+
+PC frames=541 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=541 late-us=12935 busy-us=770413 core1-draw-us=585661 panel-wait-us=653618
+
+
+
+PC frames=601 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=601 late-us=12923 busy-us=770410 core1-draw-us=585626 panel-wait-us=653624
+
+
+
+PC frames=661 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=661 late-us=12922 busy-us=770398 core1-draw-us=585648 panel-wait-us=653621
+
+
+
+PC frames=721 clocks/s=4778880 CS:IP=0050:0117 mode=29 colour=00 PIT0=65536 IMR=FD panel frames=721 late-us=12934 busy-us=770398 core1-draw-us=585617 panel-wait-us=653616
+
+
+serial check PASS
+serial check exit 0
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 60191 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2.asm
+> RP2350 ASSEMBLER: 91188 bytes of code run from SRAM at $20000000-$20016433, copied from flash at boot; 39848 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|122108|4194304
+CYCLES_TOTAL_RP2350|69598|straight-line, not-taken branches
+REGMAP_RP2350|7150|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122108 bytes into 477 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: OK
+image ends at 0x1001DD00
+
+Algorithm Hash                                                             Path                                        
+--------- ----                                                             ----                                        
+SHA256    16FC5AA154B86B7F48B6F52C6BE4A3DB83269111C1312FA1740C77060690370C C:\Users\ajtaj\Desktop\Github\8086Emulato...
+
+
+pmfc: C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\pc-demo.pico2w  ->  RP2350
+pmfc: pin aliases from Boards/Raspberry_Pi_Pico_2_W.board
+pmfc: 60191 lines of assembly
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2.asm
+> RP2350 ASSEMBLER: 91188 bytes of code run from SRAM at $20000000-$20016433, copied from flash at boot; 39848 bytes of SRAM left free, stacks and reserved windows excluded.
+NOTE: 'global_pcram' lifted clear of usb_serial descriptor staging at $20030000-$2003007F.
+NOTE: 'global_pcram' lifted clear of usb_serial outgoing packet buffer at $20030080-$200300BF.
+NOTE: 'global_pcram' lifted clear of usb_serial receive ring at $20030100-$200301FF.
+NOTE: 'global_pcram' lifted clear of usb_serial reboot command at $20030200-$2003021F.
+NOTE: 'global_pcram' lifted clear of multicore mailbox at $20031000-$2003103F.
+ROM_TOTAL_RP2350|122108|4194304
+CYCLES_TOTAL_RP2350|69598|straight-line, not-taken branches
+REGMAP_RP2350|7150|255|120|402|materialisations seen|already in dest|already in another reg|nearby constant
+SLOTMAP_RP2350|1472|frame-slot loads taken from a register
+pmfc: pc2-demo.uf2 is named .uf2, so the image is written as a UF2, exactly as an upload packs it: Packed 122108 bytes into 477 blocks -> C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: wrote C:\Users\ajtaj\Desktop\Github\8086EmulatorPicoSeries\Diagnostics\build\pc2-demo.uf2
+pmfc: uploading pc2-demo.uf2 (RP2350) through COM6
+> [NATIVE UPLOADER] Sending BOOTSEL reset command to COM6 (the 1200-baud touch)...
+> [NATIVE UPLOADER] COM6 left the bus after the 1200-baud touch (0.0 s): the board is going to its boot loader.
+> [NATIVE UPLOADER] Waiting for matching BOOTSEL drive: RP2350 (Pico 2)...
+> [NATIVE UPLOADER] The boot drive at I:\ carries the board's serial 3D00D889CF7F499A.
+> [NATIVE UPLOADER] Found BOOTSEL drive at I:\
+> [NATIVE UPLOADER] Writing image: 65536 of 244224 bytes (26%)
+> [NATIVE UPLOADER] Writing image: 131072 of 244224 bytes (53%)
+> [NATIVE UPLOADER] Writing image: 196608 of 244224 bytes (80%)
+> [NATIVE UPLOADER] Writing image: 244224 of 244224 bytes (100%)
+> [NATIVE UPLOADER] Wrote pc2-demo.uf2 to I:\
+> [NATIVE UPLOADER] FLASH COMPLETE! Board will reboot into the new firmware automatically.
+pmfc: uploaded.
+pmfc: OK
+
+
+PC frames=61 clocks/s=4858543 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=61 late-us=14374 busy-us=870064 core1-draw-us=634373 panel-wait-us=365965
+
+
+
+PC frames=121 clocks/s=4778867 CS:IP=0050:09BB mode=09 colour=00 PIT0=19886 IMR=FE panel frames=121 late-us=14335 busy-us=857620 core1-draw-us=626465 panel-wait-us=346735
+
+
+
+PC frames=181 clocks/s=4778885 CS:IP=0050:06E4 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=181 late-us=14320 busy-us=857718 core1-draw-us=626410 panel-wait-us=346922
+
+
+
+PC frames=241 clocks/s=4778874 CS:IP=0050:09C0 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=241 late-us=14324 busy-us=857293 core1-draw-us=626505 panel-wait-us=346359
+
+
+
+PC frames=301 clocks/s=4778892 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=301 late-us=14300 busy-us=857392 core1-draw-us=626495 panel-wait-us=346519
+
+
+
+PC frames=361 clocks/s=4778867 CS:IP=0050:09BE mode=09 colour=00 PIT0=19886 IMR=FE panel frames=361 late-us=14314 busy-us=857311 core1-draw-us=626576 panel-wait-us=346510
+
+
+
+PC frames=421 clocks/s=4778895 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=421 late-us=14343 busy-us=857646 core1-draw-us=626531 panel-wait-us=346793
+
+
+
+PC frames=481 clocks/s=4778868 CS:IP=0050:09B5 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=481 late-us=14326 busy-us=857675 core1-draw-us=626448 panel-wait-us=346668
+
+
+
+PC frames=541 clocks/s=4778880 CS:IP=0050:09B8 mode=09 colour=00 PIT0=19886 IMR=FE panel frames=541 late-us=14326 busy-us=857700 core1-draw-us=626555 panel-wait-us=346938
+
+
+
+PC frames=601 clocks/s=4778885 CS:IP=0050:10C7 mode=08 colour=00 PIT0=19886 IMR=FE panel frames=601 late-us=14163 busy-us=857538 core1-draw-us=626355 panel-wait-us=346814
+
+
+
+PC frames=661 clocks/s=4778898 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=661 late-us=13559 busy-us=834733 core1-draw-us=442451 panel-wait-us=425377
+
+
+
+PC frames=721 clocks/s=4778864 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=721 late-us=14047 busy-us=835955 core1-draw-us=448872 panel-wait-us=424826
+
+
+
+PC frames=781 clocks/s=4778879 CS:IP=0050:0F5D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=781 late-us=14084 busy-us=835464 core1-draw-us=445802 panel-wait-us=424298
+
+
+
+PC frames=841 clocks/s=4778880 CS:IP=0050:0F78 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=841 late-us=14085 busy-us=835315 core1-draw-us=440536 panel-wait-us=424317
+
+
+
+PC frames=901 clocks/s=4778955 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=901 late-us=13676 busy-us=835029 core1-draw-us=443302 panel-wait-us=424553
+
+
+
+PC frames=961 clocks/s=4778807 CS:IP=0050:0F30 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=961 late-us=14085 busy-us=835820 core1-draw-us=448606 panel-wait-us=426042
+
+
+
+PC frames=1021 clocks/s=4778874 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1021 late-us=14076 busy-us=835455 core1-draw-us=448928 panel-wait-us=424229
+
+
+
+PC frames=1081 clocks/s=4778978 CS:IP=0050:0EB3 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1081 late-us=14106 busy-us=835404 core1-draw-us=443295 panel-wait-us=424300
+
+
+
+PC frames=1141 clocks/s=4778785 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1141 late-us=14095 busy-us=835492 core1-draw-us=440936 panel-wait-us=424433
+
+
+
+PC frames=1201 clocks/s=4778879 CS:IP=0050:0DDF mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1201 late-us=13574 busy-us=835026 core1-draw-us=445372 panel-wait-us=425564
+
+
+
+PC frames=1261 clocks/s=4778873 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1261 late-us=14090 busy-us=835852 core1-draw-us=448759 panel-wait-us=424789
+
+
+
+PC frames=1321 clocks/s=4778885 CS:IP=0050:0EFC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1321 late-us=14103 busy-us=835165 core1-draw-us=445210 panel-wait-us=424096
+
+
+
+PC frames=1381 clocks/s=4778877 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1381 late-us=14103 busy-us=835182 core1-draw-us=442608 panel-wait-us=424112
+
+
+
+PC frames=1441 clocks/s=4778925 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1441 late-us=13622 busy-us=834891 core1-draw-us=444058 panel-wait-us=424552
+
+
+
+PC frames=1501 clocks/s=4778837 CS:IP=0050:0F85 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1501 late-us=14152 busy-us=835743 core1-draw-us=447971 panel-wait-us=425562
+
+
+
+PC frames=1561 clocks/s=4778890 CS:IP=0050:0F4E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1561 late-us=14139 busy-us=835566 core1-draw-us=444311 panel-wait-us=424578
+
+
+
+PC frames=1621 clocks/s=4778870 CS:IP=0050:0F4A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1621 late-us=14099 busy-us=835238 core1-draw-us=442783 panel-wait-us=424198
+
+
+
+PC frames=1681 clocks/s=4778878 CS:IP=0050:0F7A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1681 late-us=14134 busy-us=835610 core1-draw-us=444887 panel-wait-us=424489
+
+
+
+PC frames=1741 clocks/s=4778974 CS:IP=0050:1468 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1741 late-us=13711 busy-us=835244 core1-draw-us=448694 panel-wait-us=424864
+
+
+
+PC frames=1801 clocks/s=4778786 CS:IP=0050:0F5A mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1801 late-us=14143 busy-us=835428 core1-draw-us=446725 panel-wait-us=425641
+
+
+
+PC frames=1861 clocks/s=4778887 CS:IP=0050:0F33 mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1861 late-us=14080 busy-us=835236 core1-draw-us=440445 panel-wait-us=424105
+
+
+
+PC frames=1921 clocks/s=4778871 CS:IP=0050:0F3E mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1921 late-us=14127 busy-us=835967 core1-draw-us=442768 panel-wait-us=424743
+
+
+
+PC frames=1981 clocks/s=4778880 CS:IP=0050:0F7D mode=08 colour=01 PIT0=19886 IMR=FE panel frames=1981 late-us=14101 busy-us=835735 core1-draw-us=447818 panel-wait-us=424816
+
+
+
+PC frames=2041 clocks/s=4779011 CS:IP=0050:0DEC mode=08 colour=01 PIT0=19886 IMR=FE panel frames=2041 late-us=13556 busy-us=835335 core1-draw-us=448412 panel-wait-us=425733
+
+
+
+PC frames=2101 clocks/s=4778755 CS:IP=0050:05C6 mode=0A colour=01 PIT0=19886 IMR=FE panel frames=2101 late-us=13246 busy-us=833933 core1-draw-us=444136 panel-wait-us=426992
+
+
+
+PC frames=2161 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2161 late-us=14430 busy-us=852358 core1-draw-us=497767 panel-wait-us=379714
+
+
+
+PC frames=2221 clocks/s=4778878 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2221 late-us=14473 busy-us=863034 core1-draw-us=497122 panel-wait-us=341103
+
+
+
+PC frames=2281 clocks/s=4778884 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2281 late-us=14473 busy-us=863144 core1-draw-us=496848 panel-wait-us=341011
+
+
+
+PC frames=2341 clocks/s=4778874 CS:IP=0050:09B9 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2341 late-us=14471 busy-us=863054 core1-draw-us=497069 panel-wait-us=341080
+
+
+
+PC frames=2401 clocks/s=4778886 CS:IP=0050:09B5 mode=0A colour=00 PIT0=19886 IMR=FE panel frames=2401 late-us=14483 busy-us=863104 core1-draw-us=496947 panel-wait-us=341139
+
+
+serial check PASS
+serial check exit 0
+lease released 07:49:30

@@ -18,6 +18,12 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 . C:\PMFBuild\board-leases\lease.ps1
+# Python's stderr (a warning, a traceback) is printed into the log, not turned into a
+# terminating error by $ErrorActionPreference = 'Stop' - its exit code is what counts.
+function Invoke-Py($a) {
+    $ErrorActionPreference = 'Continue'
+    & py -3 @a 2>&1 | ForEach-Object { "$_" }
+}
 $l = Get-BoardLease -Port $Port -Owner 'cg-8086' -Minutes $Minutes
 "lease taken $(Get-Date -Format HH:mm:ss)"
 try {
@@ -32,13 +38,13 @@ try {
                 'vectors' {
                     & (Join-Path $PSScriptRoot 'build.ps1') -Source $w[1] -Output $w[2] -Port $Port -Seconds 0
                     $a = @((Join-Path $PSScriptRoot 'vectors.py'), '--port', $Port) + $w[3..($w.Count - 1)]
-                    & py -3 @a
+                    Invoke-Py $a
                     "vectors exit $LASTEXITCODE"
                 }
                 'serial' {
                     & (Join-Path $PSScriptRoot 'build.ps1') -Source $w[1] -Output $w[2] -Port $Port -Seconds 0
                     $a = @((Join-Path $PSScriptRoot 'pc_serial_check.py'), '--port', $Port) + $w[3..($w.Count - 1)]
-                    & py -3 @a
+                    Invoke-Py $a
                     "serial check exit $LASTEXITCODE"
                 }
                 default { "unknown job: $job" }
