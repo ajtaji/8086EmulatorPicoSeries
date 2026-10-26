@@ -66,6 +66,7 @@ CompilerEndIf
 XIncludeFile "tests.pbi"
 XIncludeFile "machine.pbi"
 CompilerIf #CPU86_LEAN = 0
+XIncludeFile "controls.pbi"
 XIncludeFile "pcmachine.pbi"
 CompilerEndIf
 XIncludeFile "hooks.pbi"
@@ -346,6 +347,8 @@ Structure CtlRect
 EndStructure
 Global NewMap Ctl.CtlRect()
 Global SynthOn.i, SynthClicked$, DisRowAdr.i = -1
+Global FullScreen.i                       ; full screen (below); the toolbar's button toggles it
+Declare WindowAction(action.i)
 Procedure CtlSet(name$, x.f, y.f, w.f, h.f)
   Ctl(name$)\x = x : Ctl()\y = y : Ctl()\w = w : Ctl()\h = h
 EndProcedure
@@ -576,10 +579,46 @@ Procedure DrawPcScreen(x.f, y.f, w.f, h.f)
   EndIf
 EndProcedure
 
+; The Controls tab: controls.pbi's table, the same rows the keyboard code reads.
+Global CtlTop.i
+Procedure DrawControls(x.f, y.f, w.f, h.f)
+  Protected lh.f = Neon_S(19), rows.i, n.i, i.i, yy.f, group.i = -1, kx.f = x + Neon_S(14), wx.f = x + Neon_S(200)
+  n = ListSize(CtlRows()) + 4
+  rows = Int((h - Neon_S(8)) / lh)
+  If Neon_Hit(x, y, w, h) And Neon_Wheel : CtlTop - Neon_Wheel * 3 : EndIf
+  Neon_ScrollBarV(104, x + w - Neon_S(14), y + Neon_S(4), Neon_S(12), h - Neon_S(8), n, rows, @CtlTop)
+  If CtlTop > n - rows : CtlTop = n - rows : EndIf
+  If CtlTop < 0 : CtlTop = 0 : EndIf
+  yy = y + Neon_S(6) - CtlTop * lh
+  ForEach CtlRows()
+    If CtlRows()\group <> group
+      group = CtlRows()\group
+      If group <> #CTL_PC : yy + lh : EndIf
+      If yy >= y And yy < y + h - lh
+        If group = #CTL_PC
+          Neon_Text(*Neon_FontBold, kx, yy, "The PC's keyboard - on the PC screen tab, or in full screen, while the PC runs", Neon_C_AccR, Neon_C_AccG, Neon_C_AccB)
+        Else
+          Neon_Text(*Neon_FontBold, kx, yy, "The window", Neon_C_AccR, Neon_C_AccG, Neon_C_AccB)
+        EndIf
+      EndIf
+      yy + lh
+    EndIf
+    If yy >= y And yy < y + h - lh
+      Neon_Text(*Neon_FontMono, kx, yy, CtlRows()\keys$, Neon_C_TextR, Neon_C_TextG, Neon_C_TextB)
+      Neon_Text(*Neon_FontUI, wx, yy, CtlRows()\what$, Neon_C_DimR, Neon_C_DimG, Neon_C_DimB)
+    EndIf
+    yy + lh
+  Next
+EndProcedure
+
 Procedure DrawMemory(x.f, y.f, w.f, h.f)
   Protected lh.f = Neon_S(18), rows.i, total.i = 65536, r.i, c.i, a.i, s.s, yy.f, base.i, txt.s, v.i
   Neon_Panel(x, y, w, h, "Memory", Neon_C_GrnR, Neon_C_GrnG, Neon_C_GrnB)
-  MemTab = Neon_TabStrip(101, x + Neon_S(2), y + Neon_S(28), w - Neon_S(4), Neon_S(26), "DS:0000|SS:SP|ES:DI|Address|Screen B800|PC screen", MemTab)
+  MemTab = Neon_TabStrip(101, x + Neon_S(2), y + Neon_S(28), w - Neon_S(4), Neon_S(26), "DS:0000|SS:SP|ES:DI|Address|Screen B800|PC screen|Controls", MemTab)
+  If MemTab = 6
+    DrawControls(x, y + Neon_S(58), w, h - Neon_S(58))
+    ProcedureReturn
+  EndIf
   If MemTab = 5
     DrawPcScreen(x + Neon_S(6), y + Neon_S(60), w - Neon_S(12), h - Neon_S(64))
     ProcedureReturn
@@ -746,6 +785,10 @@ Procedure DrawToolbar(w.f)
   If Btn("Run tests", x, y, Neon_S(110), bh, "Run tests", Bool(TestsRun And TestsFailed = 0))
     RunTestsInWindow()
   EndIf
+  x + Neon_S(118)
+  If Btn("Full screen", x, y, Neon_S(120), bh, "Full screen  F11", FullScreen, Bool(MachineKind = 1))
+    WindowAction(#CTL_FULLSCREEN)
+  EndIf
   r = RateShown / 1000000.0
   label = StrF(r, 1) + " M instructions/s"
   If #CPU_TIMING : label = StrF(r, 2) + " MHz (" + StrF(r / 4.772727, 1) + "x a 4.77 MHz 8086)" : EndIf
@@ -773,6 +816,126 @@ Procedure SaveShot(pw.i, ph.i)
   ShotFrames = -1
 EndProcedure
 
+; ---------------------------------------------------------------- full screen
+; A borderless window over the window's own monitor (the display mode does not change),
+; showing only the PC's screen: the CGA picture at its 4:3 shape with its border, as
+; large as fits, centred on black. The pointer hides after two idle seconds. F11 or the
+; Full screen button toggles it, Esc leaves (controls.pbi); the window's placement and
+; style are saved on entering and put back exactly on leaving. The PC machine only.
+Global FsStyle.i, FsPlacement.WINDOWPLACEMENT, FsCursorHidden.i, FsMouseX.i, FsMouseY.i, FsMouseMs.q
+Global FsViewX.f, FsViewY.f, FsViewW.f, FsViewH.f
+
+Procedure FsShowCursor(show.i)
+  If show And FsCursorHidden : ShowCursor_(#True) : FsCursorHidden = 0 : EndIf
+  If show = 0 And FsCursorHidden = 0 : ShowCursor_(#False) : FsCursorHidden = 1 : EndIf
+EndProcedure
+
+Procedure EnterFullScreen()
+  Protected hwnd.i, mi.MONITORINFO
+  If FullScreen Or MachineKind <> 1 : ProcedureReturn : EndIf
+  hwnd = WindowID(Win)
+  FsPlacement\length = SizeOf(WINDOWPLACEMENT) : GetWindowPlacement_(hwnd, @FsPlacement)
+  FsStyle = GetWindowLongPtr_(hwnd, #GWL_STYLE)
+  mi\cbSize = SizeOf(MONITORINFO) : GetMonitorInfo_(MonitorFromWindow_(hwnd, 2), @mi)   ; 2: the nearest monitor
+  SetWindowLongPtr_(hwnd, #GWL_STYLE, FsStyle & ~(#WS_CAPTION | #WS_THICKFRAME | #WS_MINIMIZEBOX | #WS_MAXIMIZEBOX | #WS_SYSMENU))
+  SetWindowPos_(hwnd, #HWND_TOP, mi\rcMonitor\left, mi\rcMonitor\top, mi\rcMonitor\right - mi\rcMonitor\left, mi\rcMonitor\bottom - mi\rcMonitor\top, #SWP_FRAMECHANGED | #SWP_NOOWNERZORDER | #SWP_SHOWWINDOW)
+  FullScreen = 1 : FsMouseMs = ElapsedMilliseconds()
+  Neon_FocusID = 0                          ; the keys go to the PC
+  SetActiveGadget(Gl)
+EndProcedure
+
+Procedure LeaveFullScreen()
+  Protected hwnd.i
+  If FullScreen = 0 : ProcedureReturn : EndIf
+  hwnd = WindowID(Win)
+  SetWindowLongPtr_(hwnd, #GWL_STYLE, FsStyle)
+  SetWindowPlacement_(hwnd, @FsPlacement)
+  SetWindowPos_(hwnd, 0, 0, 0, 0, 0, #SWP_FRAMECHANGED | #SWP_NOMOVE | #SWP_NOSIZE | #SWP_NOZORDER | #SWP_NOOWNERZORDER)
+  FullScreen = 0 : FsShowCursor(1)
+  SetActiveGadget(Gl)
+EndProcedure
+
+Procedure WindowAction(action.i)
+  Select action
+    Case #CTL_FULLSCREEN : If FullScreen : LeaveFullScreen() : Else : EnterFullScreen() : EndIf
+    Case #CTL_LEAVEFULL : LeaveFullScreen()
+  EndSelect
+EndProcedure
+
+; Keys reach the PC on the PC screen tab, or in full screen, while it runs.
+Procedure.i PcKeysOn()
+  ProcedureReturn Bool(MachineKind = 1 And Running And (MemTab = 5 Or FullScreen))
+EndProcedure
+
+; The PC's screen alone: the texture (704 x 464, the 640 x 200 picture with its border,
+; lines doubled) drawn at the picture's 4:3 shape: 704 / 640 of the width and 232 / 200
+; of the height of a 4:3 screen.
+Procedure DrawPcFull(pw.f, ph.f)
+  Protected a.f, vw.f, vh.f, sc.f, keepH.f
+  Neon_Box(0, 0, pw, ph, 0.0, 0.0, 0.0)
+  If PcTexReady = 0 : ProcedureReturn : EndIf
+  PcTextureUpload()
+  a = (4.0 / 3.0) * (#PC_FW * 1.0 / #PC_W) / (#PC_FH * 1.0 / #PC_H)
+  vh = ph : vw = vh * a
+  If vw > pw : vw = pw : vh = vw / a : EndIf
+  FsViewW = vw : FsViewH = vh : FsViewX = (pw - vw) / 2 : FsViewY = (ph - vh) / 2
+  sc = vw / #PC_FW
+  keepH = PcSprite\Height
+  PcSprite\Height = vh / sc
+  DrawGLSprite(@PcSprite, FsViewX, FsViewY, 0.0, sc, 1.0, 1.0, 1.0, 1.0, #True, -1, -1, -1, -1, #True)
+  PcSprite\Height = keepH
+EndProcedure
+
+; ---------------------------------------------------------------- --fullscreen-test
+; Full screen by its own keys, no real pointer: F11 posted to the window's GL gadget, Esc
+; to the window (the engine's Esc shortcut catches it there). Checked: the window covers
+; its monitor, the canvas is the monitor, the view has the picture's 4:3 shape and is
+; centred, Esc leaves, the windowed rectangle and style come back. Writes the log, ends.
+Global FsTestOn.i, FsTestFile$, FsTestShot$, FsTestStep.i, FsTestWait.i, FsTestFails.i, FsTestLog$, FsTestDone.i
+Global FsTestRect.RECT, FsTestStyle.i
+
+Procedure FsTestCheck(ok.i, what$)
+  If ok = 0 : FsTestFails + 1 : FsTestLog$ + "FAIL " : Else : FsTestLog$ + "ok   " : EndIf
+  FsTestLog$ + what$ + #LF$
+EndProcedure
+
+Procedure FsTestTick(pw.i, ph.i)
+  Protected r.RECT, mi.MONITORINFO, hwnd.i = WindowID(Win), f.i, aspect.f, want.f
+  FsTestWait + 1 : If FsTestWait < 40 : ProcedureReturn : EndIf
+  FsTestWait = 0 : FsTestStep + 1
+  Select FsTestStep
+    Case 1
+      GetWindowRect_(hwnd, @FsTestRect) : FsTestStyle = GetWindowLongPtr_(hwnd, #GWL_STYLE)
+      FsTestLog$ + "windowed: " + Str(FsTestRect\left) + "," + Str(FsTestRect\top) + " " + Str(FsTestRect\right - FsTestRect\left) + "x" + Str(FsTestRect\bottom - FsTestRect\top) + ", scale " + StrF(Neon_UIScale, 2) + #LF$
+      PostMessage_(hwnd, #WM_KEYDOWN, #VK_ESCAPE, 0) : PostMessage_(hwnd, #WM_KEYUP, #VK_ESCAPE, 0)   ; windowed: the PC's Esc
+      PostMessage_(GadgetID(Gl), #WM_KEYDOWN, #VK_F11, 0) : PostMessage_(GadgetID(Gl), #WM_KEYUP, #VK_F11, 0)
+    Case 2
+      GetWindowRect_(hwnd, @r) : mi\cbSize = SizeOf(MONITORINFO) : GetMonitorInfo_(MonitorFromWindow_(hwnd, 2), @mi)
+      FsTestCheck(FullScreen, "F11 entered full screen")
+      FsTestCheck(Bool(r\left = mi\rcMonitor\left And r\top = mi\rcMonitor\top And r\right = mi\rcMonitor\right And r\bottom = mi\rcMonitor\bottom), "the window covers its monitor " + Str(mi\rcMonitor\right - mi\rcMonitor\left) + "x" + Str(mi\rcMonitor\bottom - mi\rcMonitor\top))
+      FsTestCheck(Bool(pw = mi\rcMonitor\right - mi\rcMonitor\left And ph = mi\rcMonitor\bottom - mi\rcMonitor\top), "the canvas is the whole monitor (" + Str(pw) + "x" + Str(ph) + ")")
+      want = (4.0 / 3.0) * (#PC_FW * 1.0 / #PC_W) / (#PC_FH * 1.0 / #PC_H)
+      aspect = FsViewW / FsViewH
+      FsTestCheck(Bool(Abs(aspect - want) < 0.002 And FsViewW <= pw And FsViewH <= ph), "the view " + StrF(FsViewW, 1) + "x" + StrF(FsViewH, 1) + " has the 4:3 picture's shape with its border, " + StrF(want, 4) + " (" + StrF(aspect, 4) + "), and fits")
+      FsTestCheck(Bool(Abs(FsViewX * 2 + FsViewW - pw) <= 1 And Abs(FsViewY * 2 + FsViewH - ph) <= 1), "the view is centred at " + StrF(FsViewX, 1) + "," + StrF(FsViewY, 1))
+      FsTestCheck(Bool(Running And MachineKind = 1), "the PC is still running")
+      If FsTestShot$ <> "" : ShotPath$ = FsTestShot$ : SaveShot(pw, ph) : ShotFrames = 0 : EndIf   ; SaveShot ends a --screenshot run; this one goes on
+      PostMessage_(GadgetID(Gl), #WM_KEYDOWN, #VK_F12, 0) : PostMessage_(GadgetID(Gl), #WM_KEYUP, #VK_F12, 0)   ; full screen: F12 is the PC's Esc
+      PostMessage_(hwnd, #WM_KEYDOWN, #VK_ESCAPE, 0) : PostMessage_(hwnd, #WM_KEYUP, #VK_ESCAPE, 0)
+    Case 3
+      GetWindowRect_(hwnd, @r)
+      FsTestCheck(Bool(FullScreen = 0), "Esc left full screen")
+      FsTestCheck(Bool(r\left = FsTestRect\left And r\top = FsTestRect\top And r\right = FsTestRect\right And r\bottom = FsTestRect\bottom), "the windowed rectangle came back: " + Str(r\left) + "," + Str(r\top) + " " + Str(r\right - r\left) + "x" + Str(r\bottom - r\top))
+      FsTestCheck(Bool(GetWindowLongPtr_(hwnd, #GWL_STYLE) = FsTestStyle), "the window's frame and style came back")
+      If LCase(MachineName$) = "keytest.com"     ; it prints every scan code the PC gets
+        FsTestCheck(Bool(CountString(MachineConsole$, "01 81 ") = 2), "the PC got Esc twice (Esc in the window, F12 in full screen), and not the Esc that left: " + Trim(MachineConsole$))
+      EndIf
+      FsTestLog$ + "fullscreen-test: " + Str(FsTestFails) + " failures" + #LF$
+      f = CreateFile(#PB_Any, FsTestFile$) : If f : WriteString(f, FsTestLog$) : CloseFile(f) : EndIf
+      FsTestDone = 1
+  EndSelect
+EndProcedure
+
 ; ---------------------------------------------------------------- --pointer-test
 ; The mouse and the controls at the desktop's scale without the real pointer (it
 ; is shared): the chrome is driven with synthetic positions in the units
@@ -794,8 +957,8 @@ Procedure SynthInit()
   Protected i.i
   ForEach Ctl() : Next
   SynthAdd("Open...") : SynthAdd("Hello") : SynthAdd("Sieve") : SynthAdd("Machine") : SynthAdd("Reset")
-  SynthAdd("Run") : SynthAdd("Step") : SynthAdd("Step 100") : SynthAdd("Break at field") : SynthAdd("Run tests")
-  For i = 0 To 5 : SynthAdd("memory tab " + Str(i)) : Next
+  SynthAdd("Run") : SynthAdd("Step") : SynthAdd("Step 100") : SynthAdd("Break at field") : SynthAdd("Run tests") : SynthAdd("Full screen")
+  For i = 0 To 6 : SynthAdd("memory tab " + Str(i)) : Next
   SynthAdd("Address field", 3)
   SynthAdd("disassembly row")
   For i = 0 To 1 : SynthAdd("output tab " + Str(i)) : Next
@@ -841,6 +1004,7 @@ Procedure SynthStep()
   Select SynthFrame
     Case 1                                       ; the state that shows the control
       If SynthMemTab(SynthCase) >= 0 : MemTab = SynthMemTab(SynthCase) : EndIf
+      If name$ = "Full screen" : SynthSave = MachineKind : MachineKind = 1 : EndIf   ; it is the PC machine's
       If name$ = "output scroll bar"            ; enough lines to scroll, the view mid-way
         SynthSaveStr$ = MachineConsole$ : MachineConsole$ = ""
         For k = 1 To 300 : MachineConsole$ + "line " + Str(k) + #LF$ : Next
@@ -869,10 +1033,10 @@ Procedure SynthStep()
       inside = Bool(SynthPoint <= 1)
       If Left(name$, 11) = "memory tab " Or Left(name$, 11) = "output tab "
         i = Val(Mid(name$, 12))
-        k = 5 : If Left(name$, 11) = "output tab " : k = 1 : EndIf
+        k = 6 : If Left(name$, 11) = "output tab " : k = 1 : EndIf
         If inside : expect$ = Left(name$, 11) + Str(i) : ElseIf SynthPoint = 2 And i < k : expect$ = Left(name$, 11) + Str(i + 1) : EndIf
         If Left(name$, 11) = "memory tab "
-          If MemTab >= 0 And MemTab <= 5 : got$ = "memory tab " + Str(MemTab) : EndIf
+          If MemTab >= 0 And MemTab <= 6 : got$ = "memory tab " + Str(MemTab) : EndIf
           MemTab = SynthSave
         Else
           If LogTab >= 0 And LogTab <= 1 : got$ = "output tab " + Str(LogTab) : EndIf
@@ -903,6 +1067,7 @@ Procedure SynthStep()
         SynthPoint = 0
         If SynthMemTab(SynthCase) >= 0 : MemTab = 0 : EndIf
         If name$ = "output scroll bar" : MachineConsole$ = SynthSaveStr$ : LogTop = 0 : EndIf
+        If name$ = "Full screen" : MachineKind = SynthSave : EndIf
         SynthCase + 1
       EndIf
   EndSelect
@@ -949,6 +1114,10 @@ Procedure Frame()
     Neon_ChromeBeginFrame(SynthX, SynthY, SynthDown, 0, 0, 0, 1.0 / 60.0)   ; --pointer-test: the real pointer is not read
   Else
     mx = WindowMouseX(Win) : my = WindowMouseY(Win)
+    If FullScreen                            ; the pointer hides after two idle seconds, shows on a move
+      If mx <> FsMouseX Or my <> FsMouseY : FsMouseX = mx : FsMouseY = my : FsMouseMs = ElapsedMilliseconds() : FsShowCursor(1) : EndIf
+      If ElapsedMilliseconds() - FsMouseMs > 2000 : FsShowCursor(0) : EndIf
+    EndIf
     down = Bool(GetActiveWindow() = Win And (GetAsyncKeyState_(#VK_LBUTTON) & $8000))
     Neon_ChromeBeginFrame(mx, my, down, Wheel, KeyCode, KeyChar, 1.0 / 60.0)
   EndIf
@@ -966,6 +1135,13 @@ Procedure Frame()
     RateWindowCount = 0 : RateWindowStart = now
   EndIf
 
+  If FullScreen
+    DrawPcFull(pw, ph)
+    Neon_ChromeEndFrame()
+    If FsTestOn : FsTestTick(pw, ph) : EndIf
+    SetGadgetAttribute(Gl, #PB_OpenGL_FlipBuffers, #True)
+    ProcedureReturn
+  EndIf
   w = pw : h = ph
   top = Neon_S(52)
   logH = Neon_S(230)
@@ -980,6 +1156,7 @@ Procedure Frame()
   Neon_Text(*Neon_FontSmall, Neon_S(10), h - Neon_S(21), "Program: " + MachineName$ + "     " + Status$, Neon_C_DimR, Neon_C_DimG, Neon_C_DimB)
   Neon_ChromeEndFrame()
   If SynthOn : SynthStep() : EndIf
+  If FsTestOn : FsTestTick(pw, ph) : EndIf
   If ShotPath$ <> ""
     ShotFrames + 1
     If ShotFrames = 120
@@ -1021,6 +1198,7 @@ Procedure WindowMain()
                     #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_SizeGadget | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget)
   Win = Util_MainWindowID
   UI_UseCRT = #False                         ; the frame is not drawn through DrawRetroCRT: no barrel-bent pointer
+  CtlLoad()
   ScaleFonts(DisplayScale())                 ; Frame() measures s from then on
   PcTextureInit()
   If #CPU_TIMING : PcSoundOpen() : EndIf
@@ -1029,17 +1207,31 @@ Procedure WindowMain()
     Repeat
       ev = WindowEvent()
       If ev = #PB_Event_CloseWindow : quit = 1 : EndIf
+      If ev = #PB_Event_Menu And EventMenu() = 1001  ; the engine takes Escape as a shortcut: the table says what it is
+        k = CtlFind(#PB_Shortcut_Escape, FullScreen)
+        If k >= 0 And CtlHitGroup = #CTL_WINDOW
+          WindowAction(k)
+        ElseIf k >= 0 And PcKeysOn()
+          Pc86Key(k) : Pc86Key(k | $80)          ; the shortcut gives one event: press and release
+        Else
+          KeyCode = #PB_Shortcut_Escape
+        EndIf
+      EndIf
       If ev = #PB_Event_Gadget And EventGadget() = Gl
         et = EventType()
-        If et = #PB_EventType_MouseWheel
+        If et = #PB_EventType_KeyDown And CtlFind(GetGadgetAttribute(Gl, #PB_OpenGL_Key), FullScreen) >= 0 And CtlHitGroup = #CTL_WINDOW
+          WindowAction(CtlFind(GetGadgetAttribute(Gl, #PB_OpenGL_Key), FullScreen))   ; F11
+        ElseIf et = #PB_EventType_KeyUp And CtlFind(GetGadgetAttribute(Gl, #PB_OpenGL_Key), FullScreen) >= 0 And CtlHitGroup = #CTL_WINDOW
+          ; F11's release
+        ElseIf et = #PB_EventType_MouseWheel
           Wheel + GetGadgetAttribute(Gl, #PB_OpenGL_WheelDelta)
-        ElseIf MachineKind = 1 And Running And MemTab = 5 And (et = #PB_EventType_KeyDown Or et = #PB_EventType_KeyUp)
-          k = PcScanCode(GetGadgetAttribute(Gl, #PB_OpenGL_Key))
+        ElseIf PcKeysOn() And (et = #PB_EventType_KeyDown Or et = #PB_EventType_KeyUp)
+          k = PcScanCode(GetGadgetAttribute(Gl, #PB_OpenGL_Key), FullScreen)
           If k
             If et = #PB_EventType_KeyUp : k | $80 : EndIf
             Pc86Key(k)
           EndIf
-        ElseIf MachineKind = 1 And Running And MemTab = 5 And et = #PB_EventType_Input
+        ElseIf PcKeysOn() And et = #PB_EventType_Input
           ; the key went to the PC
         ElseIf et = #PB_EventType_KeyDown
           KeyCode = GetGadgetAttribute(Gl, #PB_OpenGL_Key)
@@ -1049,7 +1241,7 @@ Procedure WindowMain()
       EndIf
     Until ev = 0
     Frame()
-    If ShotFrames < 0 Or SynthDone : quit = 1 : EndIf
+    If ShotFrames < 0 Or SynthDone Or FsTestDone : quit = 1 : EndIf
     If Running = 0 : Delay(10) : EndIf
   Until quit
   PcSoundClose()
@@ -1074,6 +1266,12 @@ For argi = 0 To CountProgramParameters() - 1
   ElseIf LCase(arg$) = "--screenshot"
     argi + 1
     ShotPath$ = ProgramParameter(argi)
+  ElseIf LCase(arg$) = "--fullscreen-test"
+    argi + 1
+    FsTestFile$ = ProgramParameter(argi) : FsTestOn = 1
+  ElseIf LCase(arg$) = "--fullscreen-shot"
+    argi + 1
+    FsTestShot$ = ProgramParameter(argi)
   ElseIf LCase(arg$) = "--pointer-test"
     argi + 1
     SynthFile$ = ProgramParameter(argi) : SynthOn = 1 : SynthInit()

@@ -240,68 +240,10 @@ Procedure PcSoundClose()
   PcSndOpen = 0
 EndProcedure
 
-; ---- keyboard: PureBasic key codes to set-1 scan codes ----
-Procedure.i PcScanCode(key.i)
-  Select key
-    Case #PB_Shortcut_Escape : ProcedureReturn $01
-    Case #PB_Shortcut_1 : ProcedureReturn $02
-    Case #PB_Shortcut_2 : ProcedureReturn $03
-    Case #PB_Shortcut_3 : ProcedureReturn $04
-    Case #PB_Shortcut_4 : ProcedureReturn $05
-    Case #PB_Shortcut_5 : ProcedureReturn $06
-    Case #PB_Shortcut_6 : ProcedureReturn $07
-    Case #PB_Shortcut_7 : ProcedureReturn $08
-    Case #PB_Shortcut_8 : ProcedureReturn $09
-    Case #PB_Shortcut_9 : ProcedureReturn $0A
-    Case #PB_Shortcut_0 : ProcedureReturn $0B
-    Case #PB_Shortcut_Back : ProcedureReturn $0E
-    Case #PB_Shortcut_Tab : ProcedureReturn $0F
-    Case #PB_Shortcut_Q : ProcedureReturn $10
-    Case #PB_Shortcut_W : ProcedureReturn $11
-    Case #PB_Shortcut_E : ProcedureReturn $12
-    Case #PB_Shortcut_R : ProcedureReturn $13
-    Case #PB_Shortcut_T : ProcedureReturn $14
-    Case #PB_Shortcut_Y : ProcedureReturn $15
-    Case #PB_Shortcut_U : ProcedureReturn $16
-    Case #PB_Shortcut_I : ProcedureReturn $17
-    Case #PB_Shortcut_O : ProcedureReturn $18
-    Case #PB_Shortcut_P : ProcedureReturn $19
-    Case #PB_Shortcut_Return : ProcedureReturn $1C
-    Case #PB_Shortcut_Control : ProcedureReturn $1D
-    Case #PB_Shortcut_A : ProcedureReturn $1E
-    Case #PB_Shortcut_S : ProcedureReturn $1F
-    Case #PB_Shortcut_D : ProcedureReturn $20
-    Case #PB_Shortcut_F : ProcedureReturn $21
-    Case #PB_Shortcut_G : ProcedureReturn $22
-    Case #PB_Shortcut_H : ProcedureReturn $23
-    Case #PB_Shortcut_J : ProcedureReturn $24
-    Case #PB_Shortcut_K : ProcedureReturn $25
-    Case #PB_Shortcut_L : ProcedureReturn $26
-    Case #PB_Shortcut_Shift : ProcedureReturn $2A
-    Case #PB_Shortcut_Z : ProcedureReturn $2C
-    Case #PB_Shortcut_X : ProcedureReturn $2D
-    Case #PB_Shortcut_C : ProcedureReturn $2E
-    Case #PB_Shortcut_V : ProcedureReturn $2F
-    Case #PB_Shortcut_B : ProcedureReturn $30
-    Case #PB_Shortcut_N : ProcedureReturn $31
-    Case #PB_Shortcut_M : ProcedureReturn $32
-    Case #PB_Shortcut_Alt : ProcedureReturn $38
-    Case #PB_Shortcut_Space : ProcedureReturn $39
-    Case #PB_Shortcut_F1 : ProcedureReturn $3B
-    Case #PB_Shortcut_F2 : ProcedureReturn $3C
-    Case #PB_Shortcut_F3 : ProcedureReturn $3D
-    Case #PB_Shortcut_F4 : ProcedureReturn $3E
-    Case #PB_Shortcut_F5 : ProcedureReturn $3F
-    Case #PB_Shortcut_F6 : ProcedureReturn $40
-    Case #PB_Shortcut_F7 : ProcedureReturn $41
-    Case #PB_Shortcut_F8 : ProcedureReturn $42
-    Case #PB_Shortcut_F9 : ProcedureReturn $43
-    Case #PB_Shortcut_F10 : ProcedureReturn $44
-    Case #PB_Shortcut_Up : ProcedureReturn $48
-    Case #PB_Shortcut_Left : ProcedureReturn $4B
-    Case #PB_Shortcut_Right : ProcedureReturn $4D
-    Case #PB_Shortcut_Down : ProcedureReturn $50
-  EndSelect
+; ---- keyboard: PureBasic key codes to set-1 scan codes, from controls.pbi's table ----
+Procedure.i PcScanCode(key.i, full.i = 0)
+  Protected v.l = CtlFind(key, full)
+  If v >= 0 And CtlHitGroup = #CTL_PC : ProcedureReturn v : EndIf
   ProcedureReturn 0
 EndProcedure
 
