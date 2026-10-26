@@ -340,6 +340,26 @@ Global Wheel.i, KeyCode.i, KeyChar.i
 Global TestsRun.i, TestsFailed.i, ShotPath$, ShotFrames.i
 Global AddrText.String, AddrCaret.i, MemBase.i
 
+; Where each control was last drawn (canvas units = physical pixels), for --pointer-test.
+Structure CtlRect
+  x.f : y.f : w.f : h.f
+EndStructure
+Global NewMap Ctl.CtlRect()
+Global SynthOn.i, SynthClicked$, DisRowAdr.i = -1
+Procedure CtlSet(name$, x.f, y.f, w.f, h.f)
+  Ctl(name$)\x = x : Ctl()\y = y : Ctl()\w = w : Ctl()\h = h
+EndProcedure
+; Neon_Button, remembering where it was drawn under a fixed name. Under
+; --pointer-test a press is recorded and its action is not taken.
+Procedure.b Btn(name$, x.f, y.f, w.f, h.f, label.s, lit.b = #False, enabled.b = #True)
+  CtlSet(name$, x, y, w, h)
+  If Neon_Button(x, y, w, h, label, lit, enabled)
+    If SynthOn : SynthClicked$ = name$ : ProcedureReturn #False : EndIf
+    ProcedureReturn #True
+  EndIf
+  ProcedureReturn #False
+EndProcedure
+
 Procedure ResetProgram()
   If MachineKind = 1
     PcStart(*MachineImage, MachineImageLen)
@@ -511,6 +531,7 @@ Procedure DrawDisasm(x.f, y.f, w.f, h.f)
     If adr = BreakAt
       Neon_Box(x + Neon_S(6), yy + Neon_S(3), Neon_S(8), Neon_S(8), Neon_C_RedR, Neon_C_RedG, Neon_C_RedB)
     EndIf
+    If i = 2 : CtlSet("disassembly row", x, yy - Neon_S(2), w, lh) : DisRowAdr = adr : EndIf
     If Neon_MouseClicked And Neon_Hit(x, yy - Neon_S(2), w, lh)
       If BreakAt = adr : BreakAt = -1 : BreakText\s = "" : Else : BreakAt = adr : BreakText\s = H4(adr) : EndIf
     EndIf
@@ -573,6 +594,7 @@ Procedure DrawMemory(x.f, y.f, w.f, h.f)
     Case 2 : base = SegB(0) + (R(7) & $FFF0)
     Default
       Neon_Text(*Neon_FontUI, x + Neon_S(10), y + Neon_S(64), "Linear (hex)", Neon_C_DimR, Neon_C_DimG, Neon_C_DimB)
+      CtlSet("Address field", x + Neon_S(100), y + Neon_S(58), Neon_S(100), Neon_S(26))
       If Neon_TextInput(103, x + Neon_S(100), y + Neon_S(58), Neon_S(100), Neon_S(26), @AddrText, "e.g. B8000", @AddrCaret)
         MemBase = Val("$" + Trim(AddrText\s)) & $FFFF0
       EndIf
@@ -580,7 +602,7 @@ Procedure DrawMemory(x.f, y.f, w.f, h.f)
       y + Neon_S(30) : h - Neon_S(30)
   EndSelect
   rows = Int((h - Neon_S(70)) / lh)
-  If Neon_Hit(x, y, w, h) And Wheel : MemTop - Wheel * 3 : EndIf
+  If Neon_Hit(x, y, w, h) And Neon_Wheel : MemTop - Neon_Wheel * 3 : EndIf
   Neon_ScrollBarV(102, x + w - Neon_S(14), y + Neon_S(58), Neon_S(12), h - Neon_S(62), total, rows, @MemTop)
   If MemTop > total - rows : MemTop = total - rows : EndIf
   If MemTop < 0 : MemTop = 0 : EndIf
@@ -606,7 +628,8 @@ Procedure DrawLog(x.f, y.f, w.f, h.f)
   If t = "" : t = "(nothing yet)" : EndIf
   n = CountString(t, #LF$) + 1
   rows = Int((h - Neon_S(66)) / lh)
-  If Neon_Hit(x, y, w, h) And Wheel : LogTop - Wheel * 3 : EndIf
+  If Neon_Hit(x, y, w, h) And Neon_Wheel : LogTop - Neon_Wheel * 3 : EndIf
+  CtlSet("output scroll bar", x + w - Neon_S(14), y + Neon_S(58), Neon_S(12), h - Neon_S(62))
   Neon_ScrollBarV(202, x + w - Neon_S(14), y + Neon_S(58), Neon_S(12), h - Neon_S(62), n, rows, @LogTop)
   If LogTop > n - rows : LogTop = n - rows : EndIf
   If LogTop < 0 : LogTop = 0 : EndIf
@@ -651,7 +674,7 @@ EndProcedure
 Procedure DrawToolbar(w.f)
   Protected x.f = Neon_S(10), y.f = Neon_S(8), bh.f = Neon_S(30), f.s, label.s, r.f, k.i
   Neon_Box(0, 0, w, Neon_S(46), Neon_C_HeadR, Neon_C_HeadG, Neon_C_HeadB)
-  If Neon_Button(x, y, Neon_S(86), bh, "Open...")
+  If Btn("Open...", x, y, Neon_S(86), bh, "Open...")
     f = OpenFileRequester("Load an 8086 program", "", "DOS programs (*.com)|*.com|Binary (*.bin)|*.bin|All files (*.*)|*.*", 0)
     If f <> ""
       Running = 0
@@ -660,16 +683,16 @@ Procedure DrawToolbar(w.f)
     EndIf
   EndIf
   x + Neon_S(94)
-  If Neon_Button(x, y, Neon_S(70), bh, "Hello")
+  If Btn("Hello", x, y, Neon_S(70), bh, "Hello")
     LoadExample("hello.com")
   EndIf
   x + Neon_S(78)
-  If Neon_Button(x, y, Neon_S(70), bh, "Sieve")
+  If Btn("Sieve", x, y, Neon_S(70), bh, "Sieve")
     LoadExample("sieve.com")
   EndIf
   x + Neon_S(78)
   If MachineKind = 1 : label = "PC machine" : Else : label = "DOS machine" : EndIf
-  If Neon_Button(x, y, Neon_S(110), bh, label, Bool(MachineKind = 1), Bool(#CPU_TIMING = 1))
+  If Btn("Machine", x, y, Neon_S(110), bh, label, Bool(MachineKind = 1), Bool(#CPU_TIMING = 1))
     Running = 0
     MachineKind = 1 - MachineKind
     ResetProgram() : MachineConsole$ = "" : Executed = 0
@@ -680,13 +703,13 @@ Procedure DrawToolbar(w.f)
     EndIf
   EndIf
   x + Neon_S(118)
-  If Neon_Button(x, y, Neon_S(70), bh, "Reset")
+  If Btn("Reset", x, y, Neon_S(70), bh, "Reset")
     Running = 0 : ResetProgram() : MachineConsole$ = "" : Executed = 0 : Status$ = "Reset."
   EndIf
   x + Neon_S(78)
   label = "Run"
   If Running : label = "Stop" : EndIf
-  If Neon_Button(x, y, Neon_S(70), bh, label, Running)
+  If Btn("Run", x, y, Neon_S(70), bh, label, Running)
     Running = Bool(Running = 0)
     If Running
       If MachineExited Or Halted : Running = 0 : Status$ = "Reset first." : EndIf
@@ -697,11 +720,11 @@ Procedure DrawToolbar(w.f)
     EndIf
   EndIf
   x + Neon_S(78)
-  If Neon_Button(x, y, Neon_S(70), bh, "Step", #False, Bool(Running = 0))
+  If Btn("Step", x, y, Neon_S(70), bh, "Step", #False, Bool(Running = 0))
     StepOne() : Status$ = "Stepped to " + H4(Cpu86GetSeg(1)) + ":" + H4(Cpu86GetIP()) + "."
   EndIf
   x + Neon_S(78)
-  If Neon_Button(x, y, Neon_S(90), bh, "Step 100", #False, Bool(Running = 0))
+  If Btn("Step 100", x, y, Neon_S(90), bh, "Step 100", #False, Bool(Running = 0))
     For k = 1 To 100
       StepOne()
       If Cpu86GetIP() = BreakAt Or Halted Or MachineExited : Break : EndIf
@@ -711,6 +734,7 @@ Procedure DrawToolbar(w.f)
   x + Neon_S(98)
   Neon_Text(*Neon_FontUI, x, y + Neon_S(6), "Break at IP", Neon_C_DimR, Neon_C_DimG, Neon_C_DimB)
   x + Neon_S(78)
+  CtlSet("Break at field", x, y, Neon_S(70), bh)
   If Neon_TextInput(301, x, y, Neon_S(70), bh, @BreakText, "hex", @BreakCaret)
     If Trim(BreakText\s) = ""
       BreakAt = -1
@@ -719,7 +743,7 @@ Procedure DrawToolbar(w.f)
     EndIf
   EndIf
   x + Neon_S(78)
-  If Neon_Button(x, y, Neon_S(110), bh, "Run tests", Bool(TestsRun And TestsFailed = 0))
+  If Btn("Run tests", x, y, Neon_S(110), bh, "Run tests", Bool(TestsRun And TestsFailed = 0))
     RunTestsInWindow()
   EndIf
   r = RateShown / 1000000.0
@@ -749,8 +773,160 @@ Procedure SaveShot(pw.i, ph.i)
   ShotFrames = -1
 EndProcedure
 
+; ---------------------------------------------------------------- --pointer-test
+; The mouse and the controls at the desktop's scale without the real pointer (it
+; is shared): the chrome is driven with synthetic positions in the units
+; WindowMouseX/Y give a DPI-aware window, physical pixels (GlUIChrome.pbi 5a).
+; For every control four points: just inside its top-left and bottom-right
+; corners (the press must land), just right of it and just below it (it must
+; not; right of a tab is the next tab). Every frame Neon_MX/Neon_MY must read the
+; point back unbent. Controls at the top (toolbar, tabs) and at the bottom (the
+; output tabs and scroll bar) are both covered.
+Global SynthFile$, SynthX.f, SynthY.f, SynthDown.i, SynthCase.i, SynthPoint.i, SynthFrame.i, SynthDone.i
+Global SynthFails.i, SynthPoints.i, SynthLog$, SynthWorst.f, SynthSave.i, SynthSaveStr$, SynthCanvasW.i, SynthCanvasH.i
+Global Dim SynthName$(40), Dim SynthMemTab.i(40), SynthCount.i
+
+Procedure SynthAdd(name$, memtab.i = -1)
+  SynthName$(SynthCount) = name$ : SynthMemTab(SynthCount) = memtab : SynthCount + 1
+EndProcedure
+
+Procedure SynthInit()
+  Protected i.i
+  ForEach Ctl() : Next
+  SynthAdd("Open...") : SynthAdd("Hello") : SynthAdd("Sieve") : SynthAdd("Machine") : SynthAdd("Reset")
+  SynthAdd("Run") : SynthAdd("Step") : SynthAdd("Step 100") : SynthAdd("Break at field") : SynthAdd("Run tests")
+  For i = 0 To 5 : SynthAdd("memory tab " + Str(i)) : Next
+  SynthAdd("Address field", 3)
+  SynthAdd("disassembly row")
+  For i = 0 To 1 : SynthAdd("output tab " + Str(i)) : Next
+  SynthAdd("output scroll bar")
+EndProcedure
+
+; The control's rectangle as last drawn; 0 when it was not.
+Procedure.i SynthRect(name$, *r.CtlRect)
+  Protected *row.Neon_TabRowLayout, i.i, id$
+  If Left(name$, 11) = "memory tab " : id$ = "101" : i = Val(Mid(name$, 12)) : EndIf
+  If Left(name$, 11) = "output tab " : id$ = "201" : i = Val(Mid(name$, 12)) : EndIf
+  If id$ <> ""
+    If FindMapElement(Neon_TabLayout(), id$) = 0 : ProcedureReturn 0 : EndIf
+    *row = @Neon_TabLayout()
+    If i >= *row\Count : ProcedureReturn 0 : EndIf
+    ; the row's last pixel belongs to the strip's underline, not to a tab
+    *r\x = *row\X(i) : *r\w = *row\W(i) : *r\y = *row\Y : *r\h = *row\H - 1
+    ProcedureReturn 1
+  EndIf
+  If FindMapElement(Ctl(), name$) = 0 : ProcedureReturn 0 : EndIf
+  *r\x = Ctl()\x : *r\y = Ctl()\y : *r\w = Ctl()\w : *r\h = Ctl()\h
+  ProcedureReturn 1
+EndProcedure
+
+Procedure SynthFinish()
+  Protected f.i
+  SynthLog$ + "pointer-test: " + Str(SynthPoints) + " points on " + Str(SynthCount) + " controls, " + Str(SynthFails) +
+              " failures, scale " + StrF(Neon_UIScale, 2) + ", canvas " + Str(SynthCanvasW) + "x" + Str(SynthCanvasH) +
+              ", worst pointer read-back error " + StrF(SynthWorst, 2) + " px" + #LF$
+  f = CreateFile(#PB_Any, SynthFile$)
+  If f : WriteString(f, SynthLog$) : CloseFile(f) : EndIf
+  SynthDone = 1
+EndProcedure
+
+; One step of the test, after each frame is drawn.
+Procedure SynthStep()
+  Protected r.CtlRect, name$, inside.i, hit.i, expect$, got$, i.i, k.i
+  If SynthCase >= SynthCount : SynthFinish() : ProcedureReturn : EndIf
+  name$ = SynthName$(SynthCase)
+  If Abs(Neon_MX - SynthX) > SynthWorst : SynthWorst = Abs(Neon_MX - SynthX) : EndIf
+  If Abs(Neon_MY - SynthY) > SynthWorst : SynthWorst = Abs(Neon_MY - SynthY) : EndIf
+  SynthFrame + 1
+  Select SynthFrame
+    Case 1                                       ; the state that shows the control
+      If SynthMemTab(SynthCase) >= 0 : MemTab = SynthMemTab(SynthCase) : EndIf
+      If name$ = "output scroll bar"            ; enough lines to scroll, the view mid-way
+        SynthSaveStr$ = MachineConsole$ : MachineConsole$ = ""
+        For k = 1 To 300 : MachineConsole$ + "line " + Str(k) + #LF$ : Next
+        LogTab = 0 : LogTop = 100
+      EndIf
+      SynthX = 1 : SynthY = 1 : SynthDown = 0
+    Case 2                                       ; drawn: go to the point
+      If SynthRect(name$, @r) = 0
+        SynthLog$ + "FAIL " + name$ + ": not drawn" + #LF$ : SynthFails + 1
+        SynthFrame = 0 : SynthPoint = 0 : SynthCase + 1 : ProcedureReturn
+      EndIf
+      Select SynthPoint
+        Case 0 : SynthX = r\x + 2 : SynthY = r\y + 2
+        Case 1 : SynthX = r\x + r\w - 2 : SynthY = r\y + r\h - 2
+        Case 2 : SynthX = r\x + r\w + 2 : SynthY = r\y + r\h - 2
+        Case 3 : SynthX = r\x + r\w - 2 : SynthY = r\y + r\h + 2
+      EndSelect
+      SynthClicked$ = "" : Neon_FocusID = 0
+      If Left(name$, 11) = "memory tab " : SynthSave = MemTab : MemTab = 99 : EndIf   ; none selected
+      If Left(name$, 11) = "output tab " : SynthSave = LogTab : LogTab = 99 : EndIf
+      If name$ = "disassembly row" : SynthSave = BreakAt : BreakAt = -1 : EndIf
+      If name$ = "output scroll bar" : LogTop = 100 : EndIf
+    Case 3 : SynthDown = 1
+    Case 4 : SynthDown = 0
+    Case 5                                       ; what the press did
+      inside = Bool(SynthPoint <= 1)
+      If Left(name$, 11) = "memory tab " Or Left(name$, 11) = "output tab "
+        i = Val(Mid(name$, 12))
+        k = 5 : If Left(name$, 11) = "output tab " : k = 1 : EndIf
+        If inside : expect$ = Left(name$, 11) + Str(i) : ElseIf SynthPoint = 2 And i < k : expect$ = Left(name$, 11) + Str(i + 1) : EndIf
+        If Left(name$, 11) = "memory tab "
+          If MemTab >= 0 And MemTab <= 5 : got$ = "memory tab " + Str(MemTab) : EndIf
+          MemTab = SynthSave
+        Else
+          If LogTab >= 0 And LogTab <= 1 : got$ = "output tab " + Str(LogTab) : EndIf
+          LogTab = SynthSave
+        EndIf
+      ElseIf name$ = "Break at field" Or name$ = "Address field"
+        If inside : expect$ = name$ : EndIf
+        If (name$ = "Break at field" And Neon_FocusID = 301) Or (name$ = "Address field" And Neon_FocusID = 103) : got$ = name$ : EndIf
+      ElseIf name$ = "disassembly row"
+        If inside : expect$ = name$ : EndIf
+        If BreakAt = DisRowAdr : got$ = name$ : EndIf
+        BreakAt = SynthSave : If BreakAt < 0 : BreakText\s = "" : EndIf
+      ElseIf name$ = "output scroll bar"
+        If inside : expect$ = name$ : EndIf
+        If LogTop <> 100 : got$ = name$ : EndIf
+      Else
+        If inside : expect$ = name$ : EndIf
+        got$ = SynthClicked$
+      EndIf
+      SynthPoints + 1
+      hit = Bool(got$ = expect$)
+      If hit = 0 : SynthFails + 1 : EndIf
+      SynthLog$ + StringField("FAIL|ok  ", hit + 1, "|") + " " + LSet(name$, 18) + " " + StringField("top-left in|bottom-right in|right of it|below it", SynthPoint + 1, "|") +
+                  " (" + StrF(SynthX, 1) + ", " + StrF(SynthY, 1) + "): expected '" + expect$ + "', got '" + got$ + "'" + #LF$
+      Neon_FocusID = 0
+      SynthFrame = 0 : SynthPoint + 1
+      If SynthPoint > 3
+        SynthPoint = 0
+        If SynthMemTab(SynthCase) >= 0 : MemTab = 0 : EndIf
+        If name$ = "output scroll bar" : MachineConsole$ = SynthSaveStr$ : LogTop = 0 : EndIf
+        SynthCase + 1
+      EndIf
+  EndSelect
+EndProcedure
+
+; The chrome's scale and its four fonts (logical pixel sizes * s, snapped). Built
+; again whenever s changes: the window moved to a monitor with another scale.
+Global FontScale.f
+Procedure ScaleFonts(s.f)
+  If s = FontScale : ProcedureReturn : EndIf
+  FontScale = s
+  Neon_UIScale = s
+  *Neon_FontUI = Neon_CreateFontPx("Segoe UI", Round(14 * s, #PB_Round_Nearest))
+  *Neon_FontSmall = Neon_CreateFontPx("Segoe UI", Round(12 * s, #PB_Round_Nearest))
+  *Neon_FontBold = Neon_CreateFontPx("Segoe UI", Round(15 * s, #PB_Round_Nearest), #PB_Font_Bold)
+  *Neon_FontMono = Neon_CreateFontPx("Consolas", Round(14 * s, #PB_Round_Nearest))
+  GLFontSetSnapToPixel(*Neon_FontUI, #True)
+  GLFontSetSnapToPixel(*Neon_FontSmall, #True)
+  GLFontSetSnapToPixel(*Neon_FontBold, #True)
+  GLFontSetSnapToPixel(*Neon_FontMono, #True)
+EndProcedure
+
 Procedure Frame()
-  Protected r.RECT, pw.i, ph.i, mx.i, my.i, down.b, w.f, h.f, colW.f, top.f, logH.f, now.q, midH.f
+  Protected r.RECT, pw.i, ph.i, mx.i, my.i, down.b, w.f, h.f, colW.f, top.f, logH.f, now.q, midH.f, lw.i, lh.i
   SetGadgetAttribute(Gl, #PB_OpenGL_SetContext, #True)
   GetClientRect_(WindowID(Win), @r)
   pw = r\right - r\left : ph = r\bottom - r\top
@@ -758,16 +934,24 @@ Procedure Frame()
   If GadgetWidth(Gl) <> WindowWidth(Win) Or GadgetHeight(Gl) <> WindowHeight(Win)
     ResizeGadget(Gl, 0, 0, WindowWidth(Win), WindowHeight(Win))
   EndIf
+  ; The engine's hosting rules for Windows, as measured (GlUIChrome.pbi section 5a):
+  ; the canvas and viewport are the PHYSICAL client, Util_Win* the LOGICAL one,
+  ; s = physical / logical, and the mouse goes in as WindowMouseX/Y give it
+  ; (already physical in a DPI-aware window - scaling it again puts clicks off).
+  lw = WindowWidth(Win, #PB_Window_InnerCoordinate) : lh = WindowHeight(Win, #PB_Window_InnerCoordinate)
+  If lw < 1 Or lh < 1 : ProcedureReturn : EndIf
+  ScaleFonts(Round(pw * 100.0 / lw, #PB_Round_Nearest) / 100.0)
   Util_BaseWidth = pw : Util_BaseHeight = ph
-  ; Util_Win* must be what DesktopScaledX/Y() turns back into the PHYSICAL
-  ; drawable (Neon_PhysWinHeight flips the scissor rectangles with it); under
-  ; per-monitor awareness DesktopResolutionX() can report 1.0.
-  Util_WinWidth = Round(pw / DesktopResolutionX(), #PB_Round_Nearest)
-  Util_WinHeight = Round(ph / DesktopResolutionY(), #PB_Round_Nearest)
+  Util_WinWidth = lw : Util_WinHeight = lh
   GL_ViewportX = 0 : GL_ViewportY = 0 : GL_ViewportW = pw : GL_ViewportH = ph
-  mx = WindowMouseX(Win) : my = WindowMouseY(Win)
-  down = Bool(GetAsyncKeyState_(#VK_LBUTTON) & $8000)
-  Neon_ChromeBeginFrame(mx, my, down, Wheel, KeyCode, KeyChar, 1.0 / 60.0)
+  If SynthOn
+    SynthCanvasW = pw : SynthCanvasH = ph
+    Neon_ChromeBeginFrame(SynthX, SynthY, SynthDown, 0, 0, 0, 1.0 / 60.0)   ; --pointer-test: the real pointer is not read
+  Else
+    mx = WindowMouseX(Win) : my = WindowMouseY(Win)
+    down = Bool(GetActiveWindow() = Win And (GetAsyncKeyState_(#VK_LBUTTON) & $8000))
+    Neon_ChromeBeginFrame(mx, my, down, Wheel, KeyCode, KeyChar, 1.0 / 60.0)
+  EndIf
   Wheel = 0 : KeyCode = 0 : KeyChar = 0
   glBindFramebuffer(#GL_FRAMEBUFFER, 0)
   glDisable_(#GL_SCISSOR_TEST)
@@ -795,6 +979,7 @@ Procedure Frame()
   Neon_Box(0, h - Neon_S(26), w, Neon_S(26), Neon_C_HeadR, Neon_C_HeadG, Neon_C_HeadB)
   Neon_Text(*Neon_FontSmall, Neon_S(10), h - Neon_S(21), "Program: " + MachineName$ + "     " + Status$, Neon_C_DimR, Neon_C_DimG, Neon_C_DimB)
   Neon_ChromeEndFrame()
+  If SynthOn : SynthStep() : EndIf
   If ShotPath$ <> ""
     ShotFrames + 1
     If ShotFrames = 120
@@ -835,16 +1020,8 @@ Procedure WindowMain()
   Gl = OpenGLWindow("8086 emulator - PureBasic, Neon Arcade", w, h,
                     #PB_Window_SystemMenu | #PB_Window_ScreenCentered | #PB_Window_SizeGadget | #PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget)
   Win = Util_MainWindowID
-  s = DisplayScale()
-  Neon_UIScale = s
-  *Neon_FontUI = Neon_CreateFontPx("Segoe UI", Round(14 * s, #PB_Round_Nearest))
-  *Neon_FontSmall = Neon_CreateFontPx("Segoe UI", Round(12 * s, #PB_Round_Nearest))
-  *Neon_FontBold = Neon_CreateFontPx("Segoe UI", Round(15 * s, #PB_Round_Nearest), #PB_Font_Bold)
-  *Neon_FontMono = Neon_CreateFontPx("Consolas", Round(14 * s, #PB_Round_Nearest))
-  GLFontSetSnapToPixel(*Neon_FontUI, #True)
-  GLFontSetSnapToPixel(*Neon_FontSmall, #True)
-  GLFontSetSnapToPixel(*Neon_FontBold, #True)
-  GLFontSetSnapToPixel(*Neon_FontMono, #True)
+  UI_UseCRT = #False                         ; the frame is not drawn through DrawRetroCRT: no barrel-bent pointer
+  ScaleFonts(DisplayScale())                 ; Frame() measures s from then on
   PcTextureInit()
   If #CPU_TIMING : PcSoundOpen() : EndIf
   RateWindowStart = ElapsedMilliseconds()
@@ -872,7 +1049,7 @@ Procedure WindowMain()
       EndIf
     Until ev = 0
     Frame()
-    If ShotFrames < 0 : quit = 1 : EndIf
+    If ShotFrames < 0 Or SynthDone : quit = 1 : EndIf
     If Running = 0 : Delay(10) : EndIf
   Until quit
   PcSoundClose()
@@ -897,6 +1074,9 @@ For argi = 0 To CountProgramParameters() - 1
   ElseIf LCase(arg$) = "--screenshot"
     argi + 1
     ShotPath$ = ProgramParameter(argi)
+  ElseIf LCase(arg$) = "--pointer-test"
+    argi + 1
+    SynthFile$ = ProgramParameter(argi) : SynthOn = 1 : SynthInit()
   ElseIf LCase(arg$) = "--mute"
     PcSndMuted = 1
   ElseIf LCase(arg$) = "--pc"
