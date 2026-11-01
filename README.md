@@ -5,7 +5,7 @@ PureMetal and compiled with PureMetal Forge to bare-metal machine code: no SDK, 
 complete, cycle-counted 8086 core that passes all 646,000 SingleStepTests reference tests on the
 physical boards, and around it a small IBM PC (CGA graphics, 8253 timer, 8259 interrupt controller,
 keyboard) that runs .COM programs in real time on a 480 x 320 SPI panel. The same core, generated
-from the same source, also runs as a Windows program with a debugger-style window.
+from the same source, also runs as a desktop program on Windows and Linux with a debugger-style window.
 
 **No BIOS, DOS or other copyrighted ROM is needed or included.** The PC machine starts a .COM
 program directly; every program in this repository was written for it (most of them in PureMetal).
@@ -25,7 +25,7 @@ program directly; every program in this repository was written for it (most of t
   the panel by DMA. Raster effects (colour changes in the horizontal blank) are exact to the line.
 - A documented core API: memory pages (RAM, ROM, unmapped, hooks), port hooks, interrupt and NMI
   lines, a run-for-N budget in instructions or clocks.
-- A Windows version on the Neon Arcade Display Engine: registers, flags, disassembly, memory and CGA
+- A Windows and Linux version on the Neon Arcade Display Engine (one source, no OS calls): registers, flags, disassembly, memory and CGA
   views, breakpoints, run/step, the PC screen with sound, and command-line runners for automated tests.
 
 ## Download
@@ -88,11 +88,29 @@ interrupt vectors. Full details: [`desktop/README.md`](desktop/README.md#the-pc-
 
 Any .COM that drives the hardware directly (no BIOS or DOS calls) runs on the PC machine.
 
-On the desktop:
+On the desktop, Windows:
 
 ```text
 desktop\cpu86_desktop.exe program.com --pc --run          the window, with sound (--mute for none)
 desktop\cpu86_pc.exe --com program.com --pc --frames 600  headless; --screenshot shot.png
+```
+
+Linux (after building, below):
+
+```text
+./desktop/cpu86_desktop program.com --pc --run            the window, with sound (--mute for none)
+./desktop/cpu86_pc --com program.com --pc --frames 600    headless; --screenshot shot.png
+```
+
+To build the desktop programs (the Neon Arcade Display Engine cloned beside this repository, or
+`NEON_ENGINE` set to its folder; [`desktop/README.md`](desktop/README.md#build) has the details):
+
+```powershell
+.\desktop\build.ps1                                         # Windows, PureBasic 6 x64
+```
+
+```sh
+PUREBASIC_HOME=/path/to/purebasic sh desktop/build.sh       # Linux, PureBasic 6.41 x64
 ```
 
 On a Pico, the program is built into the firmware:
@@ -105,9 +123,10 @@ py -3 tools/make_pcprogram.py path\to\program.com           # writes src/pcprogr
 `demo/` holds the PureMetal demo's source (`demo.pc8086`), written for this machine and compiled by
 PureMetal Forge's 8086 back end, as an example of a program written for it.
 
-## The desktop version (Windows)
+## The desktop version (Windows and Linux)
 
-`desktop/` has ready-built x64 programs:
+`desktop/` has ready-built x64 Windows programs; on Linux `desktop/build.sh` builds the same five
+from the same source, named without `.exe`:
 
 | Program | Use |
 |---|---|
@@ -391,7 +410,7 @@ interrupts between windows. The core is one global CPU; keep it on one host core
 | Folder | Contents |
 |---|---|
 | `src/` | the generated cores, the PC machine (`pc86.pmi`), the Pico builds (`*.picow`, `*.pico2w`), the panel driver |
-| `desktop/` | the Windows programs, their source and `build.ps1`; `examples/` the test programs |
+| `desktop/` | the Windows programs, their source, `build.ps1` (Windows) and `build.sh` (Linux); `examples/` the test programs |
 | `demo/` | the PureMetal demo's source and `demo.com` |
 | `Diagnostics/` | the on-board test runners (reference tests, API checks, PC machine tests) |
 | `tools/` | the core generator, build and test scripts, the test-program assembler |
