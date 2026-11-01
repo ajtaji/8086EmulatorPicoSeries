@@ -1,6 +1,6 @@
 ; The PC machine on the desktop: src/pc86.pmi (the devices, shared with the
 ; Pico build) given 640 KB of RAM, 16 KB of CGA memory at B800:0000 (mirrored at
-; BC00:0000), a screen texture, the keyboard and the speaker through waveOut.
+; BC00:0000), a screen texture, the keyboard and the speaker through the engine's sound out.
 ; A program loads at 0050:0100 (#PC86_SEG) as a .COM would; no BIOS, no ROM.
 
 #PC86_SEG = $0050
@@ -12,7 +12,7 @@
 #PC_FH = #PC_H + 2 * #PC_BY
 #PC_RATE = 48000
 #PC_FRAME_SAMPLES = 800             ; 48000 / 60
-#PC_SND_BUFFERS = 6
+#PC_SND_BUFFERS = 3                 ; 16-bit stereo frames queued at most: the queue is full at three
 
 #PC86_HALF = 0                      ; full-width lines through Pc86PutLine (the Pico draws them at half width)
 XIncludeFile "../src/pc86_state.pmi"
@@ -171,41 +171,27 @@ Procedure.i PcSavePng(path.s)
   ProcedureReturn ok
 EndProcedure
 
-; ---- speaker ----
+; ---- speaker (the engine's sound out: GL_AudioOpen / Next / Play) ----
 Global Dim PcSnd.w(#PC_FRAME_SAMPLES - 1)
-Global Dim PcSndHeader.WAVEHDR(#PC_SND_BUFFERS - 1)
-Global Dim *PcSndBuf(#PC_SND_BUFFERS - 1)
-Global PcSndDevice.i, PcSndOpen.i, PcSndNext.i, PcSndPhase.d, PcSndMuted.i
+Global PcSndOpen.i, PcSndPhase.d, PcSndMuted.i, *PcSndHeld
 
 Procedure.i PcSoundOpen()
-  Protected fmt.WAVEFORMATEX, i.i
-  fmt\wFormatTag = #WAVE_FORMAT_PCM : fmt\nChannels = 1 : fmt\nSamplesPerSec = #PC_RATE
-  fmt\wBitsPerSample = 16 : fmt\nBlockAlign = 2 : fmt\nAvgBytesPerSec = #PC_RATE * 2 : fmt\cbSize = 0
-  If waveOutOpen_(@PcSndDevice, #WAVE_MAPPER, @fmt, 0, 0, #CALLBACK_NULL) <> #MMSYSERR_NOERROR
-    ProcedureReturn 0
-  EndIf
-  For i = 0 To #PC_SND_BUFFERS - 1
-    *PcSndBuf(i) = AllocateMemory(#PC_FRAME_SAMPLES * 2)
-    PcSndHeader(i)\lpData = *PcSndBuf(i)
-    PcSndHeader(i)\dwBufferLength = #PC_FRAME_SAMPLES * 2
-    waveOutPrepareHeader_(PcSndDevice, @PcSndHeader(i), SizeOf(WAVEHDR))
-    PcSndHeader(i)\dwFlags | #WHDR_DONE
-  Next
+  If GL_AudioOpen(#PC_RATE, #PC_FRAME_SAMPLES, #PC_SND_BUFFERS) = 0 : ProcedureReturn 0 : EndIf
   PcSndOpen = 1
   ProcedureReturn 1
 EndProcedure
 
-Procedure.i PcSoundPending()
-  Protected i.i, n.i
-  For i = 0 To #PC_SND_BUFFERS - 1
-    If (PcSndHeader(i)\dwFlags & #WHDR_DONE) = 0 : n + 1 : EndIf
-  Next
-  ProcedureReturn n
+; #True while every buffer is queued: the queue paces the frames. A free buffer
+; found here is held for the next PcSoundFrame.
+Procedure.i PcSoundFull()
+  If PcSndOpen = 0 : ProcedureReturn #False : EndIf
+  If *PcSndHeld = 0 : *PcSndHeld = GL_AudioNext() : EndIf
+  ProcedureReturn Bool(*PcSndHeld = 0)
 EndProcedure
 
 ; One frame of sound from the per-scanline speaker record of the frame just run.
 Procedure PcSoundFrame()
-  Protected i.i, line.i, f.i, v.i, k.i = PcSndNext
+  Protected i.i, line.i, f.i, v.i
   For i = 0 To #PC_FRAME_SAMPLES - 1
     line = (i * #PC86_LINES) / #PC_FRAME_SAMPLES
     f = SpkFreq(line)
@@ -221,23 +207,19 @@ Procedure PcSoundFrame()
     PcSnd(i) = v
   Next
   If PcSndOpen = 0 Or PcSndMuted : ProcedureReturn : EndIf
-  If (PcSndHeader(k)\dwFlags & #WHDR_DONE) = 0 : ProcedureReturn : EndIf   ; full: drop a frame
-  CopyMemory(@PcSnd(0), *PcSndBuf(k), #PC_FRAME_SAMPLES * 2)
-  PcSndHeader(k)\dwFlags & ~#WHDR_DONE
-  waveOutWrite_(PcSndDevice, @PcSndHeader(k), SizeOf(WAVEHDR))
-  PcSndNext = (k + 1) % #PC_SND_BUFFERS
+  If *PcSndHeld = 0 : *PcSndHeld = GL_AudioNext() : EndIf
+  If *PcSndHeld = 0 : ProcedureReturn : EndIf   ; full: drop a frame
+  For i = 0 To #PC_FRAME_SAMPLES - 1            ; the speaker in both channels
+    PokeW(*PcSndHeld + i * 4, PcSnd(i)) : PokeW(*PcSndHeld + i * 4 + 2, PcSnd(i))
+  Next
+  GL_AudioPlay(*PcSndHeld)
+  *PcSndHeld = 0
 EndProcedure
 
 Procedure PcSoundClose()
-  Protected i.i
   If PcSndOpen = 0 : ProcedureReturn : EndIf
-  waveOutReset_(PcSndDevice)
-  For i = 0 To #PC_SND_BUFFERS - 1
-    waveOutUnprepareHeader_(PcSndDevice, @PcSndHeader(i), SizeOf(WAVEHDR))
-    FreeMemory(*PcSndBuf(i))
-  Next
-  waveOutClose_(PcSndDevice)
-  PcSndOpen = 0
+  GL_AudioClose()
+  PcSndOpen = 0 : *PcSndHeld = 0
 EndProcedure
 
 ; ---- keyboard: PureBasic key codes to set-1 scan codes, from controls.pbi's table ----

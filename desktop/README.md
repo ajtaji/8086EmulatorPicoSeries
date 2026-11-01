@@ -1,7 +1,10 @@
 # The 8086 on the PC
 
-The same Intel 8086 core as the Pico build, as a Windows program in PureBasic
-(C back end, x64), drawn with the Neon Arcade Display Engine.
+The same Intel 8086 core as the Pico build, as a Windows and Linux program in PureBasic
+(C back end, x64), drawn with the Neon Arcade Display Engine. One source builds on both:
+everything the operating system gives (full screen, the pointer, the window's size, the
+work area, the sound card) comes through the engine's HOST SERVICES, and the emulator
+calls no OS function itself. On Linux the programs have the same names without `.exe`.
 
 ![the window after Run tests](../docs/desktop-window-tests.png)
 
@@ -280,3 +283,25 @@ by default, or `-Compiler`), `/THREAD /DPIAWARE /OPTIMIZER`. The Neon Arcade Dis
 (github.com/ajtaji/Neon-Arcade-Dispay-Engine) is not copied here: clone it beside this repository,
 or set `NEON_ENGINE` to its folder, or pass `-Engine`. The script regenerates the cores and the
 examples first, then builds all five programs.
+
+**Linux** (PureBasic 6.41 for Linux, x64; Python 3): the same sources, built with the C back end
+(`pbcompilerc`, flags `-t -z`, `-cl` for the console programs):
+
+```sh
+PUREBASIC_HOME=/path/to/purebasic sh desktop/build.sh
+```
+
+The engine is found the same way (a clone beside this repository, or `NEON_ENGINE`). Under WSL,
+copy the repository and the engine to the Linux disk first: on `/mnt/c` the Linux compiler
+includes an `XIncludeFile` twice. At run time the window needs X11 and GLX (the engine runs GTK
+on X11, also under WSLg) and the sound card ALSA's `default` device; with no sound device the PC
+machine runs silent, paced by the clock as with `--mute`. Then, in `desktop`:
+
+```sh
+./cpu86_console --test
+./cpu86_desktop examples/hello.com
+./cpu86_desktop examples/bars.com --pc --run
+```
+
+Both systems give the same results: 646,000 of 646,000 reference tests and 78 of 78 API checks
+on all three cores, the same PC machine checks, and the same PC picture pixel for pixel.

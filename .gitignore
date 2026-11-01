@@ -15,3 +15,9 @@ __pycache__/
 Diagnostics/variant/
 Diagnostics/gate/*.dump
 PUBLISH-META.txt
+# Linux builds of the desktop programs (desktop/build.sh)
+desktop/cpu86_desktop
+desktop/cpu86_pc
+desktop/cpu86_console
+desktop/cpu86_run
+desktop/cpu86_console_proctable
