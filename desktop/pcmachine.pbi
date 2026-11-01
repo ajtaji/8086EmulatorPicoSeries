@@ -128,7 +128,8 @@ Procedure PcStart(*image, n.i)
   Pc86Reset()
 EndProcedure
 
-; ---- screen texture (bottom row first: the engine samples a sprite's top at v = 1) ----
+; ---- screen texture (row order: the engine's #GL_SpriteRowsBottomUp - 1 on Windows, where it
+; samples a sprite's top at v = 1, 0 on Linux) ----
 Procedure PcTextureInit()
   glGenTextures_(1, @PcTex)
   glBindTexture_(#GL_TEXTURE_2D, PcTex)
@@ -144,8 +145,13 @@ EndProcedure
 Procedure PcTextureUpload()
   Protected y.i
   For y = 0 To #PC_FH - 1
-    CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((#PC_FH * 2 - 1 - y * 2) * #PC_FW), #PC_FW * 4)
-    CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((#PC_FH * 2 - 2 - y * 2) * #PC_FW), #PC_FW * 4)
+    If #GL_SpriteRowsBottomUp
+      CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((#PC_FH * 2 - 1 - y * 2) * #PC_FW), #PC_FW * 4)
+      CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((#PC_FH * 2 - 2 - y * 2) * #PC_FW), #PC_FW * 4)
+    Else
+      CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((y * 2) * #PC_FW), #PC_FW * 4)
+      CopyMemory(@PcRGBA(y * #PC_FW), @PcTexRows((y * 2 + 1) * #PC_FW), #PC_FW * 4)
+    EndIf
   Next
   glBindTexture_(#GL_TEXTURE_2D, PcTex)
   glTexSubImage2D_(#GL_TEXTURE_2D, 0, 0, 0, #PC_FW, #PC_FH * 2, #GL_RGBA, #GL_UNSIGNED_BYTE, @PcTexRows(0))

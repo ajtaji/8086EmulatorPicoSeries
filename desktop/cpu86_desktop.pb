@@ -1227,7 +1227,7 @@ Procedure WindowMain()
       If ev = #PB_Event_Gadget And EventGadget() = Gl
         et = EventType()
         If et = #PB_EventType_KeyDown Or et = #PB_EventType_KeyUp
-          KeyEvent(et, GetGadgetAttribute(Gl, #PB_OpenGL_Key))
+          KeyEvent(et, GL_KeyEventCode(GetGadgetAttribute(Gl, #PB_OpenGL_Key)))   ; (the engine's: KeyUp's code as KeyDown's on Linux)
         ElseIf et = #PB_EventType_LeftButtonDown
           MouseDown = 1
         ElseIf et = #PB_EventType_LeftButtonUp
