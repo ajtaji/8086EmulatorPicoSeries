@@ -5,9 +5,9 @@ in PureMetal and compiled by PureMetal Forge's 8086 back end - no hand-written a
 
 | File | What it is |
 |---|---|
-| `demo.pc8086` | the demo |
+| `demo.pc8086` | the demo; its texts (PUREMETAL, 8086, the scroller) are strings in it, read with `Mid` and `Asc` (the compiler's string library for the classic CPUs) |
 | `demo_assets.pc8086` | its tables, written by `make_demo_assets.py` (do not edit by hand) |
-| `make_demo_assets.py` | the sine table, the speaker's note divisors, the plasma's colour ramp, the title letters, the tune |
+| `make_demo_assets.py` | the sine table, the speaker's note divisors, the plasma's colour ramp, the 5 x 5 font of the big letters, the tune |
 | `demo.com` | the built demo |
 
 ## What it shows
@@ -29,7 +29,7 @@ The parts loop forever: ten seconds of title, twenty-five of plasma, ten of copp
 
 ## Build and run
 
-    PureMetalForge.exe --compile demo.pc8086           (writes demo.com; needs the 8086 back end, compiler of 2026-10-23 or later)
+    PureMetalForge.exe --compile demo.pc8086           (writes demo.com; needs the 8086 back end and the classic CPUs' string library, compiler of 2026-11-03 or later)
     desktop\cpu86_desktop.exe demo.com --pc --run       (the window, with sound)
     desktop\cpu86_pc.exe --com demo.com --pc --frames N  (headless; --screenshot f.png for a picture)
     py -3 tools\make_pcprogram.py demo\demo.com          (then build src\pc.picow for the Pico W)

@@ -7,8 +7,8 @@ DataSection source (demo_assets.pc8086).
   py -3 make_demo_assets.py --check   fail if the file on disk is not what this writes
 
 Everything here is computed: a sine table, the PC speaker's divisors for the
-notes, the plasma's colour ramp, the big letters of the title, and the tune
-(original, written for this demo).
+notes, the plasma's colour ramp, the 5 x 5 font of the big letters, and the tune
+(original, written for this demo). The texts themselves are strings in demo.pc8086.
 """
 import math
 import os
@@ -61,7 +61,7 @@ def plasma_ramp():
     return steps[:64]
 
 
-# A 5x5 font for the title, one byte a row (bit 4 = leftmost).
+# A 5x5 font for the big letters, one byte a row (bit 4 = leftmost).
 FONT = {
     "P": ["11110", "10001", "11110", "10000", "10000"],
     "U": ["10001", "10001", "10001", "10001", "01110"],
@@ -74,18 +74,18 @@ FONT = {
     "8": ["01110", "10001", "01110", "10001", "01110"],
     "0": ["01110", "10011", "10101", "11001", "01110"],
     "6": ["01110", "10000", "11110", "10001", "01110"],
-    " ": ["00000"] * 5,
 }
 
 
-def title_bits(text):
-    rows = []
-    for r in range(5):
-        v = []
-        for ch in text:
-            v.append(int(FONT[ch][r], 2))
-        rows.append(v)
-    return rows
+FONT_FIRST, FONT_LAST = "0", "Z"
+
+
+def font_bits():
+    # Five bytes a character, "0" to "Z" in ASCII order; a character not drawn here is blank.
+    out = []
+    for c in range(ord(FONT_FIRST), ord(FONT_LAST) + 1):
+        out += [int(row, 2) for row in FONT.get(chr(c), ["00000"] * 5)]
+    return out
 
 
 # ----------------------------------------------------------------------
@@ -128,10 +128,8 @@ def main():
     lines += data_lines("SineTable", "a", sine_table())
     lines += data_lines("NoteDivisor", "u", note_divisors())
     lines += data_lines("PlasmaRamp", "u", plasma_ramp(), per=8)
-    title = "PUREMETAL"
-    sub = "8086"
-    lines += data_lines("TitleBits", "a", sum(title_bits(title), []), per=len(title))
-    lines += data_lines("SubBits", "a", sum(title_bits(sub), []), per=len(sub))
+    lines += data_lines("FontBits", "a", font_bits(), per=5)
+
     rows, chord = song()
     lines += data_lines("SongRows", "a", rows)
     lines += data_lines("SongChord", "a", chord)
@@ -140,9 +138,6 @@ def main():
         third = 3 if shape == 0 else 4
         chords += [root, root + third, root + 7]
     lines += data_lines("ChordNotes", "a", chords, per=3)
-    msg = ("PUREMETAL ON THE INTEL 8086 ... COMPILED, NOT HAND-WRITTEN ... "
-           "A TEXT-MODE PLASMA, BORDER BARS AND THE PC SPEAKER, ALL FROM ONE .COM ...     ")
-    lines += data_lines("ScrollText", "a", [ord(c) for c in msg] + [0])
     lines += ["EndDataSection", ""]
     text = "\n".join(lines)
     if "--check" in sys.argv:

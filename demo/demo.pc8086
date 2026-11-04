@@ -13,8 +13,9 @@
 ;   the music     one voice on the PC speaker from the timer interrupt, 60 times
 ;                 a second: a melody, and the chords as fast arpeggios between
 ;
-; The tables (sine, the speaker's divisors, the colour ramp, the letters and
-; the tune) are made by make_demo_assets.py into demo_assets.pc8086.
+; The tables (sine, the speaker's divisors, the colour ramp, the 5 x 5 font and
+; the tune) are made by make_demo_assets.py into demo_assets.pc8086; the texts
+; (the big letters and the scroller) are strings here, read with Mid and Asc.
 ; ======================================================================
 XIncludeFile "I8086/Lib/pc.i8086"
 XIncludeFile "demo_assets.pc8086"
@@ -31,6 +32,32 @@ Global Dim cells.w(80)            ; one screen row being built
 Global Dim barImg.a(256)          ; the bars, one colour a scan line
 Global Dim barImgP.a(256)         ; the same with the other palette and intensity (320 x 200)
 Global Dim rainbow.a(40)          ; the scroller's colour per column
+Global Dim titleBits.a(45)        ; PUREMETAL in the 5 x 5 font, made from its string at the start
+Global Dim subBits.a(20)          ; 8086, the same
+Global Dim scrollText.a(160)      ; the scroller's text, a byte a character, ending in 0
+
+Global text.s{160}                ; the text WordBits or TextBytes reads
+
+; The rows of text's big letters, as BigText and BlockText read them: five rows
+; of one byte a letter, each letter's from the font ("0" to "Z").
+Procedure WordBits(*bits)
+  Protected n.w = Len(text), l.w, r.w, g.w
+  For l = 0 To n - 1
+    g = (Asc(Mid(text, l + 1, 1)) - 48) * 5
+    For r = 0 To 4
+      PokeA(*bits + r * n + l, PeekA(?FontBits + g + r))
+    Next
+  Next
+EndProcedure
+
+; text as bytes, ending in 0: read once, so the scroller reads a byte a cell.
+Procedure TextBytes(*dest)
+  Protected n.w = Len(text), i.w
+  For i = 0 To n - 1
+    PokeA(*dest + i, Asc(Mid(text, i + 1, 1)))
+  Next
+  PokeA(*dest + n, 0)
+EndProcedure
 
 ; ----------------------------------------------------------------------
 ; THE MUSIC - from the timer interrupt
@@ -145,10 +172,18 @@ EndProcedure
 
 Procedure TitleScene()
   Protected phase.w, start.w = ticks, rollRow.w
+  If subBits(0) = 0
+    ; The texts, once, with the timer already running: every scene goes by the
+    ; tick count, so the time this takes delays only the first title's picture.
+    text = "PUREMETAL" : WordBits(@titleBits(0))
+    text = "8086" : WordBits(@subBits(0))
+    text = "PUREMETAL ON THE INTEL 8086 ... COMPILED, NOT HAND-WRITTEN ... A TEXT-MODE PLASMA, BORDER BARS AND THE PC SPEAKER, ALL FROM ONE .COM ...     "
+    TextBytes(@scrollText(0))
+  EndIf
   CgaSetMode(#CGA_TEXT80_16BG)
   i8086_far_fillw(#CGA_SEG, 0, $0020, 2000)
-  BigText(13, 5, ?TitleBits, 9)
-  BigText(28, 12, ?SubBits, 4)
+  BigText(13, 5, @titleBits(0), 9)
+  BigText(28, 12, @subBits(0), 4)
   CgaText(26, 19, $0B, ?Line1)
   CgaText(24, 21, $07, ?Line2)
   While ticks - start < #TITLE_TICKS
@@ -193,7 +228,7 @@ Procedure ScrollerFrame(t.w)
   For x = 0 To 39
     p = scrollPos + x
     If p >= scrollLen : p = p - scrollLen : EndIf
-    c = PeekA(?ScrollText + p)
+    c = scrollText(p)
     cells(x) = c | (rainbow((x + t) % 40) << 8)
   Next
   i8086_far_copyw(#CGA_SEG, 24 * 80, @cells(0), 40)
@@ -205,7 +240,7 @@ Procedure PlasmaScene()
   i8086_far_fillw(#CGA_SEG, 0, $0020, 1000)
   CgaColor(1)
   scrollLen = 0
-  While PeekA(?ScrollText + scrollLen) <> 0 : scrollLen = scrollLen + 1 : Wend
+  While scrollText(scrollLen) <> 0 : scrollLen = scrollLen + 1 : Wend
   For x = 0 To 39 : rainbow(x) = PeekA(?RollColours + (x >> 1) & 7) : Next
   scrollPos = 0
   While ticks - start < #PLASMA_TICKS
@@ -252,8 +287,8 @@ Procedure CopperScene()
   Protected start.w = ticks
   CgaSetMode(#CGA_GFX320)
   CgaClear(0)
-  blockColour = 3 : BlockText(13, 40, ?TitleBits, 9)
-  blockColour = 2 : BlockText(28, 120, ?SubBits, 4)
+  blockColour = 3 : BlockText(13, 40, @titleBits(0), 9)
+  blockColour = 2 : BlockText(28, 120, @subBits(0), 4)
   While ticks - start < #COPPER_TICKS
     CgaWaitVRetrace()
     RasterBars(ticks * 3, @barImg(0), @barImgP(0))
