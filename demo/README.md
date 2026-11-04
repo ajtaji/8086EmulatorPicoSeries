@@ -3,6 +3,8 @@
 A demo for the PC machine of this emulator (CGA, the 8253 timer and its speaker, the 8259, no BIOS), written
 in PureMetal and compiled by PureMetal Forge's 8086 back end - no hand-written assembly.
 
+**Building it needs a newer compiler.** This demo uses PureMetal Forge's string library for the classic CPUs, so it needs a compiler newer than the 2026-10-25 release (a3098475d or later). It can't be built with the current public release; the next release, which is being prepared, will build it. The ready-built `demo.com` here runs as it is.
+
 | File | What it is |
 |---|---|
 | `demo.pc8086` | the demo; its texts (PUREMETAL, 8086, the scroller) are strings in it, read with `Mid` and `Asc` (the compiler's string library for the classic CPUs) |

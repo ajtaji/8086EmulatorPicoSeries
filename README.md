@@ -7,6 +7,8 @@ physical boards, and around it a small IBM PC (CGA graphics, 8253 timer, 8259 in
 keyboard) that runs .COM programs in real time on a 480 x 320 SPI panel. The same core, generated
 from the same source, also runs as a desktop program on Windows and Linux with a debugger-style window.
 
+**Building the demo needs a newer compiler.** The demo (`demo/`) uses PureMetal Forge's string library for the classic CPUs, so it needs a compiler newer than the 2026-10-25 release (a3098475d or later). It can't be built with the current public release; the next release, which is being prepared, will build it. The ready-built `demo/demo.com` and the images in `firmware/` work as they are.
+
 **No BIOS, DOS or other copyrighted ROM is needed or included.** The PC machine starts a .COM
 program directly; every program in this repository was written for it (most of them in PureMetal).
 
