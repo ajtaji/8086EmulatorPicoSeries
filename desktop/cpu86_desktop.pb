@@ -405,8 +405,11 @@ Procedure RunFor(budgetMs.i)
   Protected t0.q = ElapsedMilliseconds(), ran.i, k.i, ln.i, n.i, silent.i
   If MachineKind = 1
     Cpu86RepYield = 1                 ; the test runners turn it off
-    ; With sound the queue paces the frames; without it (--mute, or no sound
-    ; device) the clock does - a frame each 16.688 ms, whatever the screen's refresh.
+    ; With sound the queue paces the frames: a frame is run only while it has a
+    ; free buffer, asked BEFORE the frame - this is called once a drawn frame, and
+    ; at 240 Hz a frame run first and its sound dropped was 4x real time. Without
+    ; sound (--mute, or no sound device) the clock does - a frame each 16.688 ms,
+    ; whatever the screen's refresh.
     silent = Bool(PcSndOpen = 0 Or PcSndMuted)
     If silent
       If PcLastMs = 0 Or t0 - PcLastMs > 100 : PcLastMs = t0 - 17 : EndIf   ; starting, or after a pause
@@ -414,6 +417,7 @@ Procedure RunFor(budgetMs.i)
       If PcOwedMs < 16.688 : ProcedureReturn : EndIf
     EndIf
     While Running And n < 3
+      If silent = 0 And PcSoundFull() : Break : EndIf
       For ln = 1 To #PC86_LINES
         ran + PcRunLine()
         If BreakAt >= 0 And Cpu86GetIP() = BreakAt
@@ -432,8 +436,6 @@ Procedure RunFor(budgetMs.i)
       If silent
         PcOwedMs - 16.688
         If PcOwedMs < 16.688 : Break : EndIf
-      ElseIf PcSoundFull()
-        Break
       EndIf
     Wend
     If silent And PcOwedMs > 50 : PcOwedMs = 0 : EndIf     ; too far behind: let it go
